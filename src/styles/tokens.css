@@ -1,0 +1,156 @@
+/* ═══════════════════════════════════════════════════════════════
+   LovIA! — Design Tokens
+   ═══════════════════════════════════════════════════════════════ */
+
+:root {
+  /* ── Colores Primarios (Gradientes de amor) ── */
+  --love-rose: #FF6B8A;
+  --love-coral: #FF8E72;
+  --love-warm: #FFB347;
+  --love-gradient: linear-gradient(135deg, var(--love-rose), var(--love-coral), var(--love-warm));
+
+  /* ── Fondos (dark glassmorphism) ── */
+  --bg-deep: #0A0A1A;
+  --bg-surface: #12122A;
+  --bg-card: rgba(255, 255, 255, 0.05);
+  --bg-card-hover: rgba(255, 255, 255, 0.08);
+  --bg-glass: rgba(255, 255, 255, 0.08);
+  --bg-glass-strong: rgba(255, 255, 255, 0.12);
+  --bg-overlay: rgba(10, 10, 26, 0.8);
+
+  /* ── Acentos por Línea ── */
+  --line-love: #FF6B8A;
+  --line-sex: #A855F7;
+  --line-realization: #22D3EE;
+
+  /* ── Texto ── */
+  --text-primary: #F8FAFC;
+  --text-secondary: rgba(248, 250, 252, 0.6);
+  --text-tertiary: rgba(248, 250, 252, 0.4);
+  --text-inverse: #0A0A1A;
+
+  /* ── Niveles / Gamificación ── */
+  --level-1: #22D3EE;
+  /* Trazado — Cyan */
+  --level-2: #A855F7;
+  /* Constructor — Purple */
+  --level-3: #FFB347;
+  /* Arquitecto — Gold */
+
+  /* ── Frecuencia de Relación ── */
+  --freq-high: #10B981;
+  --freq-mid: #F59E0B;
+  --freq-dev: #F97316;
+  --freq-low: #EF4444;
+  --freq-critical: #DC2626;
+
+  /* ── Semánticos ── */
+  --success: #10B981;
+  --warning: #F59E0B;
+  --danger: #EF4444;
+  --info: #3B82F6;
+
+  /* ── Trust Score ── */
+  --trust-bronze: #CD7F32;
+  --trust-silver: #C0C0C0;
+  --trust-gold: #FFD700;
+  --trust-diamond: #B9F2FF;
+
+  /* ── Bordes ── */
+  --border-subtle: rgba(255, 255, 255, 0.08);
+  --border-default: rgba(255, 255, 255, 0.12);
+  --border-strong: rgba(255, 255, 255, 0.2);
+
+  /* ── Sombras ── */
+  --shadow-sm: 0 2px 8px rgba(0, 0, 0, 0.3);
+  --shadow-md: 0 4px 16px rgba(0, 0, 0, 0.4);
+  --shadow-lg: 0 8px 32px rgba(0, 0, 0, 0.5);
+  --shadow-glow-rose: 0 0 20px rgba(255, 107, 138, 0.3);
+  --shadow-glow-purple: 0 0 20px rgba(168, 85, 247, 0.3);
+  --shadow-glow-cyan: 0 0 20px rgba(34, 211, 238, 0.3);
+
+  /* ── Tipografía ── */
+  --font-heading: 'Outfit', sans-serif;
+  --font-body: 'Inter', sans-serif;
+  --font-accent: 'Space Grotesk', monospace;
+
+  --fs-xs: 0.75rem;
+  /* 12px */
+  --fs-sm: 0.875rem;
+  /* 14px */
+  --fs-base: 1rem;
+  /* 16px */
+  --fs-lg: 1.125rem;
+  /* 18px */
+  --fs-xl: 1.25rem;
+  /* 20px */
+  --fs-2xl: 1.5rem;
+  /* 24px */
+  --fs-3xl: 1.875rem;
+  /* 30px */
+  --fs-4xl: 2.25rem;
+  /* 36px */
+  --fs-5xl: 3rem;
+  /* 48px */
+
+  --fw-regular: 400;
+  --fw-medium: 500;
+  --fw-semibold: 600;
+  --fw-bold: 700;
+
+  /* ── Espaciado ── */
+  --space-1: 0.25rem;
+  /* 4px */
+  --space-2: 0.5rem;
+  /* 8px */
+  --space-3: 0.75rem;
+  /* 12px */
+  --space-4: 1rem;
+  /* 16px */
+  --space-5: 1.25rem;
+  /* 20px */
+  --space-6: 1.5rem;
+  /* 24px */
+  --space-8: 2rem;
+  /* 32px */
+  --space-10: 2.5rem;
+  /* 40px */
+  --space-12: 3rem;
+  /* 48px */
+  --space-16: 4rem;
+  /* 64px */
+
+  /* ── Radios ── */
+  --radius-sm: 0.5rem;
+  /* 8px */
+  --radius-md: 0.75rem;
+  /* 12px */
+  --radius-lg: 1rem;
+  /* 16px */
+  --radius-xl: 1.5rem;
+  /* 24px */
+  --radius-full: 9999px;
+
+  /* ── Transiciones ── */
+  --ease-out: cubic-bezier(0.16, 1, 0.3, 1);
+  --ease-spring: cubic-bezier(0.34, 1.56, 0.64, 1);
+  --duration-fast: 150ms;
+  --duration-normal: 250ms;
+  --duration-slow: 400ms;
+
+  /* ── Z-index ── */
+  --z-base: 0;
+  --z-dropdown: 100;
+  --z-sidebar: 150;
+  --z-sticky: 200;
+  --z-modal: 300;
+  --z-toast: 400;
+  --z-tooltip: 500;
+
+  /* ── Layout ── */
+  --header-height: 3.5rem;
+  --tab-bar-height: 4rem;
+  --sidebar-width: 260px;
+  --max-content-width: 480px;
+  --max-admin-width: 1400px;
+}

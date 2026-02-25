@@ -1,0 +1,275 @@
+/* ═══════════════════════════════════════════════════════════════
+   LovIA! — Auth Pages (Login + Register)
+   ═══════════════════════════════════════════════════════════════ */
+
+.auth-page {
+    min-height: 100dvh;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: var(--space-6);
+    position: relative;
+    overflow: hidden;
+}
+
+.auth-page__glow {
+    position: absolute;
+    border-radius: 50%;
+    filter: blur(120px);
+    opacity: 0.35;
+    pointer-events: none;
+}
+
+.auth-page__glow--1 {
+    width: 350px;
+    height: 350px;
+    background: var(--line-love);
+    top: -15%;
+    right: -10%;
+    animation: float 8s ease-in-out infinite;
+}
+
+.auth-page__glow--2 {
+    width: 250px;
+    height: 250px;
+    background: var(--line-sex);
+    bottom: -10%;
+    left: -5%;
+    animation: float 10s ease-in-out infinite reverse;
+}
+
+/* ── Card ── */
+.auth-card {
+    width: 100%;
+    max-width: 420px;
+    padding: var(--space-8);
+    border-radius: var(--radius-xl);
+    position: relative;
+    z-index: 1;
+}
+
+.auth-card__header {
+    text-align: center;
+    margin-bottom: var(--space-6);
+}
+
+.auth-card__header h1 {
+    font-size: var(--fs-4xl);
+    margin-bottom: var(--space-2);
+}
+
+.auth-card__header p {
+    font-size: var(--fs-sm);
+    color: var(--text-secondary);
+}
+
+/* ── Form ── */
+.auth-card__form {
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-4);
+}
+
+.auth-card__field {
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-2);
+}
+
+.auth-card__field label {
+    font-size: var(--fs-sm);
+    font-weight: var(--fw-medium);
+    color: var(--text-secondary);
+}
+
+.auth-card__input-wrap {
+    position: relative;
+    display: flex;
+    align-items: center;
+}
+
+.auth-card__input-icon {
+    position: absolute;
+    left: var(--space-4);
+    color: var(--text-tertiary);
+    pointer-events: none;
+}
+
+.auth-card__input-wrap input {
+    width: 100%;
+    padding: var(--space-3) var(--space-4);
+    padding-left: calc(var(--space-4) + 18px + var(--space-3));
+    background: var(--bg-card);
+    border: 1px solid var(--border-subtle);
+    border-radius: var(--radius-md);
+    color: var(--text-primary);
+    font-size: var(--fs-base);
+    transition: border-color var(--duration-fast) var(--ease-out),
+        box-shadow var(--duration-fast) var(--ease-out);
+    outline: none;
+}
+
+.auth-card__input-wrap input:focus {
+    border-color: var(--love-rose);
+    box-shadow: 0 0 0 3px rgba(255, 107, 138, 0.15);
+}
+
+.auth-card__input-wrap input::placeholder {
+    color: var(--text-tertiary);
+}
+
+.auth-card__toggle-pw {
+    position: absolute;
+    right: var(--space-3);
+    background: none;
+    border: none;
+    color: var(--text-tertiary);
+    padding: var(--space-1);
+    transition: color var(--duration-fast);
+}
+
+.auth-card__toggle-pw:hover {
+    color: var(--text-secondary);
+}
+
+/* ── Password checks ── */
+.auth-card__pw-checks {
+    display: flex;
+    flex-wrap: wrap;
+    gap: var(--space-2);
+    margin-top: var(--space-1);
+}
+
+.auth-card__pw-check {
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    font-size: var(--fs-xs);
+    color: var(--text-tertiary);
+    transition: color var(--duration-fast);
+}
+
+.auth-card__pw-check--ok {
+    color: var(--success);
+}
+
+.auth-card__pw-dot {
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    background: var(--border-default);
+    display: inline-block;
+}
+
+/* ── Error ── */
+.auth-card__error {
+    display: flex;
+    align-items: center;
+    gap: var(--space-2);
+    padding: var(--space-3) var(--space-4);
+    background: rgba(239, 68, 68, 0.1);
+    border: 1px solid rgba(239, 68, 68, 0.2);
+    border-radius: var(--radius-md);
+    color: var(--danger);
+    font-size: var(--fs-sm);
+}
+
+/* ── Legal ── */
+.auth-card__legal {
+    padding: var(--space-2) 0;
+}
+
+.auth-card__checkbox-label {
+    display: flex;
+    align-items: flex-start;
+    gap: var(--space-3);
+    font-size: var(--fs-sm);
+    color: var(--text-secondary);
+    cursor: pointer;
+    line-height: 1.5;
+}
+
+.auth-card__checkbox-label input[type="checkbox"] {
+    accent-color: var(--love-rose);
+    width: 18px;
+    height: 18px;
+    margin-top: 2px;
+    flex-shrink: 0;
+}
+
+.auth-card__link {
+    background: none;
+    border: none;
+    color: var(--love-rose);
+    text-decoration: underline;
+    font-size: inherit;
+    cursor: pointer;
+    padding: 0;
+}
+
+.auth-card__link:hover {
+    color: var(--love-coral);
+}
+
+/* ── Submit ── */
+.auth-card__submit {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: var(--space-2);
+    padding: var(--space-4);
+    background: var(--love-gradient);
+    color: white;
+    border: none;
+    border-radius: var(--radius-full);
+    font-size: var(--fs-base);
+    font-weight: var(--fw-semibold);
+    transition: all var(--duration-normal) var(--ease-out);
+    margin-top: var(--space-2);
+}
+
+.auth-card__submit:hover:not(:disabled) {
+    transform: translateY(-2px);
+    box-shadow: var(--shadow-glow-rose);
+}
+
+.auth-card__submit:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+}
+
+.auth-card__spinner {
+    width: 20px;
+    height: 20px;
+    border: 2px solid rgba(255, 255, 255, 0.3);
+    border-top-color: white;
+    border-radius: 50%;
+    animation: spin 0.6s linear infinite;
+}
+
+/* ── Footer ── */
+.auth-card__footer {
+    text-align: center;
+    margin-top: var(--space-5);
+    font-size: var(--fs-sm);
+    color: var(--text-secondary);
+}
+
+.auth-card__footer a {
+    color: var(--love-rose);
+    font-weight: var(--fw-semibold);
+}
+
+/* ── Success ── */
+.auth-card__success-icon {
+    margin-bottom: var(--space-4);
+}
+
+/* ── Loading screen ── */
+.auth-loading {
+    min-height: 100dvh;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: var(--bg-deep);
+}

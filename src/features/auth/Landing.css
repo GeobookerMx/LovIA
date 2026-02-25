@@ -1,0 +1,201 @@
+.landing {
+    min-height: 100dvh;
+    background: var(--bg-deep);
+    overflow-x: hidden;
+}
+
+/* ── Hero ── */
+.landing__hero {
+    position: relative;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    min-height: 85dvh;
+    padding: var(--space-8) var(--space-6);
+    overflow: hidden;
+}
+
+.landing__hero-content {
+    position: relative;
+    z-index: 1;
+    text-align: center;
+    max-width: var(--max-content-width);
+}
+
+.landing__badge {
+    display: inline-flex;
+    align-items: center;
+    gap: var(--space-2);
+    padding: var(--space-1) var(--space-4);
+    border-radius: var(--radius-full);
+    background: var(--bg-glass);
+    border: 1px solid var(--border-subtle);
+    font-size: var(--fs-xs);
+    font-weight: var(--fw-semibold);
+    color: var(--love-warm);
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+    margin-bottom: var(--space-6);
+}
+
+.landing__title {
+    font-family: var(--font-heading);
+    font-size: clamp(3.5rem, 12vw, 6rem);
+    font-weight: var(--fw-bold);
+    line-height: 1;
+    margin-bottom: var(--space-4);
+    letter-spacing: -0.02em;
+}
+
+.landing__subtitle {
+    font-size: var(--fs-lg);
+    font-weight: var(--fw-semibold);
+    color: var(--text-primary);
+    margin-bottom: var(--space-3);
+}
+
+.landing__description {
+    font-size: var(--fs-base);
+    color: var(--text-secondary);
+    max-width: 400px;
+    margin: 0 auto var(--space-8);
+    line-height: 1.7;
+}
+
+/* ── CTAs ── */
+.landing__cta-group {
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-3);
+    align-items: center;
+}
+
+.landing__cta {
+    display: inline-flex;
+    align-items: center;
+    gap: var(--space-2);
+    padding: var(--space-4) var(--space-8);
+    border-radius: var(--radius-full);
+    font-size: var(--fs-base);
+    font-weight: var(--fw-semibold);
+    transition: all var(--duration-normal) var(--ease-out);
+    border: none;
+    text-decoration: none;
+}
+
+.landing__cta--primary {
+    background: var(--love-gradient);
+    color: white;
+    box-shadow: var(--shadow-glow-rose);
+}
+
+.landing__cta--primary:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 0 30px rgba(255, 107, 138, 0.5);
+    color: white;
+}
+
+.landing__cta--secondary {
+    background: transparent;
+    color: var(--text-secondary);
+    border: 1px solid var(--border-default);
+}
+
+.landing__cta--secondary:hover {
+    border-color: var(--love-rose);
+    color: var(--love-rose);
+}
+
+/* ── Glow orbs ── */
+.landing__glow {
+    position: absolute;
+    border-radius: 50%;
+    filter: blur(100px);
+    opacity: 0.4;
+    pointer-events: none;
+}
+
+.landing__glow--1 {
+    width: 400px;
+    height: 400px;
+    background: var(--line-love);
+    top: -10%;
+    right: -10%;
+    animation: float 8s ease-in-out infinite;
+}
+
+.landing__glow--2 {
+    width: 300px;
+    height: 300px;
+    background: var(--line-sex);
+    bottom: 10%;
+    left: -10%;
+    animation: float 10s ease-in-out infinite reverse;
+}
+
+.landing__glow--3 {
+    width: 250px;
+    height: 250px;
+    background: var(--line-realization);
+    top: 40%;
+    right: 20%;
+    animation: float 12s ease-in-out infinite;
+    opacity: 0.2;
+}
+
+/* ── Features ── */
+.landing__features {
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: var(--space-4);
+    padding: var(--space-8) var(--space-6);
+    max-width: 900px;
+    margin: 0 auto;
+}
+
+@media (min-width: 640px) {
+    .landing__features {
+        grid-template-columns: 1fr 1fr;
+    }
+}
+
+.landing__feature {
+    padding: var(--space-6);
+    border-radius: var(--radius-lg);
+    transition: transform var(--duration-normal) var(--ease-out),
+        box-shadow var(--duration-normal) var(--ease-out);
+}
+
+.landing__feature:hover {
+    transform: translateY(-4px);
+    box-shadow: var(--shadow-md);
+}
+
+.landing__feature-icon {
+    width: 48px;
+    height: 48px;
+    border-radius: var(--radius-md);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin-bottom: var(--space-4);
+}
+
+.landing__feature h3 {
+    font-size: var(--fs-lg);
+    margin-bottom: var(--space-2);
+}
+
+.landing__feature p {
+    font-size: var(--fs-sm);
+    color: var(--text-secondary);
+    line-height: 1.6;
+}
+
+/* ── Footer ── */
+.landing__footer {
+    text-align: center;
+    padding: var(--space-8) var(--space-6);
+    color: var(--text-tertiary);
+    font-size: var(--fs-sm);
+}

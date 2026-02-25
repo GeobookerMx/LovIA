@@ -1,0 +1,12 @@
+.user-layout {
+    display: flex;
+    flex-direction: column;
+    min-height: 100dvh;
+    background: var(--bg-deep);
+}
+
+.user-layout__content {
+    flex: 1;
+    padding-bottom: var(--tab-bar-height);
+    overflow-y: auto;
+}

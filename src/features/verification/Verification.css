@@ -1,0 +1,441 @@
+/* ═══════════════════════════════════════════════════════════════
+   LovIA! — Verification Flow
+   ═══════════════════════════════════════════════════════════════ */
+
+.verification {
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-5);
+    padding: var(--space-4) var(--space-6);
+    max-width: 600px;
+    margin: 0 auto;
+    padding-bottom: calc(var(--tab-bar-height) + var(--space-8));
+}
+
+.verification__header {
+    text-align: center;
+}
+
+.verification__header h2 {
+    font-size: var(--fs-2xl);
+}
+
+.verification__header p {
+    font-size: var(--fs-sm);
+    color: var(--text-secondary);
+    margin-top: var(--space-1);
+}
+
+/* Trust score */
+.verification__trust {
+    display: flex;
+    align-items: center;
+    gap: var(--space-5);
+    padding: var(--space-5);
+    border-radius: var(--radius-lg);
+}
+
+.verification__trust-badge {
+    width: 72px;
+    height: 72px;
+    border-radius: 50%;
+    border: 3px solid;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+    gap: 2px;
+}
+
+.verification__trust-score {
+    font-family: var(--font-accent);
+    font-size: var(--fs-lg);
+    font-weight: var(--fw-bold);
+}
+
+.verification__trust-info {
+    flex: 1;
+}
+
+.verification__trust-info p {
+    font-size: var(--fs-xs);
+    color: var(--text-tertiary);
+    margin-top: 2px;
+}
+
+.verification__trust-bar {
+    height: 6px;
+    background: var(--bg-card);
+    border-radius: var(--radius-full);
+    overflow: hidden;
+    margin-top: var(--space-2);
+}
+
+.verification__trust-fill {
+    height: 100%;
+    border-radius: var(--radius-full);
+    transition: width 0.6s var(--ease-out);
+}
+
+/* Steps */
+.verification__steps {
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-3);
+}
+
+.verification__step {
+    display: flex;
+    align-items: center;
+    gap: var(--space-4);
+    padding: var(--space-4) var(--space-5);
+    border-radius: var(--radius-lg);
+    transition: all var(--duration-normal);
+}
+
+.verification__step--done {
+    opacity: 0.7;
+}
+
+.verification__step-icon {
+    width: 44px;
+    height: 44px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: var(--bg-card);
+    color: var(--text-secondary);
+    flex-shrink: 0;
+    transition: all var(--duration-normal);
+}
+
+.verification__step-icon--done {
+    background: var(--success);
+    color: white;
+}
+
+.verification__step-info {
+    flex: 1;
+}
+
+.verification__step-info strong {
+    font-size: var(--fs-sm);
+}
+
+.verification__step-info p {
+    font-size: var(--fs-xs);
+    color: var(--text-tertiary);
+    margin-top: 1px;
+}
+
+.verification__step-meta {
+    display: flex;
+    gap: var(--space-3);
+    margin-top: var(--space-1);
+    font-size: 0.65rem;
+    color: var(--text-tertiary);
+}
+
+.verification__step-btn {
+    display: flex;
+    align-items: center;
+    gap: var(--space-1);
+    padding: var(--space-2) var(--space-4);
+    background: var(--love-gradient);
+    color: white;
+    border: none;
+    border-radius: var(--radius-full);
+    font-size: var(--fs-xs);
+    font-weight: var(--fw-semibold);
+    white-space: nowrap;
+    transition: all var(--duration-fast);
+}
+
+.verification__step-btn:hover {
+    transform: translateY(-1px);
+    box-shadow: var(--shadow-glow-rose);
+}
+
+/* ═══════════════════════════════════════════════════════════════
+   LovIA! — Psychological Evaluations
+   ═══════════════════════════════════════════════════════════════ */
+
+.psych-eval {
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-5);
+    padding: var(--space-4) var(--space-6);
+    max-width: 550px;
+    margin: 0 auto;
+    padding-bottom: calc(var(--tab-bar-height) + var(--space-8));
+}
+
+.psych-eval__header {
+    text-align: center;
+}
+
+.psych-eval__header h2 {
+    font-size: var(--fs-2xl);
+    margin-bottom: var(--space-1);
+}
+
+.psych-eval__disclaimer {
+    padding: var(--space-3) var(--space-4);
+    border-radius: var(--radius-md);
+    border-left: 3px solid var(--warning);
+    font-size: var(--fs-xs);
+    color: var(--text-secondary);
+    line-height: 1.5;
+}
+
+.psych-eval__question {
+    padding: var(--space-5);
+    border-radius: var(--radius-lg);
+}
+
+.psych-eval__question p {
+    font-size: var(--fs-sm);
+    margin-bottom: var(--space-4);
+    line-height: 1.6;
+}
+
+.psych-eval__likert {
+    display: flex;
+    gap: var(--space-2);
+    flex-wrap: wrap;
+}
+
+.psych-eval__likert-btn {
+    flex: 1;
+    min-width: 60px;
+    padding: var(--space-3);
+    border-radius: var(--radius-md);
+    border: 1px solid var(--border-subtle);
+    background: none;
+    color: var(--text-secondary);
+    font-size: var(--fs-xs);
+    text-align: center;
+    transition: all var(--duration-fast);
+    cursor: pointer;
+}
+
+.psych-eval__likert-btn:hover {
+    border-color: var(--border-default);
+    background: var(--bg-card);
+}
+
+.psych-eval__likert-btn--selected {
+    border-color: var(--love-rose);
+    background: rgba(255, 107, 138, 0.12);
+    color: var(--love-rose);
+    font-weight: var(--fw-semibold);
+}
+
+.psych-eval__result {
+    padding: var(--space-5);
+    border-radius: var(--radius-lg);
+    text-align: center;
+}
+
+.psych-eval__result-score {
+    font-family: var(--font-accent);
+    font-size: var(--fs-4xl);
+    font-weight: var(--fw-bold);
+}
+
+.psych-eval__result-level {
+    font-size: var(--fs-sm);
+    margin-top: var(--space-1);
+}
+
+.psych-eval__result-action {
+    font-size: var(--fs-xs);
+    color: var(--text-tertiary);
+    margin-top: var(--space-3);
+    line-height: 1.5;
+}
+
+/* ═══════════════════════════════════════════════════════════════
+   LovIA! — Mental Check-In
+   ═══════════════════════════════════════════════════════════════ */
+
+.check-in-overlay {
+    position: fixed;
+    inset: 0;
+    z-index: var(--z-modal);
+    display: flex;
+    align-items: flex-end;
+    justify-content: center;
+    background: var(--bg-overlay);
+    animation: overlay-in 0.3s var(--ease-out);
+}
+
+@keyframes overlay-in {
+    from {
+        opacity: 0;
+    }
+
+    to {
+        opacity: 1;
+    }
+}
+
+.check-in {
+    width: 100%;
+    max-width: 420px;
+    padding: var(--space-6) var(--space-5) var(--space-8);
+    border-radius: var(--radius-xl) var(--radius-xl) 0 0;
+    backdrop-filter: blur(20px);
+    animation: slide-up-in 0.4s var(--ease-spring);
+}
+
+@keyframes slide-up-in {
+    from {
+        transform: translateY(100%);
+    }
+
+    to {
+        transform: translateY(0);
+    }
+}
+
+.check-in__handle {
+    width: 36px;
+    height: 4px;
+    background: var(--border-default);
+    border-radius: var(--radius-full);
+    margin: 0 auto var(--space-5);
+}
+
+.check-in__header {
+    text-align: center;
+    margin-bottom: var(--space-5);
+}
+
+.check-in__header h3 {
+    font-size: var(--fs-lg);
+    margin-bottom: var(--space-1);
+}
+
+.check-in__header p {
+    font-size: var(--fs-xs);
+    color: var(--text-tertiary);
+}
+
+.check-in__emojis {
+    display: flex;
+    justify-content: center;
+    gap: var(--space-3);
+    margin-bottom: var(--space-4);
+}
+
+.check-in__emoji {
+    font-size: 2rem;
+    background: none;
+    border: none;
+    padding: var(--space-2);
+    border-radius: var(--radius-md);
+    transition: all var(--duration-fast);
+    cursor: pointer;
+}
+
+.check-in__emoji:hover {
+    transform: scale(1.2);
+}
+
+.check-in__emoji--selected {
+    background: var(--bg-card);
+    transform: scale(1.3);
+    box-shadow: var(--shadow-sm);
+}
+
+.check-in__slider-wrap {
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-2);
+    align-items: center;
+}
+
+.check-in__slider {
+    width: 100%;
+    -webkit-appearance: none;
+    appearance: none;
+    height: 6px;
+    border-radius: var(--radius-full);
+    background: var(--bg-card);
+    outline: none;
+}
+
+.check-in__slider::-webkit-slider-thumb {
+    -webkit-appearance: none;
+    width: 22px;
+    height: 22px;
+    border-radius: 50%;
+    background: var(--love-gradient);
+    cursor: pointer;
+    box-shadow: var(--shadow-glow-rose);
+}
+
+.check-in__slider-labels {
+    display: flex;
+    justify-content: space-between;
+    font-size: var(--fs-xs);
+    color: var(--text-tertiary);
+    width: 100%;
+}
+
+.check-in__actions {
+    display: flex;
+    gap: var(--space-3);
+    margin-top: var(--space-5);
+}
+
+.check-in__submit {
+    flex: 1;
+    padding: var(--space-3);
+    background: var(--love-gradient);
+    color: white;
+    border: none;
+    border-radius: var(--radius-full);
+    font-weight: var(--fw-semibold);
+    font-size: var(--fs-sm);
+    transition: all var(--duration-fast);
+}
+
+.check-in__submit:hover {
+    transform: translateY(-1px);
+    box-shadow: var(--shadow-glow-rose);
+}
+
+.check-in__dismiss {
+    padding: var(--space-3) var(--space-5);
+    background: none;
+    border: none;
+    color: var(--text-tertiary);
+    font-size: var(--fs-sm);
+}
+
+.check-in__feedback {
+    text-align: center;
+    font-size: var(--fs-sm);
+    color: var(--text-secondary);
+    margin-top: var(--space-2);
+    padding: var(--space-3);
+    border-radius: var(--radius-md);
+    background: rgba(16, 185, 129, 0.08);
+    animation: pulse-in 0.5s var(--ease-spring);
+}
+
+@keyframes pulse-in {
+    from {
+        transform: scale(0.95);
+        opacity: 0;
+    }
+
+    to {
+        transform: scale(1);
+        opacity: 1;
+    }
+}
