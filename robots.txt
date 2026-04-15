@@ -1,0 +1,6 @@
+User-agent: *
+Allow: /
+
+# LovIA! — Temporary robots.txt
+# TODO: Update sitemap URL when deploying to production
+# Sitemap: https://lovia.app/sitemap.xml
