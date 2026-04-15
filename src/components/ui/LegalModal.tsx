@@ -86,7 +86,7 @@ export default function LegalModal({ onAccept, onClose }: Props) {
                             <p>Ciertos datos que recopilamos se consideran <strong>datos sensibles</strong> bajo la LFPDPPP, incluyendo: orientación sexual, estado emocional, perfil psicológico, y respuestas a evaluaciones de salud mental. Para su tratamiento requerimos tu <strong>consentimiento expreso y por escrito</strong>, el cual se otorga mediante la casilla de consentimiento al final de este aviso.</p>
 
                             <h4>4. Derechos ARCO</h4>
-                            <p>Tienes derecho a <strong>Acceder, Rectificar, Cancelar u Oponerte</strong> al tratamiento de tus datos en cualquier momento. Para ejercer tus derechos ARCO, contacta a: <strong>privacidad@lovia.app</strong></p>
+                            <p>Tienes derecho a <strong>Acceder, Rectificar, Cancelar u Oponerte</strong> al tratamiento de tus datos en cualquier momento. Para ejercer tus derechos ARCO, contacta a: <strong>clienteslovia@gmail.com</strong></p>
 
                             <h4>5. Seguridad</h4>
                             <p>Implementamos cifrado TLS 1.3 en tránsito, AES-256 en reposo, Row Level Security (RLS) en base de datos, y auditorías periódicas de seguridad.</p>
@@ -97,7 +97,7 @@ export default function LegalModal({ onAccept, onClose }: Props) {
                             <h4>7. Cambios al aviso</h4>
                             <p>Te notificaremos de cualquier cambio material a este aviso mediante la app y por email.</p>
 
-                            <p><em>Última actualización: Febrero 2025</em></p>
+                            <p><em>Última actualización: Abril 2026</em></p>
                         </div>
                     ) : (
                         <div className="legal-modal__text">

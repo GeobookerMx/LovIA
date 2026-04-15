@@ -1,6 +1,17 @@
 import { Link } from 'react-router-dom'
-import { Heart, Shield, Brain, Sparkles, ArrowRight, Star } from 'lucide-react'
+import { Heart, Shield, Brain, Sparkles, ArrowRight, Star, BookOpen } from 'lucide-react'
 import './Landing.css'
+
+const scienceAuthors = [
+    { name: 'J. P. Peña', field: 'Evolución de las Relaciones de Pareja', year: '2023' },
+    { name: 'Sternberg', field: 'Teoría Triangular del Amor', year: '1986' },
+    { name: 'Gottman', field: '7 Principios del Matrimonio', year: '1999' },
+    { name: 'Chapman', field: '5 Lenguajes del Amor', year: '1992' },
+    { name: 'Johnson', field: 'Terapia Focalizada en Emociones', year: '2008' },
+    { name: 'Perel', field: 'Deseo y Relaciones Modernas', year: '2006' },
+    { name: 'Cohen', field: 'PSS-4 Estrés Percibido', year: '1983' },
+    { name: 'Gross & John', field: 'Regulación Emocional (ERQ)', year: '2003' },
+]
 
 export default function Landing() {
     return (
@@ -20,7 +31,7 @@ export default function Landing() {
                         Lov<span className="text-gradient">IA!</span>
                     </h1>
                     <p className="landing__subtitle">
-                        Parejas de calidad comienzan con autoconocimiento de calidad
+                        Conecta desde quien eres
                     </p>
                     <p className="landing__description">
                         Descubre tu <strong>Frecuencia de Relación</strong> basada en ciencia,
@@ -32,7 +43,10 @@ export default function Landing() {
                             Comenzar gratis
                             <ArrowRight size={18} />
                         </Link>
-                        <button className="landing__cta landing__cta--secondary">
+                        <button 
+                            className="landing__cta landing__cta--secondary"
+                            onClick={() => document.querySelector('.landing__features')?.scrollIntoView({ behavior: 'smooth' })}
+                        >
                             ¿Cómo funciona?
                         </button>
                     </div>
@@ -46,7 +60,7 @@ export default function Landing() {
                         <Heart size={24} color="var(--line-love)" />
                     </div>
                     <h3>3 Líneas de Análisis</h3>
-                    <p>Amor, Sexual y Realización Personal — cada una con factores únicos evaluados científicamente.</p>
+                    <p>Amor, Sexual y Realización — basado en la Teoría Triangular de Sternberg (1986).</p>
                 </div>
 
                 <div className="landing__feature glass">
@@ -54,7 +68,7 @@ export default function Landing() {
                         <Brain size={24} color="var(--line-sex)" />
                     </div>
                     <h3>27+ Factores</h3>
-                    <p>De la inteligencia emocional al manejo financiero, evaluamos lo que realmente importa.</p>
+                    <p>Inteligencia emocional, comunicación, valores — evaluados con instrumentos validados.</p>
                 </div>
 
                 <div className="landing__feature glass">
@@ -71,6 +85,56 @@ export default function Landing() {
                     </div>
                     <h3>Mejora Continua</h3>
                     <p>Cada área que trabajas mejora tu Frecuencia y abre nuevas conexiones.</p>
+                </div>
+            </section>
+
+            {/* Science Section */}
+            <section className="landing__science">
+                <div className="landing__science-header animate-fade-in-up">
+                    <BookOpen size={28} color="var(--love-warm)" />
+                    <h2>Respaldado por <span className="text-gradient">Ciencia</span></h2>
+                    <p>Cada test, variable y algoritmo está fundamentado en investigación publicada y revisada por pares.</p>
+                </div>
+
+                <div className="landing__science-counter glass-strong animate-fade-in-up">
+                    <span className="landing__science-number">37+</span>
+                    <span className="landing__science-label">estudios publicados respaldan nuestro modelo</span>
+                </div>
+
+                <div className="landing__science-authors stagger-children">
+                    {scienceAuthors.map((author) => (
+                        <div key={author.name} className="landing__author-badge glass">
+                            <strong>{author.name}</strong>
+                            <span>{author.field}</span>
+                            <small>{author.year}</small>
+                        </div>
+                    ))}
+                </div>
+
+                <div className="landing__science-instruments animate-fade-in-up">
+                    <h3>Instrumentos Validados</h3>
+                    <div className="landing__instruments-grid">
+                        <div className="landing__instrument glass">
+                            <span className="landing__instrument-tag">PSS-4</span>
+                            <p>Estrés percibido — Cohen et al., 1983</p>
+                        </div>
+                        <div className="landing__instrument glass">
+                            <span className="landing__instrument-tag">ERQ</span>
+                            <p>Regulación emocional — Gross & John, 2003</p>
+                        </div>
+                        <div className="landing__instrument glass">
+                            <span className="landing__instrument-tag">ICI</span>
+                            <p>Tolerancia a frustración — Validado UNAM</p>
+                        </div>
+                        <div className="landing__instrument glass">
+                            <span className="landing__instrument-tag">Stroop</span>
+                            <p>Control cognitivo — Stroop, 1935</p>
+                        </div>
+                        <div className="landing__instrument glass">
+                            <span className="landing__instrument-tag">WAIS-IV</span>
+                            <p>Memoria de trabajo — Wechsler, 2008</p>
+                        </div>
+                    </div>
                 </div>
             </section>
 

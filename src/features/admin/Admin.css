@@ -1,0 +1,142 @@
+.admin-dashboard {
+    padding: var(--space-6);
+    max-width: 800px;
+    margin: 0 auto;
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+}
+
+.admin__header {
+    display: flex;
+    align-items: center;
+    gap: var(--space-4);
+    margin-bottom: var(--space-6);
+}
+
+.admin__tabs {
+    display: flex;
+    gap: 8px;
+    margin-bottom: var(--space-6);
+    overflow-x: auto;
+    padding-bottom: 4px;
+}
+
+.admin__tab {
+    padding: 8px 16px;
+    border-radius: 20px;
+    border: 1px solid var(--border-subtle);
+    background: transparent;
+    color: var(--text-secondary);
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-size: 14px;
+    cursor: pointer;
+    white-space: nowrap;
+    transition: all 0.2s ease;
+}
+
+.admin__tab.active {
+    background: var(--line-love);
+    color: white;
+    border-color: var(--line-love);
+}
+
+.admin__badge {
+    background: white;
+    color: var(--line-love);
+    font-size: 10px;
+    font-weight: bold;
+    padding: 2px 6px;
+    border-radius: 10px;
+}
+
+.admin__metrics-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    gap: var(--space-4);
+}
+
+.admin__metric-card {
+    padding: var(--space-5);
+    border-radius: var(--radius-lg);
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+}
+
+.admin__metric-card h4 {
+    margin: 0;
+    font-size: 13px;
+    color: var(--text-secondary);
+}
+
+.admin__metric-value {
+    font-size: 28px;
+    font-weight: bold;
+    color: var(--text-primary);
+}
+
+.admin__metric-trend {
+    font-size: 11px;
+    color: var(--text-tertiary);
+    display: flex;
+    align-items: center;
+    gap: 4px;
+}
+
+.admin__metric-trend.positive {
+    color: var(--success);
+}
+
+.admin__report-card {
+    padding: var(--space-4);
+    border-radius: var(--radius-md);
+    margin-bottom: var(--space-3);
+    border-left: 3px solid var(--warning);
+}
+
+.admin__report-header {
+    display: flex;
+    justify-content: space-between;
+    margin-bottom: 8px;
+}
+
+.admin__report-reason {
+    font-style: italic;
+    color: var(--text-secondary);
+    background: rgba(0,0,0,0.2);
+    padding: 8px;
+    border-radius: 4px;
+    font-size: 14px;
+    margin-bottom: 12px;
+}
+
+.admin__report-actions {
+    display: flex;
+    gap: 8px;
+}
+
+.admin__btn-dismiss, .admin__btn-ban {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    padding: 6px 12px;
+    border-radius: 6px;
+    font-size: 12px;
+    cursor: pointer;
+    border: none;
+    font-weight: bold;
+}
+
+.admin__btn-dismiss {
+    background: var(--bg-card);
+    color: var(--text-secondary);
+    border: 1px solid var(--border-subtle);
+}
+
+.admin__btn-ban {
+    background: rgba(239, 68, 68, 0.1);
+    color: var(--warning);
+}

@@ -1,4 +1,6 @@
-import { Check, Crown, Sparkles, Zap } from 'lucide-react'
+import { useState } from 'react'
+import { Check, Crown, Sparkles, Zap, Loader2, AlertCircle } from 'lucide-react'
+import { supabase } from '../../lib/supabase'
 import { TIERS, useSubscriptionStore } from '../../stores/subscriptionStore'
 import type { Tier } from '../../stores/subscriptionStore'
 import './Pricing.css'
@@ -12,14 +14,67 @@ const tierIcons: Record<Tier, React.ReactNode> = {
 
 export default function PricingPage() {
     const currentTier = useSubscriptionStore((s) => s.currentTier)
-    const setTier = useSubscriptionStore((s) => s.setTier)
+    const [loadingTier, setLoadingTier] = useState<Tier | null>(null)
+
+    const [paymentError, setPaymentError] = useState<string | null>(null)
+
+    const handleSubscribe = async (tierId: Tier) => {
+        if (tierId === 'free') return
+        if (currentTier === tierId) return
+
+        setLoadingTier(tierId)
+        setPaymentError(null)
+
+        try {
+            // Llamar a la Edge Function de Mercado Pago
+            const { data, error } = await supabase.functions.invoke('create-mp-preference', {
+                body: {
+                    tier: tierId,
+                    returnUrl: window.location.origin + '/pricing'
+                }
+            })
+
+            if (error) throw new Error(error.message)
+
+            if (data?.url) {
+                // Redirigir al Checkout de Mercado Pago
+                // (incluye OXXO Pay, tarjetas, MSI automáticamente)
+                window.location.href = data.url
+            } else {
+                throw new Error('No se recibió URL de pago')
+            }
+        } catch (err: any) {
+            console.error('[PricingPage] Error al iniciar pago:', err)
+            setPaymentError(
+                'Hubo un problema al conectar con la pasarela de pago. ' +
+                'Intenta de nuevo o contáctanos en soporte@lovia.app'
+            )
+        } finally {
+            setLoadingTier(null)
+        }
+    }
 
     return (
         <div className="pricing-page">
             <div className="pricing-page__header animate-fade-in-up">
                 <h1>Elige tu plan</h1>
                 <p>Invierte en ti. Cada tier desbloquea herramientas más profundas para tu crecimiento.</p>
+                <p style={{ fontSize: '0.8rem', color: 'var(--text-tertiary)', marginTop: 8 }}>
+                    🔒 Pago seguro vía Mercado Pago · OXXO · Tarjeta · Hasta 12 MSI
+                </p>
             </div>
+
+            {paymentError && (
+                <div style={{
+                    display: 'flex', alignItems: 'center', gap: 8,
+                    background: 'rgba(239,68,68,0.1)', border: '1px solid rgba(239,68,68,0.3)',
+                    borderRadius: 12, padding: '12px 16px', margin: '0 0 16px',
+                    color: '#fca5a5', fontSize: '0.85rem'
+                }}>
+                    <AlertCircle size={16} style={{ flexShrink: 0 }} />
+                    {paymentError}
+                </div>
+            )}
 
             <div className="pricing-grid">
                 {TIERS.map((tier, i) => {
@@ -66,10 +121,10 @@ export default function PricingPage() {
                             <button
                                 className={`pricing-card__cta ${isActive ? 'pricing-card__cta--current' : ''}`}
                                 style={!isActive ? { background: `linear-gradient(135deg, ${tier.color}, ${tier.color}dd)` } : {}}
-                                onClick={() => setTier(tier.id)}
-                                disabled={isActive}
+                                onClick={() => handleSubscribe(tier.id)}
+                                disabled={isActive || loadingTier !== null}
                             >
-                                {isActive ? 'Plan actual' : tier.price ? 'Suscribirse' : 'Empezar gratis'}
+                                {loadingTier === tier.id ? <Loader2 size={16} className="animate-spin" /> : isActive ? 'Plan actual' : tier.price ? 'Suscribirse Seguro' : 'Empezar gratis'}
                             </button>
                         </div>
                     )

@@ -1,0 +1,281 @@
+/* ════════════════════════════════════════
+   LovIA! — Specialist Registration Form
+   ════════════════════════════════════════ */
+
+.specialist-form {
+    min-height: 100dvh;
+    padding: var(--space-4) var(--space-4) 80px;
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-4);
+    max-width: 600px;
+    margin: 0 auto;
+}
+
+.specialist-form__header {
+    display: flex;
+    align-items: center;
+    gap: var(--space-3);
+    padding-bottom: var(--space-2);
+}
+
+.specialist-form__header h2 {
+    font-size: var(--fs-xl);
+    margin: 0;
+}
+
+.specialist-form__subtitle {
+    font-size: var(--fs-xs);
+    color: var(--text-tertiary);
+    margin: 0;
+}
+
+/* ── Steps ── */
+.specialist-steps {
+    display: flex;
+    gap: var(--space-1);
+    overflow-x: auto;
+    padding-bottom: var(--space-2);
+}
+
+.specialist-step {
+    display: flex;
+    align-items: center;
+    gap: var(--space-2);
+    padding: var(--space-2) var(--space-3);
+    border-radius: var(--radius-full);
+    background: var(--bg-glass);
+    border: 1px solid var(--border-subtle);
+    font-size: var(--fs-xs);
+    color: var(--text-tertiary);
+    white-space: nowrap;
+    transition: all 0.25s;
+}
+
+.specialist-step.active {
+    background: rgba(255, 107, 138, 0.12);
+    border-color: rgba(255, 107, 138, 0.4);
+    color: var(--love-rose);
+}
+
+.specialist-step__dot {
+    width: 20px;
+    height: 20px;
+    border-radius: 50%;
+    background: var(--border-default);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 10px;
+    font-weight: 700;
+    color: var(--text-tertiary);
+    flex-shrink: 0;
+    transition: all 0.25s;
+}
+
+.specialist-step.active .specialist-step__dot {
+    background: var(--love-rose);
+    color: white;
+}
+
+/* ── Form Body ── */
+.specialist-form__body {
+    border-radius: var(--radius-xl);
+    padding: var(--space-6);
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-5);
+}
+
+.form-section {
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-4);
+}
+
+.form-section h3 {
+    font-size: var(--fs-lg);
+    font-weight: var(--fw-semibold);
+    display: flex;
+    align-items: center;
+    gap: var(--space-2);
+    padding-bottom: var(--space-3);
+    border-bottom: 1px solid var(--border-subtle);
+}
+
+.form-field {
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-2);
+}
+
+.form-field label {
+    font-size: var(--fs-sm);
+    font-weight: var(--fw-medium);
+    color: var(--text-secondary);
+}
+
+.form-field.flex-2 {
+    flex: 2;
+}
+
+.form-field small {
+    font-size: 11px;
+    color: var(--text-tertiary);
+}
+
+.required {
+    color: var(--danger);
+}
+
+.form-field input,
+.form-field select,
+.form-field textarea {
+    width: 100%;
+    padding: 12px 14px;
+    background: var(--bg-card);
+    border: 1px solid var(--border-subtle);
+    border-radius: var(--radius-md);
+    color: var(--text-primary);
+    font-size: var(--fs-sm);
+    transition: border-color 0.2s;
+    outline: none;
+    font-family: inherit;
+}
+
+.form-field input:focus,
+.form-field select:focus,
+.form-field textarea:focus {
+    border-color: var(--love-rose);
+    box-shadow: 0 0 0 3px rgba(255, 107, 138, 0.12);
+}
+
+.form-field textarea {
+    resize: vertical;
+    min-height: 100px;
+}
+
+.form-row {
+    display: flex;
+    gap: var(--space-3);
+}
+
+/* ── Radio Options ── */
+.form-radio-group {
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-2);
+}
+
+.radio-option {
+    display: flex;
+    align-items: center;
+    gap: var(--space-3);
+    padding: 12px 14px;
+    background: var(--bg-card);
+    border: 1px solid var(--border-subtle);
+    border-radius: var(--radius-md);
+    cursor: pointer;
+    transition: all 0.2s;
+    font-size: var(--fs-sm);
+}
+
+.radio-option.active {
+    border-color: var(--love-rose);
+    background: rgba(255, 107, 138, 0.08);
+    color: var(--love-rose);
+}
+
+.radio-option input {
+    width: auto;
+    padding: 0;
+    margin: 0;
+    accent-color: var(--love-rose);
+}
+
+/* ── Day Selector ── */
+.day-selector {
+    display: flex;
+    gap: var(--space-2);
+    flex-wrap: wrap;
+}
+
+.day-btn {
+    padding: 8px 12px;
+    border-radius: var(--radius-md);
+    border: 1px solid var(--border-subtle);
+    background: var(--bg-card);
+    color: var(--text-secondary);
+    font-size: var(--fs-xs);
+    font-weight: var(--fw-semibold);
+    cursor: pointer;
+    transition: all 0.2s;
+}
+
+.day-btn.active {
+    background: var(--love-rose);
+    border-color: var(--love-rose);
+    color: white;
+}
+
+/* ── Checkbox ── */
+.form-checkbox {
+    display: flex;
+    align-items: flex-start;
+    gap: var(--space-3);
+    font-size: var(--fs-sm);
+    color: var(--text-secondary);
+    cursor: pointer;
+    line-height: 1.5;
+}
+
+.form-checkbox input {
+    width: 18px;
+    height: 18px;
+    flex-shrink: 0;
+    accent-color: var(--love-rose);
+    margin-top: 2px;
+}
+
+/* ── Legal box ── */
+.specialist-legal {
+    display: flex;
+    gap: var(--space-3);
+    padding: var(--space-4);
+    border-radius: var(--radius-md);
+    font-size: var(--fs-xs);
+    color: var(--text-secondary);
+    line-height: 1.6;
+    align-items: flex-start;
+}
+
+/* ── Navigation ── */
+.specialist-form__nav {
+    display: flex;
+    gap: var(--space-3);
+    padding-top: var(--space-4);
+    border-top: 1px solid var(--border-subtle);
+}
+
+/* ── Success ── */
+.specialist-success {
+    min-height: 60vh;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    text-align: center;
+    gap: var(--space-4);
+    padding: var(--space-8);
+    border-radius: var(--radius-xl);
+}
+
+.specialist-success h2 {
+    font-size: var(--fs-2xl);
+}
+
+.specialist-success p {
+    color: var(--text-secondary);
+    max-width: 400px;
+    line-height: 1.6;
+}

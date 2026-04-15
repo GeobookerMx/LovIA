@@ -1,152 +1,227 @@
-import { useState, useEffect, useCallback, useRef } from 'react'
+import { useState, useEffect, useRef } from 'react'
 import { useNavigate, useParams } from 'react-router-dom'
-import {
-    Phone, PhoneOff, Mic, MicOff, Video, VideoOff,
-    AlertTriangle, Clock, MessageCircle
-} from 'lucide-react'
+import { Video as VideoIcon, Mic, PhoneOff, MicOff, VideoOff, ShieldCheck, ArrowLeft } from 'lucide-react'
+import { supabase } from '../../lib/supabase'
+import { useAuthStore } from '../../stores/authStore'
 import './Matching.css'
 
-const suggestedTopics = [
-    '¿Qué valor es innegociable para ti en una relación?',
-    '¿Cuál es tu meta #1 para este año?',
-    '¿Cómo te gusta que te demuestren cariño?',
-    '¿Qué libro o serie te cambió la vida?',
-]
+const STUN_SERVERS = {
+    iceServers: [
+        { urls: 'stun:stun.l.google.com:19302' },
+        { urls: 'stun:stun1.l.google.com:19302' }
+    ]
+}
 
 export default function VideoCall() {
     const { id } = useParams<{ id: string }>()
     const navigate = useNavigate()
-    const [connected, setConnected] = useState(false)
-    const [muted, setMuted] = useState(false)
-    const [videoOff, setVideoOff] = useState(false)
-    const [seconds, setSeconds] = useState(0)
-    const [maxMinutes] = useState(5)   // Initial duration
-    const [showTopics, setShowTopics] = useState(false)
-    const timerRef = useRef<ReturnType<typeof setInterval>>(undefined)
+    const { user } = useAuthStore()
 
-    // Simulate connection
-    useEffect(() => {
-        const timeout = setTimeout(() => setConnected(true), 2000)
-        return () => clearTimeout(timeout)
-    }, [])
+    const [micOn, setMicOn] = useState(true)
+    const [videoOn, setVideoOn] = useState(true)
+    const [status, setStatus] = useState<string>('Obteniendo permisos de cámara...')
+    const [isConnected, setIsConnected] = useState(false)
 
-    // Timer
+    const localVideoRef = useRef<HTMLVideoElement>(null)
+    const remoteVideoRef = useRef<HTMLVideoElement>(null)
+    const peerConnection = useRef<RTCPeerConnection | null>(null)
+    const localStream = useRef<MediaStream | null>(null)
+    const channel = useRef<any>(null)
+
     useEffect(() => {
-        if (connected) {
-            timerRef.current = setInterval(() => setSeconds((s) => s + 1), 1000)
+        if (!user || !id) return
+
+        let mounted = true
+
+        const initializeMedia = async () => {
+            try {
+                const stream = await navigator.mediaDevices.getUserMedia({ video: true, audio: true })
+                if (!mounted) {
+                    stream.getTracks().forEach(t => t.stop())
+                    return
+                }
+                
+                localStream.current = stream
+                if (localVideoRef.current) localVideoRef.current.srcObject = stream
+                
+                setStatus('Buscando al otro participante...')
+                setupWebRTC()
+
+            } catch (err) {
+                console.error("Camera access denied", err)
+                if (mounted) setStatus('Error: Permisos de cámara denegados.')
+            }
         }
-        return () => { if (timerRef.current) clearInterval(timerRef.current) }
-    }, [connected])
 
-    const formatTime = useCallback((s: number) => {
-        const min = Math.floor(s / 60)
-        const sec = s % 60
-        return `${min}:${sec.toString().padStart(2, '0')}`
-    }, [])
+        const setupWebRTC = () => {
+            const pc = new RTCPeerConnection(STUN_SERVERS)
+            peerConnection.current = pc
 
-    const remaining = maxMinutes * 60 - seconds
-    const timerClass =
-        remaining <= 30 ? 'video-call__timer--critical' :
-            remaining <= 60 ? 'video-call__timer--warning' : ''
+            // Añadir mis envíos de audio/video al canal P2P
+            if (localStream.current) {
+                localStream.current.getTracks().forEach(track => {
+                    pc.addTrack(track, localStream.current!)
+                })
+            }
 
-    const handleEndCall = () => {
-        if (timerRef.current) clearInterval(timerRef.current)
+            // Recibir audio/video del otro participante
+            pc.ontrack = (event) => {
+                if (remoteVideoRef.current && event.streams[0]) {
+                    remoteVideoRef.current.srcObject = event.streams[0]
+                    setIsConnected(true)
+                    setStatus('Conectados de forma segura')
+                }
+            }
+
+            // Gestionar candidatos ICE (caminos de red)
+            pc.onicecandidate = (event) => {
+                if (event.candidate && channel.current) {
+                    channel.current.send({
+                        type: 'broadcast',
+                        event: 'ice-candidate',
+                        payload: { candidate: event.candidate }
+                    })
+                }
+            }
+
+            // Señalización vía Supabase Realtime
+            channel.current = supabase.channel(`webrtc-${id}`)
+
+            channel.current
+                .on('broadcast', { event: 'join' }, async () => {
+                    // El otro entró, soy el 'Llamador' (Creo Offer)
+                    const offer = await pc.createOffer()
+                    await pc.setLocalDescription(offer)
+                    channel.current.send({
+                        type: 'broadcast',
+                        event: 'offer',
+                        payload: { offer }
+                    })
+                    setStatus('Llamando...')
+                })
+                .on('broadcast', { event: 'offer' }, async ({ payload }: any) => {
+                    // Recibo Offer, respondo con Answer
+                    await pc.setRemoteDescription(new RTCSessionDescription(payload.offer))
+                    const answer = await pc.createAnswer()
+                    await pc.setLocalDescription(answer)
+                    channel.current.send({
+                        type: 'broadcast',
+                        event: 'answer',
+                        payload: { answer }
+                    })
+                    setStatus('Conectando...')
+                })
+                .on('broadcast', { event: 'answer' }, async ({ payload }: any) => {
+                    // Recibo Answer, establezco Remote Description
+                    if (!pc.currentRemoteDescription) {
+                        await pc.setRemoteDescription(new RTCSessionDescription(payload.answer))
+                    }
+                })
+                .on('broadcast', { event: 'ice-candidate' }, async ({ payload }: any) => {
+                    // Agregar posibles caminos de red
+                    try {
+                        const candidate = new RTCIceCandidate(payload.candidate)
+                        await pc.addIceCandidate(candidate)
+                    } catch (e) {
+                        console.error('Error addIceCandidate', e)
+                    }
+                })
+                .subscribe(async (statusResponse: string) => {
+                    if (statusResponse === 'SUBSCRIBED') {
+                        // Avisar que entré a la sala
+                        channel.current.send({
+                            type: 'broadcast',
+                            event: 'join',
+                            payload: {}
+                        })
+                    }
+                })
+        }
+
+        initializeMedia()
+
+        return () => {
+            mounted = false
+            if (localStream.current) localStream.current.getTracks().forEach(t => t.stop())
+            if (peerConnection.current) peerConnection.current.close()
+            if (channel.current) supabase.removeChannel(channel.current)
+        }
+    }, [id, user])
+
+    const toggleMic = () => {
+        if (localStream.current) {
+            const audioTrack = localStream.current.getAudioTracks()[0]
+            if (audioTrack) {
+                audioTrack.enabled = !audioTrack.enabled
+                setMicOn(audioTrack.enabled)
+            }
+        }
+    }
+
+    const toggleVideo = () => {
+        if (localStream.current) {
+            const videoTrack = localStream.current.getVideoTracks()[0]
+            if (videoTrack) {
+                videoTrack.enabled = !videoTrack.enabled
+                setVideoOn(videoTrack.enabled)
+            }
+        }
+    }
+
+    const endCall = () => {
         navigate(`/matches/${id}`)
     }
 
-    const handlePanic = () => {
-        if (timerRef.current) clearInterval(timerRef.current)
-        // TODO: trigger report modal + block
-        navigate('/matches')
-    }
-
     return (
-        <div className="video-call video-call--no-capture">
-            {/* Header */}
-            <div className="video-call__header">
-                <div className={`video-call__timer ${timerClass}`}>
-                    <Clock size={16} />
-                    <span>{formatTime(seconds)}</span>
-                    <span style={{ fontSize: 'var(--fs-xs)', color: 'var(--text-tertiary)' }}>
-                        / {maxMinutes}:00
-                    </span>
-                </div>
-
-                <button
-                    className="video-call__btn video-call__btn--panic"
-                    onClick={handlePanic}
-                    title="Botón de pánico — terminar y reportar"
-                >
-                    <AlertTriangle size={20} />
-                </button>
-            </div>
-
-            {/* Video area */}
-            <div className="video-call__videos">
-                {connected ? (
-                    <div className="video-call__remote video-call__placeholder">
-                        <Video size={48} />
-                        <p>Videollamada activa</p>
-                        <p style={{ fontSize: 'var(--fs-xs)', color: 'var(--text-tertiary)' }}>
-                            Match #{id?.slice(-6)}
-                        </p>
-                    </div>
-                ) : (
-                    <div className="video-call__remote video-call__placeholder">
-                        <div className="animate-pulse-soft">
-                            <Phone size={48} />
+        <div className="video-call">
+            <div className="video-call__grid">
+                {/* Remote Video */}
+                <div className="video-call__remote">
+                    <video ref={remoteVideoRef} autoPlay playsInline style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
+                    
+                    {!isConnected && (
+                        <div className="video-call__waiting flex-center" style={{ position: 'absolute', inset: 0, flexDirection: 'column', gap: 16 }}>
+                            <div className="pulse-ring">
+                                <VideoIcon size={32} color="var(--love-rose)" />
+                            </div>
+                            <p>{status}</p>
+                            <span style={{ fontSize: 'var(--fs-xs)', color: 'var(--success)', display: 'flex', gap: 4, alignItems: 'center' }}>
+                                <ShieldCheck size={14}/> Cifrado Extremo a Extremo
+                            </span>
                         </div>
-                        <p>Conectando...</p>
-                    </div>
-                )}
-
-                {/* Local video preview */}
-                <div className="video-call__local">
-                    <div className="video-call__placeholder" style={{ height: '100%' }}>
-                        {videoOff ? <VideoOff size={20} /> : <Video size={20} />}
-                    </div>
+                    )}
                 </div>
 
-                {/* Suggested topics */}
-                {showTopics && (
-                    <div className="video-call__topics animate-fade-in-up">
-                        {suggestedTopics.map((t, i) => (
-                            <button key={i} className="video-call__topic">
-                                💬 {t}
-                            </button>
-                        ))}
-                    </div>
-                )}
+                {/* Local Video */}
+                <div className="video-call__local glass">
+                    <video ref={localVideoRef} autoPlay playsInline muted style={{ width: '100%', height: '100%', objectFit: 'cover', transform: 'scaleX(-1)' }} />
+                </div>
             </div>
 
-            {/* Controls */}
-            <div className="video-call__controls">
-                <button
-                    className={`video-call__btn ${muted ? 'video-call__btn--danger' : 'video-call__btn--default'}`}
-                    onClick={() => setMuted(!muted)}
+            <div className="video-call__controls glass-strong animate-fade-in-up">
+                <button 
+                    className={`video-call__btn ${!micOn ? 'video-call__btn--off' : ''}`} 
+                    onClick={toggleMic}
                 >
-                    {muted ? <MicOff size={20} /> : <Mic size={20} />}
+                    {micOn ? <Mic size={24} /> : <MicOff size={24} />}
                 </button>
-
-                <button
-                    className={`video-call__btn ${videoOff ? 'video-call__btn--danger' : 'video-call__btn--default'}`}
-                    onClick={() => setVideoOff(!videoOff)}
+                <button 
+                    className="video-call__btn video-call__btn--danger" 
+                    onClick={endCall}
                 >
-                    {videoOff ? <VideoOff size={20} /> : <Video size={20} />}
+                    <PhoneOff size={24} />
                 </button>
-
-                <button
-                    className={`video-call__btn video-call__btn--default`}
-                    onClick={() => setShowTopics(!showTopics)}
-                    title="Temas sugeridos"
+                <button 
+                    className={`video-call__btn ${!videoOn ? 'video-call__btn--off' : ''}`} 
+                    onClick={toggleVideo}
                 >
-                    <MessageCircle size={20} />
-                </button>
-
-                <button className="video-call__btn video-call__btn--danger" onClick={handleEndCall}>
-                    <PhoneOff size={20} />
+                    {videoOn ? <VideoIcon size={24} /> : <VideoOff size={24} />}
                 </button>
             </div>
+
+            <button className="video-call__back" onClick={endCall}>
+                <ArrowLeft size={24} />
+            </button>
         </div>
     )
 }

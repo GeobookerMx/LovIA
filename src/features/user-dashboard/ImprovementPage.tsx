@@ -1,6 +1,6 @@
 import { ArrowLeft, TrendingUp, Clock, BookOpen, Zap } from 'lucide-react'
 import { useNavigate } from 'react-router-dom'
-import '../components/matching/Matching.css'
+import '../../components/matching/Matching.css'
 
 interface WeakArea {
     name: string
@@ -9,12 +9,14 @@ interface WeakArea {
     target: number
     module: string
     color: string
+    author: string
+    why: string
 }
 
 const mockAreas: WeakArea[] = [
-    { name: 'Inteligencia Emocional', factor_key: 'ie', current: 1.8, target: 3.0, module: 'Módulo IE: Reconocimiento emocional', color: 'var(--line-love)' },
-    { name: 'Comunicación', factor_key: 'comm', current: 2.2, target: 3.5, module: 'Módulo: Comunicación sin juicio (Gottman)', color: 'var(--line-sex)' },
-    { name: 'Tolerancia', factor_key: 'tolerance', current: 2.0, target: 3.0, module: 'Módulo: Resiliencia y adaptabilidad', color: 'var(--line-realization)' },
+    { name: 'Inteligencia Emocional', factor_key: 'ie', current: 1.8, target: 3.0, module: 'Módulo IE: Reconocimiento emocional', color: 'var(--line-love)', author: 'Salovey & Mayer (1990)', why: 'Las parejas con alta IE reportan 36% más satisfacción (Brackett et al., 2005)' },
+    { name: 'Comunicación', factor_key: 'comm', current: 2.2, target: 3.5, module: 'Módulo: Comunicación No Violenta', color: 'var(--line-sex)', author: 'Rosenberg (2015) + Gottman (1999)', why: 'La CNV reduce los "4 Jinetes" que predicen el 94% de divorcios' },
+    { name: 'Tolerancia a la Frustración', factor_key: 'tolerance', current: 2.0, target: 3.0, module: 'Módulo: Resiliencia y adaptabilidad', color: 'var(--line-realization)', author: 'Ellis (1962) + Dweck (2006)', why: 'La flexibilidad cognitiva es el factor #1 en resolución de conflictos' },
 ]
 
 const mockProjection = {
@@ -87,6 +89,17 @@ export default function ImprovementPage() {
                     }}>
                         <BookOpen size={12} />
                         {area.module}
+                    </div>
+
+                    <div style={{
+                        fontSize: 'var(--fs-xs)', color: 'var(--text-tertiary)',
+                        marginTop: 'var(--space-1)', lineHeight: 1.4,
+                        borderTop: '1px solid var(--border-subtle)',
+                        paddingTop: 'var(--space-2)',
+                    }}>
+                        <strong style={{ color: 'var(--love-warm)' }}>📚 {area.author}</strong>
+                        <br />
+                        <em>{area.why}</em>
                     </div>
                 </div>
             ))}

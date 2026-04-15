@@ -1,34 +1,75 @@
-import { useState } from 'react'
-import { Search, Filter, MoreVertical, Shield, Ban, Eye } from 'lucide-react'
+import { useState, useEffect } from 'react'
+import { Search, Filter, Ban, RefreshCw } from 'lucide-react'
+import { supabase } from '../../lib/supabase'
 import './AdminPages.css'
 
-const mockUsers = [
-    { id: '1', name: 'María García', email: 'maria@email.com', freq: 78, level: 'Constructor', tier: 'Arquitecto', verified: true, status: 'active', date: '2025-01-15' },
-    { id: '2', name: 'Carlos Rodríguez', email: 'carlos@email.com', freq: 52, level: 'Explorador', tier: 'Free', verified: false, status: 'active', date: '2025-01-20' },
-    { id: '3', name: 'Ana López', email: 'ana@email.com', freq: 89, level: 'Armonizador', tier: 'Diamante', verified: true, status: 'active', date: '2025-01-10' },
-    { id: '4', name: 'Pedro Martínez', email: 'pedro@email.com', freq: 41, level: 'Buscador', tier: 'Free', verified: false, status: 'suspended', date: '2025-02-01' },
-    { id: '5', name: 'Sofía Torres', email: 'sofia@email.com', freq: 65, level: 'Constructor', tier: 'Arquitecto', verified: true, status: 'active', date: '2025-02-10' },
-    { id: '6', name: 'Diego Hernández', email: 'diego@email.com', freq: 73, level: 'Constructor', tier: 'Ingeniero', verified: true, status: 'active', date: '2025-02-12' },
-    { id: '7', name: 'Valentina Ruiz', email: 'val@email.com', freq: 58, level: 'Explorador', tier: 'Free', verified: false, status: 'active', date: '2025-02-18' },
-    { id: '8', name: 'Andrés Morales', email: 'andres@email.com', freq: 34, level: 'Despertar', tier: 'Free', verified: false, status: 'banned', date: '2025-02-20' },
-]
+interface UserData {
+    id: string
+    email: string
+    full_name: string
+    onboarding_completed: boolean
+    created_at: string
+    status?: string
+}
 
 export default function UsersManager() {
     const [search, setSearch] = useState('')
     const [filter, setFilter] = useState<'all' | 'active' | 'suspended' | 'banned'>('all')
+    const [users, setUsers] = useState<UserData[]>([])
+    const [loading, setLoading] = useState(true)
 
-    const filteredUsers = mockUsers.filter((u) => {
-        const matchSearch = u.name.toLowerCase().includes(search.toLowerCase()) ||
-            u.email.toLowerCase().includes(search.toLowerCase())
-        const matchFilter = filter === 'all' || u.status === filter
-        return matchSearch && matchFilter
+    const fetchUsers = async () => {
+        setLoading(true)
+        const { data, error } = await supabase.from('profiles').select('id, email, full_name, onboarding_completed, created_at, status')
+
+        if (!error && data) {
+            const list: UserData[] = data.map((row: any) => ({
+                id: row.id,
+                email: row.email,
+                full_name: row.full_name || 'Desconocido',
+                onboarding_completed: row.onboarding_completed,
+                created_at: row.created_at,
+                status: row.status || 'active'
+            }))
+            // sort descending
+            list.sort((a,b) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime())
+            setUsers(list)
+        }
+        setLoading(false)
+    }
+
+    useEffect(() => { fetchUsers() }, [])
+
+    const handleAction = async (userId: string, currentStatus: string) => {
+        const newStatus = currentStatus === 'banned' ? 'active' : 'banned'
+        const confirmMsg = newStatus === 'banned' ? '¿Estás seguro de banear a este usuario permanentemente?' : '¿Quieres quitarle el baneo de la plataforma?'
+        
+        if (!window.confirm(confirmMsg)) return
+
+        const { error } = await supabase.from('profiles').update({ status: newStatus }).eq('id', userId)
+        
+        if (error) {
+            alert('Error al actualizar el usuario. Ejecuta el script SQL para la columna "status".')
+        } else {
+            fetchUsers()
+        }
+    }
+
+    const filteredUsers = users.filter((u) => {
+        const matchSearch = u.full_name.toLowerCase().includes(search.toLowerCase()) || u.email?.toLowerCase().includes(search.toLowerCase())
+        return matchSearch
     })
 
     return (
         <div className="admin-page">
             <div className="admin-page__header">
-                <h1>Gestión de Usuarios</h1>
-                <p>{mockUsers.length} usuarios registrados</p>
+                <div>
+                    <h1>Gestión de Usuarios</h1>
+                    <p>{users.length} usuarios registrados en la plataforma</p>
+                </div>
+                <button className="admin-refresh-btn" onClick={fetchUsers} title="Recargar">
+                    <RefreshCw size={16} className={loading ? 'animate-spin' : ''} />
+                </button>
             </div>
 
             {/* Toolbar */}
@@ -37,7 +78,7 @@ export default function UsersManager() {
                     <Search size={16} />
                     <input
                         type="text"
-                        placeholder="Buscar por nombre o email..."
+                        placeholder="Buscar por alias..."
                         value={search}
                         onChange={(e) => setSearch(e.target.value)}
                     />
@@ -62,44 +103,37 @@ export default function UsersManager() {
                     <thead>
                         <tr>
                             <th>Usuario</th>
-                            <th>Frecuencia</th>
-                            <th>Nivel</th>
-                            <th>Tier</th>
-                            <th>Verificado</th>
-                            <th>Estado</th>
-                            <th>Acciones</th>
+                            <th>Onboarding</th>
+                            <th>Registro</th>
+                            <th>Backend</th>
                         </tr>
                     </thead>
                     <tbody>
-                        {filteredUsers.map((u) => (
-                            <tr key={u.id} className={u.status !== 'active' ? 'admin-table__row--muted' : ''}>
+                        {loading && <tr><td colSpan={4} style={{textAlign:'center', padding: '20px'}}>Cargando...</td></tr>}
+                        {!loading && filteredUsers.length === 0 && <tr><td colSpan={4} style={{textAlign:'center', padding: '20px'}}>No hay resultados</td></tr>}
+                        {!loading && filteredUsers.map((u) => (
+                            <tr key={u.id}>
                                 <td>
                                     <div className="admin-user-cell">
-                                        <div className="admin-user-cell__avatar">{u.name[0]}</div>
+                                        <div className="admin-user-cell__avatar">{u.full_name[0]?.toUpperCase() || u.email?.[0]?.toUpperCase() || 'U'}</div>
                                         <div>
-                                            <strong>{u.name}</strong>
-                                            <span className="admin-user-cell__email">{u.email}</span>
+                                            <strong>{u.full_name}</strong>
+                                            <span className="admin-user-cell__email" style={{fontSize: '0.65rem'}}>{u.email} ({u.id.substring(0,8)})</span>
                                         </div>
                                     </div>
                                 </td>
                                 <td>
-                                    <span className="admin-freq-badge" data-level={u.freq >= 70 ? 'high' : u.freq >= 50 ? 'mid' : 'low'}>
-                                        {u.freq}
+                                    <span className="admin-freq-badge" data-level={u.onboarding_completed ? 'high' : 'low'}>
+                                        {u.onboarding_completed ? 'Completado' : 'Pendiente'}
                                     </span>
+                                    {u.status === 'banned' && <span className="admin-freq-badge" style={{ background: 'var(--danger)', color: 'white', marginLeft: '8px' }}>Baneado</span>}
                                 </td>
-                                <td>{u.level}</td>
-                                <td><span className={`admin-tier-badge admin-tier-badge--${u.tier.toLowerCase()}`}>{u.tier}</span></td>
-                                <td>{u.verified ? <Shield size={16} color="var(--success)" /> : <span style={{ color: 'var(--text-tertiary)' }}>—</span>}</td>
-                                <td>
-                                    <span className={`admin-status admin-status--${u.status}`}>
-                                        {u.status === 'active' ? 'Activo' : u.status === 'suspended' ? 'Suspendido' : 'Baneado'}
-                                    </span>
-                                </td>
+                                <td style={{ fontSize: 'var(--fs-xs)', color: 'var(--text-tertiary)' }}>{new Date(u.created_at).toLocaleDateString('es-MX')}</td>
                                 <td>
                                     <div className="admin-actions">
-                                        <button title="Ver detalle"><Eye size={16} /></button>
-                                        <button title="Suspender"><Ban size={16} /></button>
-                                        <button title="Más"><MoreVertical size={16} /></button>
+                                        <button title={u.status === 'banned' ? "Desbanear" : "Banear"} onClick={() => handleAction(u.id, u.status || 'active')}>
+                                            <Ban size={16} color={u.status === 'banned' ? "var(--danger)" : "var(--text-tertiary)"}/>
+                                        </button>
                                     </div>
                                 </td>
                             </tr>

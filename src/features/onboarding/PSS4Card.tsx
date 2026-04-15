@@ -1,8 +1,8 @@
-import type { PSS4Question } from './questionData'
+import type { Question } from './questionData'
 import './Onboarding.css'
 
 interface Props {
-    question: PSS4Question
+    question: Question
     options: { value: number; label: string }[]
     selected: number | undefined
     onSelect: (value: number) => void

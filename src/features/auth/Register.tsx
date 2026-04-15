@@ -1,6 +1,7 @@
 import { useState } from 'react'
 import { Link, useNavigate } from 'react-router-dom'
 import { useAuthStore } from '../../stores/authStore'
+import { supabase } from '../../lib/supabase'
 import { Mail, Lock, User, ArrowRight, Eye, EyeOff, AlertCircle, CheckCircle } from 'lucide-react'
 import LegalModal from '../../components/ui/LegalModal'
 import './Auth.css'
@@ -25,23 +26,57 @@ export default function Register() {
         match: password === confirmPassword && confirmPassword.length > 0,
     }
 
-    const allValid = Object.values(passwordChecks).every(Boolean) && legalAccepted && name.length >= 2
+    const allValid =
+        Object.values(passwordChecks).every(Boolean) &&
+        legalAccepted &&
+        name.length >= 2
 
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault()
         setError(null)
 
         if (!allValid) {
-            setError('Por favor completa todos los campos correctamente')
+            if (!legalAccepted) setError('Debes aceptar los términos y condiciones')
+            else if (name.length < 2) setError('El nombre debe tener al menos 2 caracteres')
+            else if (!passwordChecks.length) setError('La contraseña debe tener al menos 8 caracteres')
+            else if (!passwordChecks.upper) setError('La contraseña necesita al menos una mayúscula')
+            else if (!passwordChecks.number) setError('La contraseña necesita al menos un número')
+            else if (!passwordChecks.match) setError('Las contraseñas no coinciden')
+            else setError('Por favor completa todos los campos correctamente')
             return
         }
 
         const result = await signUp(email, password, name)
+
         if (result.error) {
-            setError(result.error)
-        } else {
-            setSuccess(true)
-            setTimeout(() => navigate('/login'), 3000)
+            if (result.error.includes('already registered')) {
+                setError('Este email ya está registrado. ¿Quieres iniciar sesión?')
+            } else if (result.error.includes('invalid')) {
+                setError('Email o contraseña no válidos. La contraseña necesita 8+ caracteres, 1 mayúscula y 1 número.')
+            } else if (result.error.includes('weak')) {
+                setError('Contraseña demasiado débil. Usa 8+ caracteres con mayúscula y número.')
+            } else {
+                setError(result.error)
+            }
+            return
+        }
+
+        setSuccess(true)
+        setTimeout(() => navigate('/onboarding'), 1500)
+    }
+
+    const handleOAuthLogin = async (provider: 'google' | 'apple') => {
+        setError(null)
+
+        const result = await supabase.auth.signInWithOAuth({
+            provider,
+            options: {
+                redirectTo: `${window.location.origin}/auth/callback?next=/onboarding`
+            }
+        })
+
+        if (result.error) {
+            setError(result.error.message)
         }
     }
 
@@ -55,7 +90,7 @@ export default function Register() {
                     </div>
                     <h2>¡Cuenta creada!</h2>
                     <p style={{ color: 'var(--text-secondary)', marginTop: 'var(--space-3)' }}>
-                        Revisa tu email para verificar tu cuenta. Serás redirigido al login...
+                        ¡Bienvenido/a a LovIA! Entrando a tu cuenta...
                     </p>
                 </div>
             </div>
@@ -160,11 +195,13 @@ export default function Register() {
                             />
                         </div>
                         {confirmPassword && (
-                            <PwCheck ok={passwordChecks.match} label={passwordChecks.match ? 'Contraseñas coinciden' : 'No coinciden'} />
+                            <PwCheck
+                                ok={passwordChecks.match}
+                                label={passwordChecks.match ? 'Contraseñas coinciden' : 'No coinciden'}
+                            />
                         )}
                     </div>
 
-                    {/* Legal consent */}
                     <div className="auth-card__legal">
                         <label className="auth-card__checkbox-label">
                             <input
@@ -191,29 +228,51 @@ export default function Register() {
                         </label>
                     </div>
 
-                    <button type="submit" className="auth-card__submit" disabled={loading || !allValid}>
-                        {loading ? (
-                            <span className="auth-card__spinner" />
-                        ) : (
-                            <>
-                                Crear cuenta <ArrowRight size={18} />
-                            </>
-                        )}
+                    <button
+                        type="submit"
+                        className="btn btn-primary auth-card__submit"
+                        disabled={loading}
+                    >
+                        {loading ? 'Creando...' : 'Crear cuenta'}
+                        {!loading && <ArrowRight size={18} />}
                     </button>
                 </form>
 
-                <p className="auth-card__footer">
-                    ¿Ya tienes cuenta? <Link to="/login">Iniciar sesión</Link>
-                </p>
+                <div className="auth-card__divider">
+                    <span>o</span>
+                </div>
+
+                <div className="auth-card__socials">
+                    <button
+                        type="button"
+                        className="btn btn-secondary auth-card__social-btn"
+                        onClick={() => handleOAuthLogin('google')}
+                    >
+                        Continuar con Google
+                    </button>
+                    <button
+                        type="button"
+                        className="btn btn-secondary auth-card__social-btn"
+                        onClick={() => handleOAuthLogin('apple')}
+                    >
+                        Continuar con Apple
+                    </button>
+                </div>
+
+                <div className="auth-card__footer">
+                    <p>
+                        ¿Ya tienes cuenta? <Link to="/login">Inicia sesión</Link>
+                    </p>
+                </div>
             </div>
 
             {showLegal && (
                 <LegalModal
+                    onClose={() => setShowLegal(false)}
                     onAccept={() => {
                         setLegalAccepted(true)
                         setShowLegal(false)
                     }}
-                    onClose={() => setShowLegal(false)}
                 />
             )}
         </div>
@@ -222,9 +281,9 @@ export default function Register() {
 
 function PwCheck({ ok, label }: { ok: boolean; label: string }) {
     return (
-        <span className={`auth-card__pw-check ${ok ? 'auth-card__pw-check--ok' : ''}`}>
-            {ok ? <CheckCircle size={12} /> : <span className="auth-card__pw-dot" />}
-            {label}
-        </span>
+        <div className={`auth-card__pw-check ${ok ? 'ok' : ''}`}>
+            <span className="dot" />
+            <span>{label}</span>
+        </div>
     )
 }

@@ -273,3 +273,53 @@
     justify-content: center;
     background: var(--bg-deep);
 }
+
+/* ── Social Login ── */
+.auth-divider {
+    display: flex;
+    align-items: center;
+    text-align: center;
+    margin: var(--space-6) 0;
+    color: var(--text-tertiary);
+    font-size: var(--fs-xs);
+}
+
+.auth-divider::before,
+.auth-divider::after {
+    content: '';
+    flex: 1;
+    border-bottom: 1px solid var(--border-subtle);
+}
+
+.auth-divider span {
+    padding: 0 var(--space-3);
+}
+
+.auth-social {
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-3);
+    margin-bottom: var(--space-4);
+}
+
+.btn-social {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 12px;
+    width: 100%;
+    padding: 12px;
+    border-radius: var(--radius-full);
+    border: 1px solid var(--border-subtle);
+    background: var(--bg-card);
+    color: var(--text-primary);
+    font-size: var(--fs-sm);
+    font-weight: 500;
+    cursor: pointer;
+    transition: all 0.2s ease;
+}
+
+.btn-social:hover {
+    background: var(--bg-hover);
+    transform: translateY(-1px);
+}

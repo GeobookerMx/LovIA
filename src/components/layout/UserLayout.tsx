@@ -1,5 +1,6 @@
 import { Outlet, useLocation } from 'react-router-dom'
 import BottomTabBar from './BottomTabBar'
+import Footer from './Footer'
 import './UserLayout.css'
 
 export default function UserLayout() {
@@ -9,6 +10,7 @@ export default function UserLayout() {
         <div className="user-layout">
             <main className="user-layout__content">
                 <Outlet />
+                <Footer />
             </main>
             <BottomTabBar currentPath={location.pathname} />
         </div>

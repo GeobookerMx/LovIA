@@ -1,5 +1,5 @@
 import { Link } from 'react-router-dom'
-import { Home, Heart, Sparkles, Users, User } from 'lucide-react'
+import { Home, Heart, MapPin, Users, User } from 'lucide-react'
 import './BottomTabBar.css'
 
 interface Props {
@@ -8,8 +8,8 @@ interface Props {
 
 const tabs = [
     { path: '/home', icon: Home, label: 'Inicio' },
+    { path: '/radar', icon: MapPin, label: 'Radar' },
     { path: '/matches', icon: Heart, label: 'Matches' },
-    { path: '/spark', icon: Sparkles, label: 'Spark' },
     { path: '/community', icon: Users, label: 'Comunidad' },
     { path: '/profile', icon: User, label: 'Perfil' },
 ]

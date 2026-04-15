@@ -1,11 +1,39 @@
-import { TrendingUp, Zap, Target, ChevronRight } from 'lucide-react'
+import { useEffect, useState } from 'react'
+import { useNavigate } from 'react-router-dom'
+import { TrendingUp, Zap, Target, ChevronRight, BookOpen, Shield } from 'lucide-react'
+import { useAuthStore } from '../../stores/authStore'
+import { useEvaluationStore } from '../../stores/evaluationStore'
+import { supabase } from '../../lib/supabase'
 import './Home.css'
 
+function getDynamicGreeting() {
+    const hour = new Date().getHours()
+    if (hour >= 6 && hour < 12)  return 'Buenos días ☀️'
+    if (hour >= 12 && hour < 19) return 'Buenas tardes 🌤️'
+    return 'Buenas noches 🌙'
+}
+
+function calculateProgress(evalStore: ReturnType<typeof useEvaluationStore.getState>) {
+    const tests = [evalStore.stroop, evalStore.digitSpan, evalStore.frustrationTolerance, evalStore.emotionalRegulation]
+    const passed = tests.filter(t => t?.passed).length
+    return Math.round((passed / tests.length) * 100)
+}
+
+interface TodaySpark {
+    question: string
+    category: string
+}
+
 export default function Home() {
-    // Mock data — will come from Supabase
-    const frequency = 67
-    const level = 'Constructor'
-    const progress = 40
+    const navigate = useNavigate()
+    const profile = useAuthStore(s => s.profile)
+    const evalStore = useEvaluationStore()
+    const [spark, setSpark] = useState<TodaySpark | null>(null)
+
+    const profileAny = profile as unknown as Record<string, unknown> | null
+    const frequency = (profileAny?.frequency as number) ?? 0
+    const level = (profileAny?.frequency_level as string) ?? 'Despertar'
+    const progress = calculateProgress(evalStore)
 
     const getFrequencyColor = (f: number) => {
         if (f >= 75) return 'var(--freq-high)'
@@ -14,13 +42,29 @@ export default function Home() {
         return 'var(--freq-low)'
     }
 
+    // Load today's spark from Supabase
+    useEffect(() => {
+        const today = new Date().toISOString().split('T')[0]
+        supabase
+            .from('sparks')
+            .select('question, category')
+            .eq('active_date', today)
+            .maybeSingle()
+            .then(({ data }) => {
+                if (data) setSpark(data)
+            })
+    }, [])
+
+    const name = profile?.alias || 'tú'
+    const greeting = getDynamicGreeting()
+
     return (
         <div className="home">
             {/* Header */}
             <header className="home__header">
                 <div>
-                    <p className="home__greeting">Buenos días 👋</p>
-                    <h1 className="home__name">Tu Espacio</h1>
+                    <p className="home__greeting">{greeting}</p>
+                    <h1 className="home__name">{name} 👋</h1>
                 </div>
                 <div className="home__header-badge glass">
                     <Target size={14} />
@@ -47,20 +91,27 @@ export default function Home() {
                 <p className="home__frequency-hint">
                     {frequency >= 75 ? '🟢 Excelente — listo para matches de calidad' :
                         frequency >= 50 ? '🟡 En desarrollo — sigue mejorando' :
-                            '🟠 Fundación — hay trabajo por hacer'}
+                            frequency > 0 ? '🟠 Fundación — hay trabajo por hacer' :
+                                '⚪ Completa tu perfil y evaluaciones para calcular tu frecuencia'}
                 </p>
             </div>
 
             {/* Progress */}
             <div className="home__progress glass animate-fade-in-up" style={{ animationDelay: '100ms' }}>
                 <div className="home__progress-header">
-                    <h3>Progreso</h3>
+                    <h3>Progreso de Evaluaciones</h3>
                     <span className="home__progress-pct">{progress}%</span>
                 </div>
                 <div className="home__progress-bar">
                     <div className="home__progress-fill" style={{ width: `${progress}%` }} />
                 </div>
-                <p className="home__progress-label">Nivel 1 ✓ → Nivel 2: {progress}%</p>
+                <p className="home__progress-label">
+                    {progress === 100
+                        ? '✅ Todas las evaluaciones completadas'
+                        : progress > 0
+                            ? `${progress}% completado — continúa tus evaluaciones`
+                            : 'Completa tus evaluaciones para avanzar'}
+                </p>
             </div>
 
             {/* Daily Spark Preview */}
@@ -68,31 +119,36 @@ export default function Home() {
                 <div className="home__spark-header">
                     <Zap size={18} color="var(--love-warm)" />
                     <span>La Chispa del Día</span>
+                    {spark && <span style={{ fontSize: '11px', opacity: 0.6, marginLeft: 'auto' }}>{spark.category}</span>}
                 </div>
                 <p className="home__spark-question">
-                    "¿Qué cualidad admiras más en la persona que amas?"
+                    "{spark?.question ?? 'Cargando pregunta del día...'}"
                 </p>
-                <button className="home__spark-cta">
+                <button className="home__spark-cta" onClick={() => navigate('/spark')}>
                     Responder <ChevronRight size={16} />
                 </button>
             </div>
 
-            {/* Recommendations */}
+            {/* Quick Access */}
             <section className="home__recommendations stagger-children" style={{ animationDelay: '300ms' }}>
-                <h3 className="home__section-title">Recomendado para ti</h3>
-                <div className="home__rec-card glass">
-                    <div className="home__rec-icon" style={{ background: 'rgba(168, 85, 247, 0.15)' }}>🧠</div>
+                <h3 className="home__section-title">Acceso rápido</h3>
+                <div className="home__rec-card glass" onClick={() => navigate('/modules')} style={{ cursor: 'pointer' }}>
+                    <div className="home__rec-icon" style={{ background: 'rgba(168, 85, 247, 0.15)' }}>
+                        <BookOpen size={20} color="var(--love-rose)" />
+                    </div>
                     <div>
-                        <h4>Inteligencia Emocional</h4>
-                        <p>Mejora tu comprensión emocional</p>
+                        <h4>Mis Módulos</h4>
+                        <p>{progress === 100 ? 'Todos completados ✅' : 'Continúa tu aprendizaje'}</p>
                     </div>
                     <ChevronRight size={18} color="var(--text-tertiary)" />
                 </div>
-                <div className="home__rec-card glass">
-                    <div className="home__rec-icon" style={{ background: 'rgba(34, 211, 238, 0.15)' }}>💬</div>
+                <div className="home__rec-card glass" onClick={() => navigate('/verification')} style={{ cursor: 'pointer' }}>
+                    <div className="home__rec-icon" style={{ background: 'rgba(34, 211, 238, 0.15)' }}>
+                        <Shield size={20} color="var(--freq-mid)" />
+                    </div>
                     <div>
-                        <h4>Comunicación sin Juicio</h4>
-                        <p>Basado en el método Gottman</p>
+                        <h4>Verificación</h4>
+                        <p>Aumenta tu nivel de confianza</p>
                     </div>
                     <ChevronRight size={18} color="var(--text-tertiary)" />
                 </div>

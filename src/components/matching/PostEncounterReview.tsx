@@ -1,6 +1,7 @@
 import { useState } from 'react'
 import { useNavigate, useParams } from 'react-router-dom'
 import { ArrowLeft, Send, AlertTriangle } from 'lucide-react'
+import { supabase } from '../../lib/supabase'
 import './Matching.css'
 
 export default function PostEncounterReview() {
@@ -11,11 +12,24 @@ export default function PostEncounterReview() {
     const [feedback, setFeedback] = useState('')
     const [submitted, setSubmitted] = useState(false)
 
-    const handleSubmit = () => {
-        // TODO: persist to Supabase
-        console.log({ matchId: id, rating, feltSafe, feedback })
-        setSubmitted(true)
-        setTimeout(() => navigate('/matches'), 2000)
+    const handleSubmit = async () => {
+        try {
+            // Guardar reseña en la base de datos
+            const { error } = await supabase.from('encounter_reviews').insert({
+                match_id: id,
+                rating,
+                felt_safe: feltSafe,
+                feedback
+            });
+            
+            if (error) throw error;
+            
+            setSubmitted(true)
+            setTimeout(() => navigate('/matches'), 2000)
+        } catch (error: any) {
+            console.error('Error guardando la reseña:', error)
+            alert('Asegúrate de ejecutar el comando SQL de esta fase para crear la tabla encounter_reviews.')
+        }
     }
 
     if (submitted) {

@@ -34,7 +34,7 @@ export default function FrequencyResult({ result, onContinue }: Props) {
                 <div className="result__lines glass">
                     <h3><TrendingUp size={16} /> Las 3 Líneas</h3>
                     <div className="result__lines-grid">
-                        {result.lines.map((line) => (
+                        {result.lines.map((line: { label: string; score: number; color: string; emoji: string }) => (
                             <div key={line.label} className="result__line">
                                 <div className="result__line-header">
                                     <span>{line.emoji} {line.label}</span>
@@ -66,7 +66,7 @@ export default function FrequencyResult({ result, onContinue }: Props) {
                 <div className="result__insights glass">
                     <h3><Lightbulb size={16} /> Tus Insights</h3>
                     <ul>
-                        {result.insights.map((text, i) => (
+                        {result.insights.map((text: string, i: number) => (
                             <li key={i} className="animate-fade-in-up" style={{ animationDelay: `${i * 150}ms` }}>
                                 {text}
                             </li>
