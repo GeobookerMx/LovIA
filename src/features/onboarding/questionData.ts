@@ -1,15 +1,7 @@
-/**
- * LovIA! — Level 1 Questionnaire Data
- *
- * 10 questions covering the 3 Lines and key factors.
- * Each question maps to specific factors and lines for initial scoring.
- */
-
 export interface QuestionOption {
     id: string
     text: string
     emoji: string
-    /** Score impact: which factor/line and how much (0-4) */
     scores: Record<string, number>
 }
 
@@ -17,7 +9,7 @@ export interface Question {
     id: string
     text: string
     subtitle?: string
-    category: 'love' | 'sexual' | 'realization' | 'common' | 'positive' | 'negative'
+    category: 'logistics' | 'intent' | 'emotion' | 'attachment'
     categoryLabel: string
     emoji: string
     type: 'single' | 'slider' | 'multi'
@@ -26,191 +18,159 @@ export interface Question {
     factorKeys: string[]
 }
 
+// ── TEST 1: Mapa de Momento de Vida (MVP 1.2) ──
+export const momentoDeVidaQuestions: Question[] = [
+    {
+        id: 'mv1_intent',
+        text: '¿Qué buscas en este momento de tu vida?',
+        subtitle: 'Sé honesto/a contigo mismo/a.',
+        category: 'intent',
+        categoryLabel: 'Intención Relacional',
+        emoji: '🎯',
+        type: 'single',
+        factorKeys: ['readiness_intent'],
+        options: [
+            { id: 'a', text: 'Una relación estable a largo plazo', emoji: '💍', scores: { readiness_intent: 4 } },
+            { id: 'b', text: 'Conocer gente sin prisa y ver qué pasa', emoji: '🌿', scores: { readiness_intent: 3 } },
+            { id: 'c', text: 'Primero quiero entenderme mejor', emoji: '🧘', scores: { readiness_intent: 2 } }
+        ],
+    },
+    {
+        id: 'mv2_status',
+        text: '¿Cuál es tu situación sentimental reciente?',
+        category: 'emotion',
+        categoryLabel: 'Contexto Emocional',
+        emoji: '🕰️',
+        type: 'single',
+        factorKeys: ['readiness_status'],
+        options: [
+            { id: 'a', text: 'Llevo tiempo soltero/a y estoy muy en paz', emoji: '☀️', scores: { readiness_status: 4 } },
+            { id: 'b', text: 'Terminé una relación hace unos meses, ya sano/a', emoji: '🌱', scores: { readiness_status: 3 } },
+            { id: 'c', text: 'Separación/Ruptura reciente', emoji: '🌧️', scores: { readiness_status: 1 } },
+            { id: 'd', text: 'Aún en proceso de un duelo fuerte', emoji: '🌪️', scores: { readiness_status: 0 } },
+        ],
+    },
+    {
+        id: 'mv3_time',
+        text: 'Siendo muy realista, ¿qué tanta disponibilidad de tiempo tienes hoy para salir?',
+        category: 'logistics',
+        categoryLabel: 'Disponibilidad',
+        emoji: '⏱️',
+        type: 'single',
+        factorKeys: ['readiness_time'],
+        options: [
+            { id: 'a', text: 'Tengo mis tardes/fines de semana libres', emoji: '✅', scores: { readiness_time: 4 } },
+            { id: 'b', text: 'Estoy bastante activo/a, pero hago el tiempo', emoji: '🗓️', scores: { readiness_time: 3 } },
+            { id: 'c', text: 'Mi trabajo/estudios me absorben casi al 100%', emoji: '💼', scores: { readiness_time: 1 } },
+        ],
+    },
+    {
+        id: 'mv4_dependents',
+        text: '¿Tienes hijos o responsabilidades familiares fuertes?',
+        subtitle: 'Esto nos ayuda a buscar personas con una logística compatible a la tuya.',
+        category: 'logistics',
+        categoryLabel: 'Cargas Familiares',
+        emoji: '👨‍👩‍👧',
+        type: 'single',
+        factorKeys: ['readiness_dependents'],
+        options: [
+            { id: 'a', text: 'No, no tengo dependientes', emoji: '👤', scores: { readiness_dependents: 4 } },
+            { id: 'b', text: 'Sí, pero tengo mi logística organizada', emoji: '🧩', scores: { readiness_dependents: 3 } },
+            { id: 'c', text: 'Sí, y me demandan muchísimo tiempo', emoji: '⏳', scores: { readiness_dependents: 2 } },
+        ],
+    },
+    {
+        id: 'mv5_distance',
+        text: '¿Qué distancia estás dispuesto/a a recorrer para ver a alguien recurrente?',
+        category: 'logistics',
+        categoryLabel: 'Movilidad',
+        emoji: '🚗',
+        type: 'single',
+        factorKeys: ['readiness_mobility'],
+        options: [
+            { id: 'a', text: 'No tengo problema, puedo moverme por la ciudad', emoji: '🗺️', scores: { readiness_mobility: 4 } },
+            { id: 'b', text: 'Prefiero que sea en mi misma zona', emoji: '📍', scores: { readiness_mobility: 2 } },
+        ],
+    }
+]
+
+// ── PSS-4 — Escala de Estrés Percibido (Cohen et al., 1983) ──
 export interface PSS4Question {
     id: string
     text: string
     reversed: boolean
 }
 
-// ── PSS-4 (Perceived Stress Scale — 4 items) ──
 export const pss4Questions: PSS4Question[] = [
-    { id: 'pss1', text: 'En el último mes, ¿con qué frecuencia has sentido que no podías controlar las cosas importantes de tu vida?', reversed: false },
-    { id: 'pss2', text: 'En el último mes, ¿con qué frecuencia te has sentido seguro/a de tu capacidad para manejar tus problemas personales?', reversed: true },
-    { id: 'pss3', text: 'En el último mes, ¿con qué frecuencia has sentido que las cosas te salían bien?', reversed: true },
-    { id: 'pss4', text: 'En el último mes, ¿con qué frecuencia has sentido que las dificultades se acumulaban tanto que no podías superarlas?', reversed: false },
+    {
+        id: 'pss_1',
+        text: '¿Con qué frecuencia has sentido que no podías controlar las cosas importantes de tu vida?',
+        reversed: false,
+    },
+    {
+        id: 'pss_2',
+        text: '¿Con qué frecuencia te has sentido seguro/a de tu capacidad para manejar tus problemas personales?',
+        reversed: true,
+    },
+    {
+        id: 'pss_3',
+        text: '¿Con qué frecuencia has sentido que las cosas iban bien?',
+        reversed: true,
+    },
+    {
+        id: 'pss_4',
+        text: '¿Con qué frecuencia has sentido que las dificultades se acumulaban tanto que no podías superarlas?',
+        reversed: false,
+    },
 ]
 
-// PSS-4 response options (0-4 Likert)
 export const pss4Options = [
     { value: 0, label: 'Nunca' },
     { value: 1, label: 'Casi nunca' },
     { value: 2, label: 'A veces' },
-    { value: 3, label: 'Frecuentemente' },
+    { value: 3, label: 'Bastante frecuente' },
     { value: 4, label: 'Muy frecuentemente' },
 ]
 
-// ── Level 1 Questions (10 questions) ──
-export const level1Questions: Question[] = [
-    // Q1: Love Line — Emotional openness
+// ── TEST 2: Cómo te vinculas (MVP 1.3) ──
+export const vinculoQuestions: Question[] = [
     {
-        id: 'q1_love_openness',
-        text: '¿Cómo describirías tu disposición actual a enamorarte?',
-        subtitle: 'No hay respuestas correctas — sé honesto/a contigo',
-        category: 'love',
-        categoryLabel: 'Línea del Amor',
-        emoji: '❤️',
-        type: 'single',
-        factorKeys: ['love_line', 'emotional_openness'],
-        options: [
-            { id: 'a', text: 'Totalmente abierto/a, listo/a para conectar', emoji: '💕', scores: { love_line: 4, emotional_openness: 4 } },
-            { id: 'b', text: 'Abierto/a pero con precaución saludable', emoji: '🌱', scores: { love_line: 3, emotional_openness: 3 } },
-            { id: 'c', text: 'Algo cerrado/a por experiencias pasadas', emoji: '🛡️', scores: { love_line: 2, emotional_openness: 2 } },
-            { id: 'd', text: 'Prefiero enfocarme en mí por ahora', emoji: '🧘', scores: { love_line: 1, emotional_openness: 1 } },
-        ],
-    },
-
-    // Q2: Common Factor — Values
-    {
-        id: 'q2_values',
-        text: '¿Qué valor es más importante para ti en una relación?',
-        category: 'common',
-        categoryLabel: 'Valores',
-        emoji: '⚖️',
-        type: 'single',
-        factorKeys: ['values'],
-        options: [
-            { id: 'a', text: 'Honestidad y transparencia', emoji: '🪞', scores: { values: 4 } },
-            { id: 'b', text: 'Lealtad y compromiso', emoji: '🤝', scores: { values: 4 } },
-            { id: 'c', text: 'Respeto e independencia', emoji: '🦅', scores: { values: 3 } },
-            { id: 'd', text: 'Diversión y espontaneidad', emoji: '🎉', scores: { values: 2 } },
-        ],
-    },
-
-    // Q3: Positive Factor — Emotional Intelligence
-    {
-        id: 'q3_emotional_intelligence',
-        text: 'Cuando tu pareja tiene un mal día, ¿qué haces normalmente?',
-        subtitle: 'Piensa en cómo reaccionas en la vida real',
-        category: 'positive',
-        categoryLabel: 'Inteligencia Emocional',
-        emoji: '🧠',
-        type: 'single',
-        factorKeys: ['emotional_intelligence', 'empathy'],
-        options: [
-            { id: 'a', text: 'Escucho sin juzgar y pregunto cómo apoyar', emoji: '👂', scores: { emotional_intelligence: 4, empathy: 4 } },
-            { id: 'b', text: 'Intento dar soluciones para que se sienta mejor', emoji: '💡', scores: { emotional_intelligence: 3, empathy: 2 } },
-            { id: 'c', text: 'Le doy su espacio hasta que se calme', emoji: '🚪', scores: { emotional_intelligence: 2, empathy: 2 } },
-            { id: 'd', text: 'Me cuesta saber qué hacer en esos momentos', emoji: '😶', scores: { emotional_intelligence: 1, empathy: 1 } },
-        ],
-    },
-
-    // Q4: Common Factor — Affection Language
-    {
-        id: 'q4_affection',
-        text: '¿Cómo prefieres que te demuestren cariño?',
-        category: 'common',
-        categoryLabel: 'Lenguaje del Afecto',
-        emoji: '💝',
-        type: 'single',
-        factorKeys: ['affection', 'love_language'],
-        options: [
-            { id: 'a', text: 'Palabras de afirmación y cumplidos', emoji: '💬', scores: { affection: 3, love_language: 1 } },
-            { id: 'b', text: 'Tiempo de calidad juntos', emoji: '⏰', scores: { affection: 3, love_language: 2 } },
-            { id: 'c', text: 'Contacto físico y cercanía', emoji: '🤗', scores: { affection: 3, love_language: 3 } },
-            { id: 'd', text: 'Actos de servicio y detalles', emoji: '🎁', scores: { affection: 3, love_language: 4 } },
-        ],
-    },
-
-    // Q5: Sexual Line — Priority
-    {
-        id: 'q5_sexual_priority',
-        text: '¿Qué tan importante es la intimidad física en una relación para ti?',
-        category: 'sexual',
-        categoryLabel: 'Línea Sexual',
-        emoji: '🔥',
+        id: 'vin1_trust',
+        text: '¿Qué tanta facilidad tienes para confiar en alguien nuevo?',
+        category: 'attachment',
+        categoryLabel: 'Confianza',
+        emoji: '🤝',
         type: 'slider',
-        factorKeys: ['sexual_line', 'intimacy_priority'],
-        sliderConfig: { min: 1, max: 10, step: 1, labels: ['Poco importante', 'Muy importante'] },
+        factorKeys: ['attachment_trust'],
+        sliderConfig: { min: 1, max: 10, step: 1, labels: ['Me cuesta mucho', 'Confío rápido'] },
     },
-
-    // Q6: Negative Factor — Codependency detection
     {
-        id: 'q6_independence',
-        text: '¿Qué mejor describe tu relación con la soledad?',
-        category: 'negative',
-        categoryLabel: 'Independencia Emocional',
-        emoji: '🌊',
-        type: 'single',
-        factorKeys: ['codependency', 'independence'],
-        options: [
-            { id: 'a', text: 'Disfruto mi tiempo a solas, me recarga', emoji: '✨', scores: { codependency: 0, independence: 4 } },
-            { id: 'b', text: 'Estoy bien solo/a pero prefiero compañía', emoji: '☀️', scores: { codependency: 1, independence: 3 } },
-            { id: 'c', text: 'Me cuesta estar solo/a mucho tiempo', emoji: '🌧️', scores: { codependency: 3, independence: 1 } },
-            { id: 'd', text: 'La soledad me genera ansiedad', emoji: '😟', scores: { codependency: 4, independence: 0 } },
-        ],
-    },
-
-    // Q7: Realization Line — Life goals
-    {
-        id: 'q7_realization',
-        text: '¿En qué etapa de tu vida profesional/personal te encuentras?',
-        category: 'realization',
-        categoryLabel: 'Línea de Realización',
-        emoji: '⭐',
-        type: 'single',
-        factorKeys: ['realization_line', 'life_stage'],
-        options: [
-            { id: 'a', text: 'Explorando opciones, descubriendo mi camino', emoji: '🔍', scores: { realization_line: 2, life_stage: 1 } },
-            { id: 'b', text: 'Construyendo activamente mi carrera/metas', emoji: '🏗️', scores: { realization_line: 3, life_stage: 2 } },
-            { id: 'c', text: 'Consolidado/a, enfocado/a en crecer', emoji: '🚀', scores: { realization_line: 4, life_stage: 3 } },
-            { id: 'd', text: 'Reinventándome después de un cambio importante', emoji: '🔄', scores: { realization_line: 2, life_stage: 4 } },
-        ],
-    },
-
-    // Q8: Positive Factor — Communication
-    {
-        id: 'q8_communication',
-        text: 'Cuando hay un desacuerdo con tu pareja, ¿cómo lo manejas?',
-        subtitle: 'Piensa en tu patrón más frecuente',
-        category: 'positive',
-        categoryLabel: 'Comunicación',
+        id: 'vin2_conflict',
+        text: 'Cuando hay un desacuerdo fuerte con alguien que quieres, ¿cómo reaccionas?',
+        category: 'emotion',
+        categoryLabel: 'Manejo de Conflicto',
         emoji: '💬',
         type: 'single',
-        factorKeys: ['communication', 'conflict_resolution'],
+        factorKeys: ['emotion_conflict'],
         options: [
-            { id: 'a', text: 'Hablo con calma y busco entender su punto', emoji: '🤝', scores: { communication: 4, conflict_resolution: 4 } },
-            { id: 'b', text: 'Expreso lo que siento aunque cueste', emoji: '💪', scores: { communication: 3, conflict_resolution: 3 } },
-            { id: 'c', text: 'Me callo y espero a que pase', emoji: '🤐', scores: { communication: 1, conflict_resolution: 1 } },
-            { id: 'd', text: 'Tiendo a ser reactivo/a en el momento', emoji: '🌋', scores: { communication: 2, conflict_resolution: 2 } },
-        ],
+            { id: 'a', text: 'Busco hablarlo de inmediato para resolverlo', emoji: '🗣️', scores: { emotion_conflict: 4 } },
+            { id: 'b', text: 'Pido tiempo a solas para pensar y luego hablo', emoji: '🧘', scores: { emotion_conflict: 3 } },
+            { id: 'c', text: 'Prefiero evitar el tema para no discutir', emoji: '🤐', scores: { emotion_conflict: 1 } },
+            { id: 'd', text: 'Me enojo mucho y tiendo a reaccionar fuerte', emoji: '🌋', scores: { emotion_conflict: 0 } },
+        ]
     },
-
-    // Q9: Common Factor — Family
     {
-        id: 'q9_relationship_intent',
-        text: '¿Qué tipo de relación buscas?',
-        category: 'common',
-        categoryLabel: 'Intención Relacional',
-        emoji: '🎯',
+        id: 'vin3_attachment',
+        text: 'Si la persona que estás conociendo tarda días en responder, ¿cómo te sientes?',
+        category: 'attachment',
+        categoryLabel: 'Seguridad Afectiva',
+        emoji: '📱',
         type: 'single',
-        factorKeys: ['relationship_intent'],
+        factorKeys: ['attachment_anxiety'],
         options: [
-            { id: 'a', text: 'Pareja estable a largo plazo', emoji: '💍', scores: { relationship_intent: 4 } },
-            { id: 'b', text: 'Conocer gente, ver qué pasa', emoji: '🌿', scores: { relationship_intent: 2 } },
-            { id: 'c', text: 'Amistad primero, relación después', emoji: '🤝', scores: { relationship_intent: 3 } },
-            { id: 'd', text: 'Autoconocimiento, no busco pareja ahora', emoji: '🧘', scores: { relationship_intent: 1 } },
-        ],
-    },
-
-    // Q10: Positive Factor — Self-criticism / Growth
-    {
-        id: 'q10_growth',
-        text: '¿Qué tan dispuesto/a estás a trabajar en ti para mejorar tus relaciones?',
-        category: 'positive',
-        categoryLabel: 'Crecimiento Personal',
-        emoji: '🌱',
-        type: 'slider',
-        factorKeys: ['self_criticism', 'growth_mindset'],
-        sliderConfig: { min: 1, max: 10, step: 1, labels: ['Poco dispuesto/a', 'Totalmente dispuesto/a'] },
-    },
+            { id: 'a', text: 'Normal, todos tenemos una vida ocupada', emoji: '☕', scores: { attachment_anxiety: 4 } },
+            { id: 'b', text: 'Me genera un poco de duda, pero lo entiendo', emoji: '🤔', scores: { attachment_anxiety: 3 } },
+            { id: 'c', text: 'Me genera muchísima ansiedad e inseguridad', emoji: '😟', scores: { attachment_anxiety: 0 } },
+        ]
+    }
 ]

@@ -1,59 +1,39 @@
-/**
- * LovIA! — Scoring Engine (Level 1)
- *
- * Calculates initial Frequency Score and 3-line breakdown
- * from Level 1 questionnaire + PSS-4 answers.
- */
-
-import { level1Questions, pss4Questions } from './questionData'
-
-export interface LineScore {
-    label: string
-    emoji: string
-    score: number       // 0-100
-    color: string
-}
+import { momentoDeVidaQuestions, vinculoQuestions } from './questionData'
 
 export interface OnboardingResults {
-    frequency: number        // 0-100 composite
-    level: string            // Nivel descriptivo
+    frequency: number
+    level: string
     levelEmoji: string
-    lines: LineScore[]
-    stressLevel: number      // PSS-4 score (0-16)
+    lines: {
+        label: string
+        score: number
+        color: string
+        emoji: string
+    }[]
+    stressLevel: number
     stressLabel: string
     insights: string[]
 }
 
-export function calculateFrequency(
-    answers: Record<string, string | number>,
-    pssAnswers: Record<string, number>,
-): OnboardingResults {
+export interface ReadinessResults {
+    readinessScore: number
+    needsSupport: boolean
+    narrative: string
+    recommendations: string[]
+}
 
-    // ── 1. Calculate PSS-4 Score ──
-    let pssTotal = 0
-    for (const q of pss4Questions) {
-        const raw = pssAnswers[q.id] ?? 0
-        pssTotal += q.reversed ? (4 - raw) : raw
-    }
-    // pssTotal range: 0-16 (lower = less stress)
+export function calculateReadiness(
+    answers: Record<string, string | number>
+): ReadinessResults {
+    const allQuestions = [...momentoDeVidaQuestions, ...vinculoQuestions]
+    
+    let totalScore = 0
+    let maxPossible = 0
+    let hasCriticalRedFlag = false
 
-    const stressLabel =
-        pssTotal <= 4 ? 'Bajo' :
-            pssTotal <= 8 ? 'Moderado' :
-                pssTotal <= 12 ? 'Alto' :
-                    'Muy alto'
+    const factors: Record<string, number> = {}
 
-    // ── 2. Calculate Line Scores ──
-    const lineAccum: Record<string, number[]> = {
-        love_line: [],
-        sexual_line: [],
-        realization_line: [],
-    }
-
-    // Accumulate factor scores
-    const factorAccum: Record<string, number[]> = {}
-
-    for (const q of level1Questions) {
+    for (const q of allQuestions) {
         const ans = answers[q.id]
         if (ans === undefined) continue
 
@@ -61,89 +41,176 @@ export function calculateFrequency(
             const opt = q.options.find((o) => o.id === ans)
             if (opt) {
                 for (const [key, score] of Object.entries(opt.scores)) {
-                    if (key in lineAccum) {
-                        lineAccum[key].push(score)
+                    factors[key] = score
+                    totalScore += score
+                    maxPossible += 4 // Max for every question is 4
+                    
+                    // Critical red flags that trigger support
+                    if ((key === 'readiness_status' && score === 0) || 
+                        (key === 'attachment_anxiety' && score === 0) ||
+                        (key === 'emotion_conflict' && score === 0)) {
+                        hasCriticalRedFlag = true
                     }
-                    if (!factorAccum[key]) factorAccum[key] = []
-                    factorAccum[key].push(score)
                 }
             }
         } else if (q.type === 'slider') {
-            // Slider value (1-10): normalize to 0-4 factor scale
             const normalized = ((ans as number) / 10) * 4
             for (const key of q.factorKeys) {
-                if (key in lineAccum) {
-                    lineAccum[key].push(normalized)
-                }
-                if (!factorAccum[key]) factorAccum[key] = []
-                factorAccum[key].push(normalized)
+                factors[key] = normalized
+                totalScore += normalized
+                maxPossible += 4
             }
         }
     }
 
-    // Average each line (0-4 → 0-100)
-    const avg = (arr: number[]) => arr.length > 0 ? arr.reduce((a, b) => a + b, 0) / arr.length : 2
-    const normalize = (v: number) => Math.round((v / 4) * 100)
+    const readinessScore = maxPossible > 0 ? Math.round((totalScore / maxPossible) * 100) : 0
+    const needsSupport = readinessScore < 50 || hasCriticalRedFlag
 
-    const loveScore = normalize(avg(lineAccum.love_line))
-    const sexScore = normalize(avg(lineAccum.sexual_line))
-    const realScore = normalize(avg(lineAccum.realization_line))
+    // Construct Narrative
+    let narrative = ""
+    const recommendations: string[] = []
 
-    // ── 3. Composite Frequency ──
-    // Weighted: Love 40%, Sexual 25%, Realization 35%
-    // Stress penalty: up to -15 points for high stress
-    const stressPenalty = Math.round((pssTotal / 16) * 15)
-    const rawFrequency = Math.round(
-        loveScore * 0.40 +
-        sexScore * 0.25 +
-        realScore * 0.35
-    )
-    const frequency = Math.max(10, Math.min(99, rawFrequency - stressPenalty))
-
-    // ── 4. Level ──
-    const { level, emoji } =
-        frequency >= 80 ? { level: 'Armonizador', emoji: '🌟' } :
-            frequency >= 65 ? { level: 'Constructor', emoji: '🏗️' } :
-                frequency >= 50 ? { level: 'Explorador', emoji: '🧭' } :
-                    frequency >= 35 ? { level: 'Buscador', emoji: '🔍' } :
-                        { level: 'Despertar', emoji: '🌅' }
-
-    // ── 5. Insights ──
-    const insights: string[] = []
-
-    if (loveScore >= 75) insights.push('Tu apertura emocional es alta — estás en un buen momento para conectar.')
-    else if (loveScore < 50) insights.push('Podrías beneficiarte de trabajar en tu apertura emocional antes de buscar pareja.')
-
-    if (sexScore >= 75) insights.push('La intimidad es una prioridad importante para ti — busca alguien que comparta eso.')
-    else if (sexScore < 40) insights.push('La intimidad no es tu prioridad principal ahora, y está bien.')
-
-    if (realScore >= 75) insights.push('Tu camino profesional/personal está sólido — eso aporta estabilidad.')
-    else if (realScore < 50) insights.push('Estás en un momento de transición — las relaciones pueden crecer junto con tus metas.')
-
-    const codep = factorAccum['codependency']
-    if (codep && avg(codep) >= 3) {
-        insights.push('Detectamos señales de dependencia emocional — el autoconocimiento es clave aquí.')
-    }
-
-    if (pssTotal > 8) {
-        insights.push('Tu nivel de estrés es elevado — considera prácticas de bienestar antes de entrar al matching.')
-    }
-
-    // At least 2 insights
-    if (insights.length < 2) {
-        insights.push('Tu perfil muestra un balance saludable entre las 3 dimensiones.')
+    if (needsSupport) {
+        narrative = "Parece que estás atravesando un momento de alta carga emocional o logística."
+        recommendations.push("Considera tomarte un tiempo para ti antes de buscar una relación.")
+        recommendations.push("Geobooker puede conectarte con especialistas si necesitas apoyo.")
+    } else if (readinessScore < 75) {
+        narrative = "Estás abierto/a a conectar, pero tienes límites logísticos o emocionales marcados."
+        recommendations.push("Ve despacio. Comunica tus límites logísticos desde el principio.")
+    } else {
+        narrative = "Te encuentras en un excelente momento de disponibilidad y apertura emocional."
+        recommendations.push("Disfruta el proceso de conocer gente nueva.")
     }
 
     return {
-        frequency,
+        readinessScore,
+        needsSupport,
+        narrative,
+        recommendations,
+    }
+}
+
+// ─────────────────────────────────────────────────────────────────────────────
+// calculateFrequency — Modelo Triangular de Sternberg + PSS-4 (Cohen, 1983)
+//
+// Fórmula (FUNDAMENTOS_CIENTIFICOS.md, secciones 1-3):
+//   Frecuencia_bruta = Amor×0.40 + Sexual×0.25 + Realización×0.35
+//   Penalización_estrés = (PSS4_score / 16) × 15   [máx −15 pts]
+//   Frecuencia_final = clamp(Frecuencia_bruta − Penalización, 10, 99)
+// ─────────────────────────────────────────────────────────────────────────────
+
+// Mapa de option_id → score (0-4) para cada pregunta de opción única
+const OPTION_SCORES: Record<string, Record<string, number>> = {
+    mv1_intent:      { a: 4, b: 3, c: 2 },
+    mv2_status:      { a: 4, b: 3, c: 1, d: 0 },
+    mv3_time:        { a: 4, b: 3, c: 1 },
+    mv4_dependents:  { a: 4, b: 3, c: 2 },
+    mv5_distance:    { a: 4, b: 2 },
+    vin2_conflict:   { a: 4, b: 3, c: 1, d: 0 },
+    vin3_attachment: { a: 4, b: 3, c: 0 },
+}
+
+/** Extrae un score 0-4 de cualquier tipo de respuesta */
+function score4(answers: Record<string, string | number>, qId: string): number {
+    const val = answers[qId]
+    if (val === undefined) return 2 // mid-range por defecto
+
+    if (qId === 'vin1_trust' && typeof val === 'number') {
+        return ((val - 1) / 9) * 4 // slider 1-10 → 0-4
+    }
+
+    const map = OPTION_SCORES[qId]
+    return map?.[val as string] ?? 2
+}
+
+export function calculateFrequency(
+    answers: Record<string, string | number>,
+    pss4Answers: Record<string, number>
+): OnboardingResults {
+    // ── Línea Amor (intimidad emocional, confianza, apego) ──
+    const trust    = score4(answers, 'vin1_trust')
+    const conflict = score4(answers, 'vin2_conflict')
+    const anxiety  = score4(answers, 'vin3_attachment')
+    const amor_raw = ((trust / 4) * 0.35 + (conflict / 4) * 0.40 + (anxiety / 4) * 0.25) * 100
+
+    // ── Línea Sexual (prioridad de intimidad física, disponibilidad pasional) ──
+    // Derivada de intent + status mientras no haya preguntas dedicadas (v2.0)
+    const intentSexualMap: Record<string, number> = {
+        a: 0.70, // "Relación estable" → moderado-alto sexual
+        b: 0.85, // "Conocer sin prisa" → abierto a la pasión
+        c: 0.40, // "Entenderme mejor" → enfocado en sí mismo
+    }
+    const intentKey    = answers['mv1_intent'] as string ?? 'b'
+    const statusScore  = score4(answers, 'mv2_status')
+    const sexual_raw   = Math.min(100,
+        ((intentSexualMap[intentKey] ?? 0.65) * 0.65 + (statusScore / 4) * 0.35) * 100
+    )
+
+    // ── Línea Realización (estabilidad de vida, metas, logística) ──
+    const intent      = score4(answers, 'mv1_intent')
+    const status      = score4(answers, 'mv2_status')
+    const time        = score4(answers, 'mv3_time')
+    const dependents  = score4(answers, 'mv4_dependents')
+    const mobility    = score4(answers, 'mv5_distance')
+    const realizacion_raw = (
+        (intent / 4)     * 0.25 +
+        (status / 4)     * 0.30 +
+        (time / 4)       * 0.25 +
+        (dependents / 4) * 0.12 +
+        (mobility / 4)   * 0.08
+    ) * 100
+
+    // ── PSS-4 (Cohen et al., 1983) ──
+    // Ítems 2 y 3 se invierten: (4 - respuesta)
+    const pss4_score =
+        (pss4Answers['pss_1'] ?? 0) +
+        (4 - (pss4Answers['pss_2'] ?? 0)) +
+        (4 - (pss4Answers['pss_3'] ?? 0)) +
+        (pss4Answers['pss_4'] ?? 0)
+
+    // ── Frecuencia Final ──
+    const frecuencia_bruta   = amor_raw * 0.40 + sexual_raw * 0.25 + realizacion_raw * 0.35
+    const penalizacion_estres = (pss4_score / 16) * 15
+    const frecuencia_final   = Math.round(Math.max(10, Math.min(99, frecuencia_bruta - penalizacion_estres)))
+
+    // ── Nivel (Prochaska & DiClemente, 1983 — adaptación relacional) ──
+    let level: string
+    let levelEmoji: string
+    if (frecuencia_final >= 80)      { level = 'Armonizador'; levelEmoji = '🌟' }
+    else if (frecuencia_final >= 65) { level = 'Constructor';  levelEmoji = '🏗️' }
+    else if (frecuencia_final >= 50) { level = 'Explorador';   levelEmoji = '🧭' }
+    else if (frecuencia_final >= 35) { level = 'Buscador';     levelEmoji = '🔍' }
+    else                             { level = 'Despertar';    levelEmoji = '🌅' }
+
+    // ── Clasificación de estrés ──
+    const stressLabel =
+        pss4_score <= 4  ? 'Bajo' :
+        pss4_score <= 8  ? 'Moderado' :
+        pss4_score <= 12 ? 'Alto' : 'Muy alto'
+
+    // ── Insights personalizados ──
+    const insights: string[] = []
+    if (amor_raw < 50)
+        insights.push('Tu línea de Amor muestra oportunidad: abrir la confianza es tu próximo gran paso.')
+    if (sexual_raw < 50)
+        insights.push('Tu disponibilidad para la pasión está en construcción — y eso es completamente válido.')
+    if (realizacion_raw < 50)
+        insights.push('Tu estabilidad vital es el cimiento que necesitas fortalecer antes de conectar.')
+    if (pss4_score > 8)
+        insights.push('El estrés percibido está reduciendo tu Frecuencia. Gestionar tu bienestar te abrirá nuevas posibilidades.')
+    if (insights.length === 0)
+        insights.push('Tus 3 líneas están equilibradas. Estás en un excelente momento para conectar con alguien.')
+
+    return {
+        frequency: frecuencia_final,
         level,
-        levelEmoji: emoji,
+        levelEmoji,
         lines: [
-            { label: 'Amor', emoji: '❤️', score: loveScore, color: 'var(--line-love)' },
-            { label: 'Sexual', emoji: '🔥', score: sexScore, color: 'var(--line-sex)' },
-            { label: 'Realización', emoji: '⭐', score: realScore, color: 'var(--line-realization)' },
+            { label: 'Amor',         score: Math.round(amor_raw),        color: 'var(--line-love, #ff6b9d)',        emoji: '❤️' },
+            { label: 'Sexual',       score: Math.round(sexual_raw),      color: 'var(--line-sex, #ff9d42)',         emoji: '🔥' },
+            { label: 'Realización',  score: Math.round(realizacion_raw), color: 'var(--line-realization, #a78bfa)', emoji: '⭐' },
         ],
-        stressLevel: pssTotal,
+        stressLevel: pss4_score,
         stressLabel,
         insights,
     }
