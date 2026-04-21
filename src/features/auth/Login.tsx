@@ -44,10 +44,14 @@ export default function Login() {
     const handleOAuthLogin = async (provider: 'google' | 'apple') => {
         setError(null)
 
+        const redirectUrl = (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1')
+            ? `${window.location.origin}/auth/callback`
+            : 'https://www.lovia.com.mx/auth/callback'
+
         const result = await supabase.auth.signInWithOAuth({
             provider,
             options: {
-                redirectTo: `${window.location.origin}/auth/callback`
+                redirectTo: redirectUrl
             }
         })
 

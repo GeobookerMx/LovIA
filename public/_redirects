@@ -1,1 +1,3 @@
+# Este archivo maneja solo el fallback básico.
+# La configuración completa de redirects y headers está en /netlify.toml
 /* /index.html 200

@@ -59,6 +59,18 @@ export default function PricingPage() {
             <div className="pricing-page__header animate-fade-in-up">
                 <h1>Elige tu plan</h1>
                 <p>Invierte en ti. Cada tier desbloquea herramientas más profundas para tu crecimiento.</p>
+
+                {/* Banner 4 meses gratis */}
+                <div style={{
+                    display: 'inline-flex', alignItems: 'center', gap: '8px',
+                    padding: '10px 20px', borderRadius: '40px', margin: '12px auto 8px',
+                    background: 'linear-gradient(135deg, rgba(16,185,129,0.2), rgba(16,185,129,0.08))',
+                    border: '1px solid rgba(16,185,129,0.4)', color: '#34d399',
+                    fontSize: '0.9rem', fontWeight: 600
+                }}>
+                    🎉 <strong>Acceso completo GRATIS por 4 meses</strong> — No se requiere tarjeta
+                </div>
+
                 <p style={{ fontSize: '0.8rem', color: 'var(--text-tertiary)', marginTop: 8 }}>
                     🔒 Pago seguro vía Mercado Pago · OXXO · Tarjeta · Hasta 12 MSI
                 </p>

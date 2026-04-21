@@ -1,0 +1,65 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9"
+        xmlns:image="http://www.google.com/schemas/sitemap-image/1.1">
+
+  <!-- Landing / Home público -->
+  <url>
+    <loc>https://www.lovia.com.mx/</loc>
+    <lastmod>2026-04-20</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>1.0</priority>
+    <image:image>
+      <image:loc>https://www.lovia.com.mx/icons/icon-512.png</image:loc>
+      <image:title>LovIA! — Relaciones basadas en ciencia</image:title>
+    </image:image>
+  </url>
+
+  <!-- Precios / Planes -->
+  <url>
+    <loc>https://www.lovia.com.mx/pricing</loc>
+    <lastmod>2026-04-20</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.9</priority>
+  </url>
+
+  <!-- Página del libro (pública antes del login) -->
+  <url>
+    <loc>https://www.lovia.com.mx/book</loc>
+    <lastmod>2026-04-20</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.85</priority>
+  </url>
+
+  <!-- Acerca del Autor -->
+  <url>
+    <loc>https://www.lovia.com.mx/profile/creator</loc>
+    <lastmod>2026-04-20</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.8</priority>
+  </url>
+
+  <!-- La Ciencia Detrás -->
+  <url>
+    <loc>https://www.lovia.com.mx/profile/science</loc>
+    <lastmod>2026-04-20</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.75</priority>
+  </url>
+
+  <!-- Directorio de especialistas -->
+  <url>
+    <loc>https://www.lovia.com.mx/community/directory</loc>
+    <lastmod>2026-04-20</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.7</priority>
+  </url>
+
+  <!-- Blog / Artículos -->
+  <url>
+    <loc>https://www.lovia.com.mx/community/blog</loc>
+    <lastmod>2026-04-20</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.65</priority>
+  </url>
+
+</urlset>

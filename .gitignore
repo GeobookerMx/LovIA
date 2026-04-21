@@ -12,6 +12,10 @@ dist
 dist-ssr
 *.local
 
+# Environment variables (protect API keys)
+.env*
+!.env.example
+
 # Editor directories and files
 .vscode/*
 !.vscode/extensions.json
@@ -22,3 +26,36 @@ dist-ssr
 *.njsproj
 *.sln
 *.sw?
+
+Clave/
+token.txt
+*.p8
+*.pem
+*.key
+*.crt
+*.mobileprovision
+secrets/
+private/
+
+# Secrets and local credentials
+Clave/
+token.txt
+*.p8
+*.pem
+*.key
+*.crt
+*.mobileprovision
+secrets/
+private/
+
+# Env files
+.env
+.env.local
+.env.production
+.env.development
+
+# Build / cache
+node_modules/
+dist/
+.netlify/
+coverage/

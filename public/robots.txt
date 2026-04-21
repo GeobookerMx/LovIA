@@ -1,7 +1,20 @@
 User-agent: *
 Allow: /
+
+# Páginas privadas — no indexar
+Disallow: /admin
 Disallow: /admin/
 Disallow: /auth/callback
 Disallow: /onboarding
+Disallow: /selfie-verification
+Disallow: /profile/settings
+Disallow: /profile/emergency-contacts
 
+# Indexar todo lo público
+Allow: /book
+Allow: /profile/creator
+Allow: /profile/science
+Allow: /pricing
+
+# Sitemap
 Sitemap: https://www.lovia.com.mx/sitemap.xml

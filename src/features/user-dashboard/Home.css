@@ -227,3 +227,39 @@
 .home__rec-card>svg:last-child {
     margin-left: auto;
 }
+
+/* ── Free Banner ── */
+.home__free-banner {
+    text-align: center;
+    font-size: var(--fs-sm);
+    padding: 10px 16px;
+    border-radius: var(--radius-full);
+    background: linear-gradient(135deg, rgba(16,185,129,0.12), rgba(16,185,129,0.06));
+    border: 1px solid rgba(16,185,129,0.25);
+    color: #4ade80;
+}
+
+/* ── Share Button ── */
+.home__share-btn {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    width: 100%;
+    padding: 13px;
+    border-radius: var(--radius-lg);
+    border: 1px dashed rgba(255, 107, 138, 0.4);
+    background: rgba(255, 107, 138, 0.06);
+    color: var(--love-rose);
+    font-size: var(--fs-sm);
+    font-weight: var(--fw-semibold);
+    cursor: pointer;
+    transition: all 0.2s ease;
+    margin-bottom: var(--space-6);
+}
+
+.home__share-btn:hover {
+    background: rgba(255, 107, 138, 0.14);
+    border-color: rgba(255, 107, 138, 0.6);
+    transform: translateY(-1px);
+}

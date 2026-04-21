@@ -68,10 +68,15 @@ export default function Register() {
     const handleOAuthLogin = async (provider: 'google' | 'apple') => {
         setError(null)
 
+        const isLocal = window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1'
+        const redirectUrl = isLocal
+            ? `${window.location.origin}/auth/callback?next=/onboarding`
+            : 'https://www.lovia.com.mx/auth/callback?next=/onboarding'
+
         const result = await supabase.auth.signInWithOAuth({
             provider,
             options: {
-                redirectTo: `${window.location.origin}/auth/callback?next=/onboarding`
+                redirectTo: redirectUrl
             }
         })
 

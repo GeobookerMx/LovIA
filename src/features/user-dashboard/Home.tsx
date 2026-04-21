@@ -1,9 +1,10 @@
 import { useEffect, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
-import { TrendingUp, Zap, Target, ChevronRight, BookOpen, Shield } from 'lucide-react'
+import { TrendingUp, Zap, Target, ChevronRight, BookOpen, Shield, Share2 } from 'lucide-react'
 import { useAuthStore } from '../../stores/authStore'
 import { useEvaluationStore } from '../../stores/evaluationStore'
 import { supabase } from '../../lib/supabase'
+import ShareCard from '../../components/shared/ShareCard'
 import './Home.css'
 
 function getDynamicGreeting() {
@@ -41,6 +42,8 @@ export default function Home() {
         if (f >= 40) return 'var(--freq-dev)'
         return 'var(--freq-low)'
     }
+
+    const [showShare, setShowShare] = useState(false)
 
     // Load today's spark from Supabase
     useEffect(() => {
@@ -153,6 +156,19 @@ export default function Home() {
                     <ChevronRight size={18} color="var(--text-tertiary)" />
                 </div>
             </section>
+
+            {/* Free period banner */}
+            <div className="home__free-banner">
+                🎉 <strong>Acceso GRATIS por 4 meses</strong> — Sin tarjeta requerida
+            </div>
+
+            {/* Compartir */}
+            <button className="home__share-btn" onClick={() => setShowShare(true)} id="home-share-btn">
+                <Share2 size={16} />
+                Invitar amigos a LovIA!
+            </button>
+
+            {showShare && <ShareCard onClose={() => setShowShare(false)} />}
         </div>
     )
 }

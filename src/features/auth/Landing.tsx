@@ -1,5 +1,5 @@
 import { Link } from 'react-router-dom'
-import { Heart, Shield, Brain, Sparkles, ArrowRight, Star, BookOpen } from 'lucide-react'
+import { Heart, Shield, Brain, Sparkles, ArrowRight, Star, BookOpen, Mail, Instagram } from 'lucide-react'
 import './Landing.css'
 
 const scienceAuthors = [
@@ -37,6 +37,10 @@ export default function Landing() {
                         Descubre tu <strong>Frecuencia de Relación</strong> basada en ciencia,
                         y conecta con personas en tu misma sintonía.
                     </p>
+
+                    <div className="landing__free-banner">
+                        🎉 <strong>Acceso completo GRATIS por 4 meses</strong> — Sin tarjeta requerida
+                    </div>
 
                     <div className="landing__cta-group">
                         <Link to="/home" className="landing__cta landing__cta--primary">
@@ -140,7 +144,42 @@ export default function Landing() {
 
             {/* Footer */}
             <footer className="landing__footer">
-                <p>© 2025 LovIA! — Todos los derechos reservados</p>
+                <div className="landing__footer-social">
+                    <a
+                        href="https://www.facebook.com/juanpablo.penagarcia.37/"
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="landing__footer-social-btn landing__footer-social-btn--fb"
+                        aria-label="Facebook del autor"
+                    >
+                        <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor">
+                            <path d="M24 12.073c0-6.627-5.373-12-12-12s-12 5.373-12 12c0 5.99 4.388 10.954 10.125 11.854v-8.385H7.078v-3.47h3.047V9.43c0-3.007 1.792-4.669 4.533-4.669 1.312 0 2.686.235 2.686.235v2.953H15.83c-1.491 0-1.956.925-1.956 1.874v2.25h3.328l-.532 3.47h-2.796v8.385C19.612 23.027 24 18.062 24 12.073z"/>
+                        </svg>
+                        Juan Pablo Peña G Psicólogo
+                    </a>
+                    <a
+                        href="https://www.instagram.com/psjuanpablopg"
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="landing__footer-social-btn landing__footer-social-btn--ig"
+                        aria-label="Instagram del autor"
+                    >
+                        <Instagram size={18} />
+                        @psjuanpablopg
+                    </a>
+                    <a
+                        href="mailto:evosocial@hotmail.com"
+                        className="landing__footer-social-btn landing__footer-social-btn--email"
+                        aria-label="Email del autor"
+                    >
+                        <Mail size={18} />
+                        evosocial@hotmail.com
+                    </a>
+                </div>
+                <div className="landing__footer-bottom">
+                    <p>© 2025 LovIA! — Todos los derechos reservados</p>
+                    <Link to="/home" className="landing__footer-link">Acerca del Autor</Link>
+                </div>
             </footer>
         </div>
     )

@@ -2,17 +2,60 @@
   <defs>
     <linearGradient id="bg" x1="0" y1="0" x2="1" y2="1">
       <stop offset="0%" stop-color="#0A0A1A"/>
-      <stop offset="100%" stop-color="#12122A"/>
+      <stop offset="100%" stop-color="#1A0A20"/>
     </linearGradient>
     <linearGradient id="heart" x1="0" y1="0" x2="1" y2="1">
       <stop offset="0%" stop-color="#FF6B8A"/>
-      <stop offset="50%" stop-color="#FF8E72"/>
-      <stop offset="100%" stop-color="#FFB347"/>
+      <stop offset="60%" stop-color="#FF4472"/>
+      <stop offset="100%" stop-color="#C44569"/>
     </linearGradient>
+    <filter id="glow">
+      <feGaussianBlur stdDeviation="8" result="blur"/>
+      <feMerge>
+        <feMergeNode in="blur"/>
+        <feMergeNode in="SourceGraphic"/>
+      </feMerge>
+    </filter>
   </defs>
-  <rect width="512" height="512" rx="96" fill="url(#bg)"/>
-  <!-- Heart shape -->
-  <path d="M256 420 C180 360 100 300 100 220 C100 170 140 130 190 130 C220 130 245 148 256 170 C267 148 292 130 322 130 C372 130 412 170 412 220 C412 300 332 360 256 420Z" fill="url(#heart)" opacity="0.9"/>
-  <!-- L letter -->
-  <text x="220" y="310" font-family="Arial, sans-serif" font-size="120" font-weight="bold" fill="#0A0A1A" opacity="0.6">L</text>
+
+  <!-- Fondo redondeado oscuro -->
+  <rect width="512" height="512" rx="110" fill="url(#bg)"/>
+
+  <!-- Borde sutil -->
+  <rect width="512" height="512" rx="110" fill="none" stroke="#FF6B8A" stroke-width="6" opacity="0.2"/>
+
+  <!-- Corazón principal con glow -->
+  <path
+    d="M256 390
+       C200 345 120 295 110 218
+       C103 168 138 128 185 128
+       C215 128 240 146 256 168
+       C272 146 297 128 327 128
+       C374 128 409 168 402 218
+       C392 295 312 345 256 390Z"
+    fill="url(#heart)"
+    filter="url(#glow)"
+    opacity="0.95"
+  />
+
+  <!-- Texto "Lov" en blanco -->
+  <text
+    x="110" y="310"
+    font-family="Arial Black, sans-serif"
+    font-size="115"
+    font-weight="900"
+    fill="white"
+    opacity="0.92"
+    letter-spacing="-4"
+  >Lov</text>
+
+  <!-- Texto "IA!" en rosa/gradiente -->
+  <text
+    x="298" y="310"
+    font-family="Arial Black, sans-serif"
+    font-size="115"
+    font-weight="900"
+    fill="#FF6B8A"
+    opacity="1"
+  >IA</text>
 </svg>

@@ -43,6 +43,7 @@ const EditProfilePage = lazy(() => import('./features/user-dashboard/EditProfile
 const LegalPage = lazy(() => import('./features/user-dashboard/LegalPage'))
 const SciencePage = lazy(() => import('./features/user-dashboard/SciencePage'))
 const AuthorPage = lazy(() => import('./features/user-dashboard/AuthorPage'))
+const BookPage = lazy(() => import('./features/user-dashboard/BookPage'))
 
 // ─── Lazy loaded: Community ───
 const JournalPage = lazy(() => import('./features/user-dashboard/JournalPage'))
@@ -57,7 +58,6 @@ const DirectoryPage = lazy(() => import('./features/user-dashboard/DirectoryPage
 const SpecialistRegisterPage = lazy(() => import('./features/user-dashboard/SpecialistRegisterPage'))
 
 // ─── Lazy loaded: Admin ───
-const AdminDashboard = lazy(() => import('./features/admin/AdminDashboard'))
 const ModulesList = lazy(() => import('./features/user-dashboard/ModulesList'))
 const ModuleDetail = lazy(() => import('./features/user-dashboard/ModuleDetail'))
 
@@ -161,7 +161,6 @@ function AppRoutes() {
               <Route path="/community/forum/:threadId" element={<ForumThread />} />
               <Route path="/community/directory" element={<DirectoryPage />} />
               <Route path="/community/directory/register" element={<SpecialistRegisterPage />} />
-              <Route path="/admin-dashboard" element={<AdminDashboard />} />
               <Route path="/profile" element={<ProfilePage />} />
               <Route path="/selfie-verification" element={<SelfieVerification />} />
               <Route path="/profile/emergency-contacts" element={<EmergencyContacts />} />
@@ -176,6 +175,7 @@ function AppRoutes() {
               <Route path="/profile/legal" element={<LegalPage />} />
               <Route path="/profile/science" element={<SciencePage />} />
               <Route path="/profile/creator" element={<AuthorPage />} />
+              <Route path="/book" element={<BookPage />} />
               <Route path="/modules" element={<ModulesList />} />
               <Route path="/modules/:moduleId" element={<ModuleDetail />} />
               <Route path="/pricing" element={<PricingPage />} />

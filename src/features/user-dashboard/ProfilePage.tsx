@@ -189,7 +189,8 @@ export default function ProfilePage() {
                 <MenuItem icon={<Settings size={18} />} label="Configuración" color="var(--text-secondary)" onClick={() => navigate('/profile/settings')} />
                 <MenuItem icon={<FileText size={18} />} label="Legal y Privacidad" color="var(--text-secondary)" onClick={() => navigate('/profile/legal')} />
                 <MenuItem icon={<BookOpen size={18} />} label="La Ciencia Detrás" color="var(--line-sex)" onClick={() => navigate('/profile/science')} />
-                <MenuItem icon={<Shield size={18} />} label="Acerca del Creador" color="var(--love-rose)" onClick={() => navigate('/profile/creator')} />
+                <MenuItem icon={<BookOpen size={18} />} label="El Libro — Descarga Gratis 📖" color="var(--warning)" onClick={() => navigate('/book')} />
+                <MenuItem icon={<Shield size={18} />} label="Acerca del Autor" color="var(--love-rose)" onClick={() => navigate('/profile/creator')} />
 
                 <h3 className="profile-page__menu-title" style={{ color: 'var(--warning)', marginTop: '24px' }}>Zona Creador</h3>
                  <MenuItem icon={<Activity size={18} />} label="Centro de Control (Admin)" color="var(--warning)" onClick={() => navigate('/admin')} />

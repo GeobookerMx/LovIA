@@ -18,12 +18,16 @@ interface LiveStats {
     pendingReports: number
     avgFrequency: number
     bannedUsers: number
+    newLast24h: number
+    newLast7d: number
+    onboardingRate: number
+    radarActive: number
     tierDistribution: { free: number, arquitecto: number, ingeniero: number, diamante: number }
 }
 
 const staticKpis = [
     { label: 'Conversión Free→Paid', value: '—', change: '', trend: 'neutral', icon: DollarSign, color: 'var(--success)' },
-    { label: 'Revenue (MRR)', value: '—', change: 'Requiere Stripe', trend: 'neutral', icon: DollarSign, color: 'var(--success)' },
+    { label: 'Revenue (MRR)', value: '—', change: 'Requiere MP webhooks', trend: 'neutral', icon: DollarSign, color: 'var(--success)' },
     { label: 'NPS Promedio', value: '—', change: 'Próx. V1.1', trend: 'neutral', icon: TrendingUp, color: 'var(--line-realization)' },
 ]
 
@@ -31,6 +35,7 @@ export default function Overview() {
     const [stats, setStats] = useState<LiveStats>({
         totalUsers: 0, activeUsers: 0, activeMatches: 0,
         pendingReports: 0, avgFrequency: 0, bannedUsers: 0,
+        newLast24h: 0, newLast7d: 0, onboardingRate: 0, radarActive: 0,
         tierDistribution: { free: 100, arquitecto: 0, ingeniero: 0, diamante: 0 }
     })
     const [recentUsers, setRecentUsers] = useState<any[]>([])
@@ -39,50 +44,43 @@ export default function Overview() {
     const fetchData = async () => {
         setLoading(true)
         try {
-            // Utilizamos la tabla 'profiles' real que creamos en BD
+            const now = new Date()
+            const ago24h = new Date(now.getTime() - 24 * 60 * 60 * 1000).toISOString()
+            const ago7d  = new Date(now.getTime() - 7  * 24 * 60 * 60 * 1000).toISOString()
+
             const [
                 { count: usersCount },
+                { count: new24h },
+                { count: new7d },
+                { count: onboardingDone },
+                { count: radarCount },
                 { data: recent }
             ] = await Promise.all([
                 supabase.from('profiles').select('*', { count: 'exact', head: true }),
+                supabase.from('profiles').select('*', { count: 'exact', head: true }).gte('created_at', ago24h),
+                supabase.from('profiles').select('*', { count: 'exact', head: true }).gte('created_at', ago7d),
+                supabase.from('profiles').select('*', { count: 'exact', head: true }).eq('onboarding_completed', true),
+                supabase.from('profiles').select('*', { count: 'exact', head: true }).not('last_lat', 'is', null),
                 supabase.from('profiles').select('full_name, created_at, onboarding_completed').order('created_at', { ascending: false }).limit(5),
             ])
 
-            // Simular temporalmente matches y reportes hasta Fase 4
-            const matchesCount = 0;
-            const reportsCount = 0;
-            const bannedCount = 0;
-            const userTiersAndFreq: any[] = [];
+            const total = usersCount || 1
+            const onboardingRate = Math.round(((onboardingDone || 0) / total) * 100)
 
-
-            const avg = userTiersAndFreq && userTiersAndFreq.length > 0
-                ? Math.round(userTiersAndFreq.reduce((s: number, r: any) => s + (r.frequency_score || 0), 0) / userTiersAndFreq.length)
-                : 0
-
-            const tiers = { free: 0, arquitecto: 0, ingeniero: 0, diamante: 0 };
-            if (userTiersAndFreq) {
-                userTiersAndFreq.forEach((u: any) => {
-                    const t = u.tier?.toLowerCase() || 'free'
-                    if (t === 'arquitecto') tiers.arquitecto++
-                    else if (t === 'ingeniero') tiers.ingeniero++
-                    else if (t === 'diamante') tiers.diamante++
-                    else tiers.free++
-                })
-            }
-
-            const totalForPct = Math.max(1, usersCount || 1)
-            tiers.free = Math.round((tiers.free / totalForPct) * 100)
-            tiers.arquitecto = Math.round((tiers.arquitecto / totalForPct) * 100)
-            tiers.ingeniero = Math.round((tiers.ingeniero / totalForPct) * 100)
-            tiers.diamante = Math.round((tiers.diamante / totalForPct) * 100)
+            // Tiers (simulados hasta integrar MP webhooks)
+            const tiers = { free: 100, arquitecto: 0, ingeniero: 0, diamante: 0 }
 
             setStats({
                 totalUsers: usersCount || 0,
-                activeUsers: Math.round((usersCount || 0) * 0.67), // MAU approximation
-                activeMatches: matchesCount || 0,
-                pendingReports: reportsCount || 0,
-                avgFrequency: avg,
-                bannedUsers: bannedCount || 0,
+                activeUsers: Math.round((usersCount || 0) * 0.67),
+                activeMatches: 0,
+                pendingReports: 0,
+                avgFrequency: 0,
+                bannedUsers: 0,
+                newLast24h: new24h || 0,
+                newLast7d: new7d || 0,
+                onboardingRate,
+                radarActive: radarCount || 0,
                 tierDistribution: tiers
             })
             if (recent) setRecentUsers(recent)
@@ -97,9 +95,12 @@ export default function Overview() {
 
     const liveKpis = [
         { label: 'Usuarios totales', value: String(stats.totalUsers), change: 'Tiempo real', trend: 'up', icon: Users, color: 'var(--line-love)' },
+        { label: 'Nuevos hoy (24h)', value: String(stats.newLast24h), change: 'Registros recientes', trend: stats.newLast24h > 0 ? 'up' : 'neutral', icon: Users, color: 'var(--success)' },
+        { label: 'Nuevos esta semana', value: String(stats.newLast7d), change: 'Últimos 7 días', trend: stats.newLast7d > 0 ? 'up' : 'neutral', icon: TrendingUp, color: 'var(--freq-mid)' },
         { label: 'MAU estimado', value: String(stats.activeUsers), change: '~67% de total', trend: 'up', icon: Activity, color: 'var(--line-realization)' },
+        { label: 'Onboarding completo', value: `${stats.onboardingRate}%`, change: 'Perfiles completos', trend: stats.onboardingRate >= 50 ? 'up' : 'down', icon: TrendingUp, color: 'var(--love-warm)' },
+        { label: 'Radar activo (GPS)', value: String(stats.radarActive), change: 'Usuarios con ubicación', trend: 'up', icon: Activity, color: 'var(--line-sex)' },
         { label: 'Matches activos', value: String(stats.activeMatches), change: 'Tiempo real', trend: 'up', icon: Heart, color: 'var(--love-rose)' },
-        { label: 'Frecuencia promedio', value: String(stats.avgFrequency), change: 'De todos los usuarios', trend: stats.avgFrequency >= 55 ? 'up' : 'down', icon: TrendingUp, color: 'var(--freq-mid)' },
         { label: 'Reportes pendientes', value: String(stats.pendingReports), change: stats.pendingReports > 0 ? '⚠️ Requieren atención' : '✅ Todo limpio', trend: 'neutral', icon: ShieldAlert, color: 'var(--warning)' },
         { label: 'Usuarios baneados', value: String(stats.bannedUsers), change: 'Historial total', trend: 'neutral', icon: ShieldAlert, color: 'var(--danger)' },
         ...staticKpis,
