@@ -57,9 +57,17 @@
   <!-- Blog / Artículos -->
   <url>
     <loc>https://www.lovia.com.mx/community/blog</loc>
-    <lastmod>2026-04-20</lastmod>
+    <lastmod>2026-04-24</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.65</priority>
+  </url>
+
+  <!-- Aviso de Privacidad (requerido por App Store y Google Play) -->
+  <url>
+    <loc>https://www.lovia.com.mx/privacy</loc>
+    <lastmod>2026-04-24</lastmod>
+    <changefreq>yearly</changefreq>
+    <priority>0.5</priority>
   </url>
 
 </urlset>

@@ -3,9 +3,14 @@
     "relation": ["delegate_permission/common.handle_all_urls"],
     "target": {
       "namespace": "android_app",
-      "package_name": "com.lovia.app",
+      "package_name": "com.geobooker.lovia",
       "sha256_cert_fingerprints": [
-        "REEMPLAZAR_CON_SHA256_DEL_KEYSTORE"
+        "PENDIENTE: reemplaza con el SHA256 de tu keystore Android",
+        "Instrucciones:",
+        "1. Genera keystore: keytool -genkey -v -keystore lovia-release.jks -alias lovia -keyalg RSA -keysize 2048 -validity 10000",
+        "2. Obtén SHA256:   keytool -list -v -keystore lovia-release.jks -alias lovia",
+        "3. Copia el valor SHA256 (AA:BB:CC:...) y reemplaza SOLO esa línea aquí",
+        "4. Elimina estas líneas de instrucción — solo debe quedar el SHA256 real"
       ]
     }
   }

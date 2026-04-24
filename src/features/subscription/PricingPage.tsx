@@ -47,7 +47,7 @@ export default function PricingPage() {
             console.error('[PricingPage] Error al iniciar pago:', err)
             setPaymentError(
                 'Hubo un problema al conectar con la pasarela de pago. ' +
-                'Intenta de nuevo o contáctanos en soporte@lovia.app'
+                'Intenta de nuevo o contáctanos en clienteslovia@gmail.com'
             )
         } finally {
             setLoadingTier(null)

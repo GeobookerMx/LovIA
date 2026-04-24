@@ -18,6 +18,20 @@
   status = 200
   force  = true
 
+# Página de privacidad pública (Google Play y App Store la requieren accesible sin login)
+[[redirects]]
+  from   = "/privacy"
+  to     = "/privacy.html"
+  status = 200
+  force  = true
+
+# assetlinks para TWA / Capacitor Android (Digital Asset Links)
+[[redirects]]
+  from   = "/.well-known/assetlinks.json"
+  to     = "/.well-known/assetlinks.json"
+  status = 200
+  force  = true
+
 # ── Dominio canónico ──────────────────────────────────────────────────────────
 [[redirects]]
   from = "https://lovia.com.mx/*"
