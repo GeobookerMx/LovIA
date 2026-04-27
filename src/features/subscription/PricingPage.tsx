@@ -1,8 +1,9 @@
 import { useState } from 'react'
-import { Check, Crown, Sparkles, Zap, Loader2, AlertCircle } from 'lucide-react'
+import { Check, Crown, Sparkles, Zap, Loader2, AlertCircle, ExternalLink } from 'lucide-react'
 import { supabase } from '../../lib/supabase'
 import { TIERS, useSubscriptionStore } from '../../stores/subscriptionStore'
 import type { Tier } from '../../stores/subscriptionStore'
+import { isIOS } from '../../lib/platform'
 import './Pricing.css'
 
 const tierIcons: Record<Tier, React.ReactNode> = {
@@ -52,6 +53,38 @@ export default function PricingPage() {
         } finally {
             setLoadingTier(null)
         }
+    }
+
+    // ── iOS nativo: no mostrar pagos externos (Apple rechaza redirección a Mercado Pago) ──
+    if (isIOS()) {
+        return (
+            <div className="pricing-page">
+                <div className="pricing-page__header animate-fade-in-up">
+                    <h1>Planes LovIA</h1>
+                    <p>Para suscribirte o gestionar tu plan, visita nuestra web.</p>
+                    <div style={{
+                        display: 'inline-flex', alignItems: 'center', gap: '8px',
+                        padding: '12px 24px', borderRadius: '40px', margin: '16px auto',
+                        background: 'linear-gradient(135deg, rgba(255,77,109,0.2), rgba(255,77,109,0.08))',
+                        border: '1px solid rgba(255,77,109,0.4)', color: '#ff4d6d',
+                        fontSize: '0.9rem', fontWeight: 600
+                    }}>
+                        <ExternalLink size={16} />
+                        <a
+                            href="https://www.lovia.com.mx/pricing"
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            style={{ color: 'inherit', textDecoration: 'none' }}
+                        >
+                            Ver planes en lovia.com.mx
+                        </a>
+                    </div>
+                    <p style={{ fontSize: '0.8rem', color: 'var(--text-tertiary)', marginTop: 8 }}>
+                        Acepta tarjeta, OXXO y hasta 12 MSI según disponibilidad.
+                    </p>
+                </div>
+            </div>
+        )
     }
 
     return (

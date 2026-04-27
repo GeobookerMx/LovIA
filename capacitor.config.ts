@@ -2,7 +2,7 @@ import type { CapacitorConfig } from '@capacitor/cli'
 
 const config: CapacitorConfig = {
   // ── Identidad de la app ───────────────────────────────────────────────────
-  appId: 'com.geobooker.lovia',
+  appId: 'com.lovia.ios',
   appName: 'LovIA!',
 
   // ── Vite genera el build en /dist ─────────────────────────────────────────
