@@ -2,6 +2,9 @@ import type { CapacitorConfig } from '@capacitor/cli'
 
 const config: CapacitorConfig = {
   // ── Identidad de la app ───────────────────────────────────────────────────
+  // ⚠️  IMPORTANTE: este appId es el iOS Bundle ID (com.lovia.ios).
+  //   El Android applicationId es com.lovia.app — definido en android/app/build.gradle.
+  //   NO cambiar esto sin actualizar también Xcode, App Store Connect y Play Console.
   appId: 'com.lovia.ios',
   appName: 'LovIA!',
 

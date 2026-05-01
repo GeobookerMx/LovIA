@@ -15,6 +15,9 @@ export default function ProfilePage() {
     const fileInputRef = useRef<HTMLInputElement>(null)
     const [toast, setToast] = useState<{ type: 'success' | 'error'; msg: string } | null>(null)
 
+    // Solo visible si el JWT tiene role = 'admin'
+    const isAdmin = user?.app_metadata?.role === 'admin'
+
     const showToast = (type: 'success' | 'error', msg: string) => {
         setToast({ type, msg })
         setTimeout(() => setToast(null), 3500)
@@ -192,8 +195,13 @@ export default function ProfilePage() {
                 <MenuItem icon={<BookOpen size={18} />} label="El Libro — Descarga Gratis 📖" color="var(--warning)" onClick={() => navigate('/book')} />
                 <MenuItem icon={<Shield size={18} />} label="Acerca del Autor" color="var(--love-rose)" onClick={() => navigate('/profile/creator')} />
 
-                <h3 className="profile-page__menu-title" style={{ color: 'var(--warning)', marginTop: '24px' }}>Zona Creador</h3>
-                 <MenuItem icon={<Activity size={18} />} label="Centro de Control (Admin)" color="var(--warning)" onClick={() => navigate('/admin')} />
+                {/* Zona Admin — SOLO visible para usuarios con role=admin en JWT */}
+                {isAdmin && (
+                    <>
+                        <h3 className="profile-page__menu-title" style={{ color: 'var(--warning)', marginTop: '24px' }}>Zona Creador</h3>
+                        <MenuItem icon={<Activity size={18} />} label="Centro de Control (Admin)" color="var(--warning)" onClick={() => navigate('/admin')} />
+                    </>
+                )}
 
                 <button className="profile-page__logout glass" onClick={handleLogout}>
                     <LogOut size={18} />

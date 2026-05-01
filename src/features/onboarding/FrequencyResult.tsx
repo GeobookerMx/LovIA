@@ -74,6 +74,19 @@ export default function FrequencyResult({ result, onContinue }: Props) {
                     </ul>
                 </div>
 
+                {/* Disclaimer de bienestar — requerido por Apple App Review para apps con evaluaciones psicológicas */}
+                <p style={{
+                    fontSize: '0.72rem',
+                    color: 'var(--text-tertiary)',
+                    textAlign: 'center',
+                    lineHeight: 1.5,
+                    padding: '0 var(--space-4)',
+                    marginTop: 'var(--space-2)',
+                    marginBottom: 'var(--space-4)',
+                }}>
+                    ⓘ Estos resultados son herramientas de autoconocimiento basadas en escalas validadas (PSS-4, modelos relacionales). No constituyen un diagnóstico clínico ni sustituyen la orientación de un profesional de salud mental.
+                </p>
+
                 <button className="onboarding__cta" onClick={onContinue}>
                     Ir a mi Dashboard <ArrowRight size={18} />
                 </button>

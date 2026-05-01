@@ -59,3 +59,10 @@ node_modules/
 dist/
 .netlify/
 coverage/
+
+# Android / iOS signing keys — NUNCA subir a Git
+keys-NO-SUBIR/
+*.jks
+*.keystore
+android/lovia-upload-key.jks
+android/upload_certificate.pem

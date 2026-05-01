@@ -6,7 +6,7 @@
  */
 
 import { useState } from 'react'
-import { ArrowLeft, Bell, Eye, Globe, Palette, User, Shield, Trash2, Loader2 } from 'lucide-react'
+import { ArrowLeft, Bell, Eye, Globe, Palette, User, Shield, Trash2, Loader2, AlertTriangle, X } from 'lucide-react'
 import { useNavigate } from 'react-router-dom'
 import { useSettingsStore } from '../../stores/settingsStore'
 import { useAuthStore } from '../../stores/authStore'
@@ -18,29 +18,34 @@ export default function SettingsPage() {
     const settings = useSettingsStore()
     const { signOut } = useAuthStore()
     const [isDeleting, setIsDeleting] = useState(false)
+    // Doble confirmación: paso 1 = mostrar aviso, paso 2 = botón rojo activo
+    const [deleteStep, setDeleteStep] = useState<0 | 1>(0)
 
     const handleDeleteAccount = async () => {
-        const confirmed = window.confirm(
-            '¿Estás seguro de que deseas eliminar tu cuenta? Esta acción ELIMINARÁ todos tus datos y relaciones de forma permanente. No se puede deshacer.'
-        )
-        if (!confirmed) return
+        // Paso 1: mostrar panel de advertencia
+        if (deleteStep === 0) {
+            setDeleteStep(1)
+            return
+        }
 
+        // Paso 2: usuario leyó la advertencia y confirma
         try {
             setIsDeleting(true)
-            
+
             // Invoke the secure edge function to delete the user
             const { error } = await supabase.functions.invoke('delete-account')
-            
+
             if (error) throw error
 
             // Log out and clear local state
             await signOut()
             navigate('/', { replace: true })
-            
+
         } catch (error: any) {
             console.error('Error deleting account:', error)
-            alert('Hubo un error al eliminar la cuenta. Por favor, intenta de nuevo más tarde o contacta a soporte.')
+            alert('Hubo un error al eliminar la cuenta. Por favor, intenta de nuevo más tarde o contacta a soporte en clienteslovia@gmail.com')
             setIsDeleting(false)
+            setDeleteStep(0)
         }
     }
 
@@ -154,26 +159,73 @@ export default function SettingsPage() {
                     </div>
                 </div>
 
-                <button 
-                    className="settings-item glass" 
-                    onClick={handleDeleteAccount}
-                    disabled={isDeleting}
-                    style={{ cursor: isDeleting ? 'not-allowed' : 'pointer', width: '100%', textAlign: 'left', border: 'none', background: 'transparent', padding: 0 }} 
-                >
-                    <div className="settings-item__left">
-                        {isDeleting ? (
-                            <Loader2 size={18} className="animate-spin" style={{ color: 'var(--danger)', margin: '0 12px' }} />
-                        ) : (
+                {/* Paso 1: botón inicial */}
+                {deleteStep === 0 && (
+                    <button
+                        className="settings-item glass"
+                        onClick={handleDeleteAccount}
+                        style={{ cursor: 'pointer', width: '100%', textAlign: 'left', border: 'none', background: 'transparent', padding: 0 }}
+                    >
+                        <div className="settings-item__left">
                             <Trash2 size={18} style={{ color: 'var(--danger)', margin: '0 12px' }} />
-                        )}
-                        <div>
-                            <div className="settings-item__label" style={{ color: 'var(--danger)' }}>
-                                {isDeleting ? 'Eliminando cuenta...' : 'Eliminar cuenta'}
+                            <div>
+                                <div className="settings-item__label" style={{ color: 'var(--danger)' }}>Eliminar cuenta</div>
+                                <div className="settings-item__desc">Derecho ARCO — LFPDPPP Art. 16</div>
                             </div>
-                            <div className="settings-item__desc">Derecho ARCO — LFPDPPP Art. 16</div>
+                        </div>
+                    </button>
+                )}
+
+                {/* Paso 2: panel de confirmación explícita */}
+                {deleteStep === 1 && (
+                    <div className="glass-strong animate-fade-in" style={{
+                        borderRadius: 'var(--radius-md)',
+                        border: '1px solid rgba(239,68,68,0.4)',
+                        padding: 'var(--space-4)',
+                        marginTop: 'var(--space-2)'
+                    }}>
+                        <div style={{ display: 'flex', alignItems: 'flex-start', gap: 'var(--space-3)', marginBottom: 'var(--space-4)' }}>
+                            <AlertTriangle size={20} style={{ color: 'var(--danger)', flexShrink: 0, marginTop: 2 }} />
+                            <div>
+                                <p style={{ fontWeight: 700, color: 'var(--danger)', marginBottom: 'var(--space-1)', fontSize: 'var(--fs-sm)' }}>
+                                    ¿Confirmas la eliminación permanente?
+                                </p>
+                                <p style={{ fontSize: 'var(--fs-xs)', color: 'var(--text-secondary)', lineHeight: 1.5 }}>
+                                    Se eliminarán tu perfil, matches, mensajes, evaluaciones y todos tus datos de forma
+                                    <strong> permanente e irreversible</strong>. Esta acción no se puede deshacer.
+                                </p>
+                            </div>
+                        </div>
+                        <div style={{ display: 'flex', gap: 'var(--space-2)' }}>
+                            <button
+                                onClick={() => setDeleteStep(0)}
+                                style={{
+                                    flex: 1, padding: '10px', borderRadius: 'var(--radius-sm)',
+                                    background: 'var(--bg-card)', border: '1px solid var(--border-subtle)',
+                                    color: 'var(--text-secondary)', cursor: 'pointer', fontSize: 'var(--fs-sm)',
+                                    display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 6
+                                }}
+                            >
+                                <X size={14} /> Cancelar
+                            </button>
+                            <button
+                                onClick={handleDeleteAccount}
+                                disabled={isDeleting}
+                                style={{
+                                    flex: 1, padding: '10px', borderRadius: 'var(--radius-sm)',
+                                    background: 'rgba(239,68,68,0.15)', border: '1px solid rgba(239,68,68,0.5)',
+                                    color: '#ef4444', cursor: isDeleting ? 'not-allowed' : 'pointer',
+                                    fontSize: 'var(--fs-sm)', fontWeight: 700,
+                                    display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 6
+                                }}
+                            >
+                                {isDeleting
+                                    ? <><Loader2 size={14} className="animate-spin" /> Eliminando...</>
+                                    : <><Trash2 size={14} /> Sí, eliminar mi cuenta</>}
+                            </button>
                         </div>
                     </div>
-                </button>
+                )}
             </div>
         </div>
     )
