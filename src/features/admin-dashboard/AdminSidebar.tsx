@@ -2,7 +2,8 @@ import { NavLink, useNavigate } from 'react-router-dom'
 import { useState } from 'react'
 import {
     BarChart3, Users, Heart, Shield, FileText, Building2,
-    DollarSign, Settings, LogOut, Menu, X, ChevronRight
+    DollarSign, Settings, LogOut, Menu, X, ChevronRight,
+    ExternalLink
 } from 'lucide-react'
 import { useAuthStore } from '../../stores/authStore'
 import './AdminSidebar.css'
@@ -21,12 +22,17 @@ const navItems = [
 export default function AdminSidebar() {
     const [mobileOpen, setMobileOpen] = useState(false)
     const signOut = useAuthStore((s) => s.signOut)
+    const user = useAuthStore((s) => s.user)
     const navigate = useNavigate()
 
     const handleLogout = async () => {
         await signOut()
-        navigate('/login')
+        navigate('/')
     }
+
+    const avatarUrl = user?.user_metadata?.avatar_url
+    const displayName = user?.user_metadata?.full_name || user?.email?.split('@')[0] || 'Admin'
+    const email = user?.email || ''
 
     return (
         <>
@@ -46,11 +52,25 @@ export default function AdminSidebar() {
 
             {/* Sidebar */}
             <aside className={`admin-sidebar glass-strong ${mobileOpen ? 'admin-sidebar--open' : ''}`}>
+                {/* Brand */}
                 <div className="admin-sidebar__brand">
                     <h1>Lov<span className="text-gradient">IA!</span></h1>
                     <span className="admin-sidebar__brand-tag">Admin</span>
                 </div>
 
+                {/* Admin user info */}
+                <div className="admin-sidebar__user">
+                    {avatarUrl
+                        ? <img src={avatarUrl} alt="avatar" className="admin-sidebar__avatar" />
+                        : <div className="admin-sidebar__avatar-placeholder">{displayName[0].toUpperCase()}</div>
+                    }
+                    <div className="admin-sidebar__user-info">
+                        <span className="admin-sidebar__user-name">{displayName}</span>
+                        <span className="admin-sidebar__user-email">{email}</span>
+                    </div>
+                </div>
+
+                {/* Nav */}
                 <nav className="admin-sidebar__nav">
                     {navItems.map(({ to, icon: Icon, label, end }) => (
                         <NavLink
@@ -69,7 +89,19 @@ export default function AdminSidebar() {
                     ))}
                 </nav>
 
+                {/* Footer */}
                 <div className="admin-sidebar__footer">
+                    {/* Ver sitio */}
+                    <a
+                        href="https://www.lovia.com.mx"
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="admin-sidebar__site-link"
+                    >
+                        <ExternalLink size={16} />
+                        <span>Ver sitio</span>
+                    </a>
+
                     <button className="admin-sidebar__logout" onClick={handleLogout}>
                         <LogOut size={18} />
                         <span>Cerrar sesión</span>
