@@ -185,19 +185,19 @@ function AppRoutes() {
               <Route path="/evaluations/stroop" element={<StroopGame />} />
               <Route path="/evaluations/digit-span" element={<DigitSpanGame />} />
             </Route>
+          </Route>
 
-            {/* Admin Dashboard */}
-            <Route element={<AdminGuard />}>
-              <Route element={<AdminLayout />}>
-                <Route path="/admin" element={<Overview />} />
-                <Route path="/admin/users" element={<UsersManager />} />
-                <Route path="/admin/matches" element={<MatchesManager />} />
-                <Route path="/admin/moderation" element={<ModerationQueue />} />
-                <Route path="/admin/content" element={<ContentManager />} />
-                <Route path="/admin/directory" element={<DirectoryManager />} />
-                <Route path="/admin/finance" element={<FinanceDashboard />} />
-                <Route path="/admin/system" element={<SystemConfig />} />
-              </Route>
+          {/* Admin Dashboard — fuera de ProtectedRoute, AdminGuard maneja su propio auth */}
+          <Route element={<AdminGuard />}>
+            <Route element={<AdminLayout />}>
+              <Route path="/admin" element={<Overview />} />
+              <Route path="/admin/users" element={<UsersManager />} />
+              <Route path="/admin/matches" element={<MatchesManager />} />
+              <Route path="/admin/moderation" element={<ModerationQueue />} />
+              <Route path="/admin/content" element={<ContentManager />} />
+              <Route path="/admin/directory" element={<DirectoryManager />} />
+              <Route path="/admin/finance" element={<FinanceDashboard />} />
+              <Route path="/admin/system" element={<SystemConfig />} />
             </Route>
           </Route>
 
