@@ -55,33 +55,22 @@ export default function PricingPage() {
         }
     }
 
-    // ── iOS nativo: no mostrar pagos externos (Apple rechaza redirección a Mercado Pago) ──
+    // ── iOS nativo: no mostrar pagos externos (Apple Guideline 3.1.1) ──
     if (isIOS()) {
         return (
             <div className="pricing-page">
                 <div className="pricing-page__header animate-fade-in-up">
                     <h1>Planes LovIA</h1>
-                    <p>Para suscribirte o gestionar tu plan, visita nuestra web.</p>
+                    <p>Descubre todas las herramientas que LovIA tiene para fortalecer tu relación.</p>
                     <div style={{
-                        display: 'inline-flex', alignItems: 'center', gap: '8px',
-                        padding: '12px 24px', borderRadius: '40px', margin: '16px auto',
-                        background: 'linear-gradient(135deg, rgba(255,77,109,0.2), rgba(255,77,109,0.08))',
-                        border: '1px solid rgba(255,77,109,0.4)', color: '#ff4d6d',
-                        fontSize: '0.9rem', fontWeight: 600
+                        padding: '20px 24px', borderRadius: '16px', margin: '16px auto',
+                        background: 'rgba(255,255,255,0.04)',
+                        border: '1px solid rgba(255,255,255,0.08)',
+                        color: 'var(--text-secondary)',
+                        fontSize: '0.95rem', textAlign: 'center', lineHeight: '1.6'
                     }}>
-                        <ExternalLink size={16} />
-                        <a
-                            href="https://www.lovia.com.mx/pricing"
-                            target="_blank"
-                            rel="noopener noreferrer"
-                            style={{ color: 'inherit', textDecoration: 'none' }}
-                        >
-                            Ver planes en lovia.com.mx
-                        </a>
+                        ✨ Disfruta LovIA con acceso a check-ins emocionales, sparks diarios, radar de compatibilidad, diario de pareja y mucho más.
                     </div>
-                    <p style={{ fontSize: '0.8rem', color: 'var(--text-tertiary)', marginTop: 8 }}>
-                        Acepta tarjeta, OXXO y hasta 12 MSI según disponibilidad.
-                    </p>
                 </div>
             </div>
         )
