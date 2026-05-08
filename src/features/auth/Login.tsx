@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { Link, useNavigate } from 'react-router-dom'
 import { useAuthStore } from '../../stores/authStore'
 import { supabase } from '../../lib/supabase'
@@ -11,50 +11,88 @@ export default function Login() {
     const [password, setPassword] = useState('')
     const [showPassword, setShowPassword] = useState(false)
     const [error, setError] = useState<string | null>(null)
-    const { signIn, loading } = useAuthStore()
+    const [submitting, setSubmitting] = useState(false)
+    const [oauthLoading, setOauthLoading] = useState<'google' | 'apple' | null>(null)
+    const { signIn, user, initialized } = useAuthStore()
     const navigate = useNavigate()
+
+    // Redirigir si el usuario ya está autenticado — cubre el caso OAuth nativo donde
+    // appUrlOpen llama setSession y onAuthStateChange actualiza el store sin navegar.
+    useEffect(() => {
+        if (initialized && user) {
+            navigate('/home', { replace: true })
+        }
+    }, [user, initialized, navigate])
 
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault()
         setError(null)
+        setSubmitting(true)
 
-        const result = await signIn(email, password)
+        try {
+            console.log('[LovIA] Login: intentando con email/password...')
+            const result = await signIn(email, password)
 
-        if (result.error) {
-            setError(result.error)
-            return
+            if (result.error) {
+                console.warn('[LovIA] Login error:', result.error)
+                setError(result.error)
+                return
+            }
+
+            console.log('[LovIA] signIn exitoso — leyendo perfil...')
+            const { data: authData, error: getUserError } = await supabase.auth.getUser()
+
+            if (getUserError) {
+                console.warn('[LovIA] getUser error (no crítico):', getUserError.message)
+            }
+
+            const authUser = authData?.user
+
+            if (!authUser) {
+                console.warn('[LovIA] getUser devolvió null post-signIn — navegando a /home de todas formas')
+                navigate('/home')
+                return
+            }
+
+            const { data: profile, error: profileError } = await supabase
+                .from('profiles')
+                .select('onboarding_completed')
+                .eq('id', authUser.id)
+                .maybeSingle()
+
+            if (profileError) {
+                console.warn('[LovIA] Error leyendo perfil:', profileError.message, '— enviando a /onboarding')
+                navigate('/onboarding')
+                return
+            }
+
+            const destination = profile?.onboarding_completed ? '/home' : '/onboarding'
+            console.log('[LovIA] Login completo → ', destination)
+            navigate(destination)
+
+        } catch (err: any) {
+            console.error('[LovIA] Error inesperado en handleSubmit:', err)
+            setError('Error al iniciar sesión. Por favor intenta de nuevo.')
+        } finally {
+            setSubmitting(false)
         }
-
-        const { data: authData } = await supabase.auth.getUser()
-        const user = authData.user
-
-        if (!user) {
-            navigate('/home')
-            return
-        }
-
-        const { data: profile } = await supabase
-            .from('profiles')
-            .select('onboarding_completed')
-            .eq('id', user.id)
-            .maybeSingle()
-
-        navigate(profile?.onboarding_completed ? '/home' : '/onboarding')
     }
-
-    const [oauthLoading, setOauthLoading] = useState<'google' | 'apple' | null>(null)
 
     const handleOAuthLogin = async (provider: 'google' | 'apple') => {
         setError(null)
         setOauthLoading(provider)
         try {
+            console.log('[LovIA] OAuth login iniciado con:', provider)
             if (provider === 'google') {
                 await signInWithGoogle()
             } else {
                 await signInWithApple()
             }
+            // En nativo: el flujo continúa vía appUrlOpen en main.tsx.
+            // En web: la página redirige a /auth/callback automáticamente.
         } catch (err: any) {
-            setError(err.message || 'Error al iniciar sesión social')
+            console.error('[LovIA] OAuth error:', provider, err)
+            setError(err.message || 'Error al iniciar sesión. Verifica tu conexión e intenta de nuevo.')
         } finally {
             setOauthLoading(null)
         }
@@ -120,8 +158,8 @@ export default function Login() {
                         </div>
                     </div>
 
-                    <button type="submit" className="auth-card__submit" disabled={loading}>
-                        {loading ? (
+                    <button type="submit" className="auth-card__submit" disabled={submitting || oauthLoading !== null}>
+                        {submitting ? (
                             <span className="auth-card__spinner" />
                         ) : (
                             <>
@@ -140,7 +178,7 @@ export default function Login() {
                         type="button"
                         className="btn-social google"
                         onClick={() => handleOAuthLogin('google')}
-                        disabled={oauthLoading !== null}
+                        disabled={submitting || oauthLoading !== null}
                     >
                         {oauthLoading === 'google'
                             ? <Loader2 size={18} className="animate-spin" />
@@ -151,7 +189,7 @@ export default function Login() {
                         type="button"
                         className="btn-social apple"
                         onClick={() => handleOAuthLogin('apple')}
-                        disabled={oauthLoading !== null}
+                        disabled={submitting || oauthLoading !== null}
                     >
                         {oauthLoading === 'apple'
                             ? <Loader2 size={18} className="animate-spin" />
