@@ -13,7 +13,7 @@ echo "1/4 📥 Descargando últimos cambios de GitHub..."
 git pull origin main
 
 echo "2/4 📦 Instalando dependencias (por si hay nuevas)..."
-npm install
+npm install --legacy-peer-deps
 
 echo "3/4 🏗️ Compilando el proyecto Vite..."
 npm run build
