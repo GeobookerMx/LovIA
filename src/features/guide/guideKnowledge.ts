@@ -234,6 +234,15 @@ export const INTENTS: Record<string, BotMessage> = {
         ],
     },
 
+    // ── Bloqueo de Seguridad ──
+    security_block: {
+        text: 'Soy el Dr. LovIA, enfocado en guiar tu experiencia relacional y de bienestar. Por políticas de protección, no estoy autorizado a discutir detalles técnicos, lógicas de programación, ni configuraciones de seguridad de la plataforma.',
+        quickReplies: [
+            { label: '📋 ¿Cómo funciona LovIA?', intent: 'how_it_works' },
+            { label: '🔬 Base científica', intent: 'science' },
+        ],
+    },
+
     // ── Navegación ──
     go_directory: { text: '📍 Navega a **Comunidad → Directorio** para ver todos los especialistas verificados, filtrar por ciudad o especialidad y contactar directamente.' },
     go_pricing: { text: '💳 Puedes ver y actualizar tu plan desde **Perfil → Mis Planes** en cualquier momento.' },
@@ -241,6 +250,7 @@ export const INTENTS: Record<string, BotMessage> = {
 
 // ── Detección de intents por palabras clave ──────────────────────────────
 const KEYWORD_MAP: [string[], string][] = [
+    [['hack', 'vulnerabilidad', 'código', 'codigo', 'programación', 'programacion', 'base de datos', 'sql', 'inyección', 'bypass', 'prompt', 'ignora', 'instrucciones', 'arquitectura', 'servidor', 'backend', 'sistema interno'], 'security_block'],
     [['hola', 'buenos', 'inicio', 'empezar', 'saludo', 'hi', 'oye'], 'welcome'],
     [['cómo funciona', 'como funciona', 'qué es', 'que es', 'para qué', 'para que', 'explain'], 'how_it_works'],
     [['paso a paso', 'guía', 'pasos', 'flujo', 'proceso', 'recorrido'], 'step_guide'],

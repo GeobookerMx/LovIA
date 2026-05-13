@@ -51,7 +51,7 @@ private/
 # Env files
 .env
 .env.local
-.env.production
+# .env.production → NO ignorar: contiene solo VITE_ vars públicas necesarias para el build de iOS en Mac
 .env.development
 
 # Build / cache

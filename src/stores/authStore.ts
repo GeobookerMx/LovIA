@@ -44,8 +44,23 @@ export const useAuthStore = create<AuthState>((set, get) => ({
     initialize: async () => {
         if (get().initialized) return // Evita ejecutar dos veces (React Strict Mode bug)
 
+        // Safety timeout: si Supabase no responde en 10s (ej: red lenta en lab de Apple Review),
+        // dejamos que la app arranque en estado "no autenticado" en lugar de mostrar spinner infinito.
+        const safetyTimer = setTimeout(() => {
+            if (!get().initialized) {
+                console.warn('[LovIA] initialize() timeout — Supabase no respondió en 10s. Arrancando sin sesión.')
+                set({ loading: false, initialized: true })
+            }
+        }, 10_000)
+
         try {
-            const { data: { session } } = await supabase.auth.getSession()
+            console.log('[LovIA] AuthStore: inicializando...')
+            const { data: { session }, error } = await supabase.auth.getSession()
+
+            if (error) {
+                console.warn('[LovIA] AuthStore getSession error:', error.message)
+            }
+
             set({
                 session,
                 user: session?.user ?? null,
@@ -53,6 +68,8 @@ export const useAuthStore = create<AuthState>((set, get) => ({
                 initialized: true,
                 legalAccepted: !!session?.user,
             })
+            clearTimeout(safetyTimer)
+            console.log('[LovIA] AuthStore: inicializado. User:', session?.user?.id ?? 'null')
 
             if (session?.user) {
                 get().loadProfile()
@@ -60,7 +77,8 @@ export const useAuthStore = create<AuthState>((set, get) => ({
             }
 
             if (!globalAuthSubscription) {
-                const { data: { subscription } } = supabase.auth.onAuthStateChange(async (_, session) => {
+                const { data: { subscription } } = supabase.auth.onAuthStateChange(async (event, session) => {
+                    console.log('[LovIA] onAuthStateChange:', event, session?.user?.id ?? 'null')
                     set({
                         session,
                         user: session?.user ?? null,
@@ -76,7 +94,9 @@ export const useAuthStore = create<AuthState>((set, get) => ({
             })
             globalAuthSubscription = subscription
         }
-        } catch {
+        } catch (err) {
+            console.error('[LovIA] AuthStore initialize error:', err)
+            clearTimeout(safetyTimer)
             set({ loading: false, initialized: true })
         }
     },

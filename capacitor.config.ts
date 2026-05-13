@@ -14,6 +14,13 @@ const config: CapacitorConfig = {
   // ── Servidor (solo para live-reload en desarrollo con cap run) ────────────
   server: {
     androidScheme: 'https',
+    allowNavigation: [
+      '*.supabase.co',
+      '*.lovia.com.mx',
+      '*.google.com',
+      '*.googleapis.com',
+      '*.gstatic.com',
+    ],
     // Para desarrollo local con `npx cap run android --livereload`:
     // url: 'http://TU_IP_LOCAL:5173',
     // cleartext: true,
@@ -45,7 +52,7 @@ const config: CapacitorConfig = {
   // ── Plugins nativos ───────────────────────────────────────────────────────
   plugins: {
     SplashScreen: {
-      launchShowDuration: 2000,
+      launchShowDuration: 3000,   // 3s — da tiempo suficiente a React + Supabase init en iOS
       launchAutoHide: true,
       backgroundColor: '#0E0B2A',
       androidSplashResourceName: 'splash',

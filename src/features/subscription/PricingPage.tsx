@@ -1,5 +1,5 @@
 import { useState } from 'react'
-import { Check, Crown, Sparkles, Zap, Loader2, AlertCircle, ExternalLink } from 'lucide-react'
+import { Check, Crown, Sparkles, Zap, Loader2, AlertCircle } from 'lucide-react'
 import { supabase } from '../../lib/supabase'
 import { TIERS, useSubscriptionStore } from '../../stores/subscriptionStore'
 import type { Tier } from '../../stores/subscriptionStore'

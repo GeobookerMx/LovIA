@@ -1,5 +1,6 @@
 import { useEffect, Suspense, lazy } from 'react'
-import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom'
+import { BrowserRouter, HashRouter, Routes, Route, Navigate } from 'react-router-dom'
+import { Capacitor } from '@capacitor/core'
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
 import { useAuthStore } from './stores/authStore'
 import { Loader2 } from 'lucide-react'
@@ -94,6 +95,10 @@ const queryClient = new QueryClient({
     },
   },
 })
+
+// Selección del Router: HashRouter en Capacitor (Apps Nativas), BrowserRouter en Web
+const isNative = Capacitor.isNativePlatform()
+const Router = isNative ? HashRouter : BrowserRouter
 
 function LoadingFallback() {
   return (
@@ -219,10 +224,10 @@ function AppRoutes() {
 function App() {
   return (
     <QueryClientProvider client={queryClient}>
-      <BrowserRouter>
+      <Router>
         <OfflineBanner />
         <AppRoutes />
-      </BrowserRouter>
+      </Router>
     </QueryClientProvider>
   )
 }

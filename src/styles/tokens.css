@@ -12,6 +12,7 @@
   /* ── Fondos (dark glassmorphism) ── */
   --bg-deep: #0A0A1A;
   --bg-surface: #12122A;
+  --bg-elevated: #16163A;
   --bg-card: rgba(255, 255, 255, 0.05);
   --bg-card-hover: rgba(255, 255, 255, 0.08);
   --bg-glass: rgba(255, 255, 255, 0.08);
