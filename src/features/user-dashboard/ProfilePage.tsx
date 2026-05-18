@@ -3,6 +3,7 @@ import { Shield, ChevronRight, Settings, LogOut, FileText, CreditCard, TrendingU
 import { useAuthStore } from '../../stores/authStore'
 import { useState, useRef } from 'react'
 import { supabase } from '../../lib/supabase'
+import { isIOS } from '../../lib/platform'
 
 const MAX_FILE_BYTES = 5 * 1024 * 1024 // 5 MB
 const ALLOWED_TYPES = ['image/jpeg', 'image/png', 'image/webp', 'image/heic', 'image/heif']
@@ -15,8 +16,8 @@ export default function ProfilePage() {
     const fileInputRef = useRef<HTMLInputElement>(null)
     const [toast, setToast] = useState<{ type: 'success' | 'error'; msg: string } | null>(null)
 
-    // Solo visible si el JWT tiene role = 'admin'
-    const isAdmin = user?.app_metadata?.role === 'admin'
+    // ✅ Admin: acceso solo vía URL /admin — botón eliminado del menú
+    // const isAdmin = user?.app_metadata?.role === 'admin'
 
     const showToast = (type: 'success' | 'error', msg: string) => {
         setToast({ type, msg })
@@ -169,7 +170,8 @@ export default function ProfilePage() {
                     <span className="profile-page__stat-value">{profile?.trust_level || 'bronze'}</span>
                     <span className="profile-page__stat-label">Confianza</span>
                 </div>
-                <div className="profile-page__stat glass" onClick={() => navigate('/pricing')} style={{ cursor: 'pointer' }}>
+                {/* ✅ Apple 3.1.1: stat Nivel no navega a /pricing en iOS */}
+                <div className="profile-page__stat glass" onClick={() => !isIOS() && navigate('/pricing')} style={{ cursor: isIOS() ? 'default' : 'pointer' }}>
                     <TrendingUp size={18} color="var(--line-realization)" />
                     <span className="profile-page__stat-value">{profile?.tier}</span>
                     <span className="profile-page__stat-label">Nivel</span>
@@ -188,20 +190,17 @@ export default function ProfilePage() {
                 <h3 className="profile-page__menu-title">Cuenta</h3>
                 <MenuItem icon={<Shield size={18} />} label="Verificación (Selfie)" color="var(--love-warm)" onClick={() => navigate('/selfie-verification')} />
                 <MenuItem icon={<ShieldAlert size={18} />} label="Contactos de Emergencia" color="var(--warning)" onClick={() => navigate('/profile/emergency-contacts')} />
-                <MenuItem icon={<CreditCard size={18} />} label="Suscripción" color="var(--love-rose)" onClick={() => navigate('/pricing')} />
+                {/* ✅ Apple 3.1.1: ocultar Suscripción en iOS nativo */}
+                {!isIOS() && (
+                    <MenuItem icon={<CreditCard size={18} />} label="Suscripción" color="var(--love-rose)" onClick={() => navigate('/pricing')} />
+                )}
                 <MenuItem icon={<Settings size={18} />} label="Configuración" color="var(--text-secondary)" onClick={() => navigate('/profile/settings')} />
                 <MenuItem icon={<FileText size={18} />} label="Legal y Privacidad" color="var(--text-secondary)" onClick={() => navigate('/profile/legal')} />
                 <MenuItem icon={<BookOpen size={18} />} label="La Ciencia Detrás" color="var(--line-sex)" onClick={() => navigate('/profile/science')} />
                 <MenuItem icon={<BookOpen size={18} />} label="El Libro — Descarga Gratis 📖" color="var(--warning)" onClick={() => navigate('/book')} />
                 <MenuItem icon={<Shield size={18} />} label="Acerca del Autor" color="var(--love-rose)" onClick={() => navigate('/profile/creator')} />
 
-                {/* Zona Admin — SOLO visible para usuarios con role=admin en JWT */}
-                {isAdmin && (
-                    <>
-                        <h3 className="profile-page__menu-title" style={{ color: 'var(--warning)', marginTop: '24px' }}>Zona Creador</h3>
-                        <MenuItem icon={<Activity size={18} />} label="Centro de Control (Admin)" color="var(--warning)" onClick={() => navigate('/admin')} />
-                    </>
-                )}
+                {/* ✅ Admin: acceso solo vía URL /admin (como Geobooker) — eliminado del menú del perfil */}
 
                 <button className="profile-page__logout glass" onClick={handleLogout}>
                     <LogOut size={18} />

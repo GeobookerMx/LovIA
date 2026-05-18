@@ -27,12 +27,12 @@ export const INTENTS: Record<string, BotMessage> = {
 
     // ── Bienvenida ──
     welcome: {
-        text: '¡Hola! 👋 Soy **Dr. LovIA**, tu guía dentro de la plataforma. Estoy aquí para explicarte cómo funciona la app, presentarte a nuestros especialistas, contarte la ciencia detrás y resolver tus preguntas sobre planes y costos.',
+        text: '¡Hola! 👋 Soy **Dr. LovIA**, tu guía dentro de la plataforma. Estoy aquí para explicarte cómo funciona la app, presentarte a nuestros especialistas, contarte la ciencia detrás y ayudarte a sacar el máximo provecho de tu experiencia.',
         quickReplies: [
             { label: '¿Cómo funciona LovIA?', intent: 'how_it_works' },
             { label: '🔬 Base científica', intent: 'science' },
             { label: '👩‍⚕️ Especialistas', intent: 'specialists' },
-            { label: '💳 Costos y planes', intent: 'pricing' },
+            { label: '📊 ¿Cómo obtengo matches?', intent: 'how_matches' },
             { label: '📋 Guía paso a paso', intent: 'step_guide' },
         ],
     },
@@ -74,28 +74,27 @@ export const INTENTS: Record<string, BotMessage> = {
             ],
         },
         quickReplies: [
-            { label: '🔓 ¿Qué incluye cada plan?', intent: 'pricing' },
             { label: '👩‍⚕️ Red de especialistas', intent: 'specialists' },
             { label: '🔒 ¿Cómo funcionan los desbloqueos?', intent: 'unlocks' },
+            { label: '📍 Ecosistema Geobooker', intent: 'geobooker' },
         ],
     },
 
     // ── Desbloqueos ──
     unlocks: {
-        text: 'LovIA libera funciones de forma progresiva. Las funciones críticas de **seguridad nunca están detrás de un paywall**:',
+        text: 'LovIA libera funciones de forma progresiva. **Las funciones de seguridad y los tests completos son siempre gratuitos:**',
         richContent: {
             type: 'list',
             items: [
-                '🆓 **Gratis para todos**: registro, tests completos, matching básico, chat inicial',
-                '📸 **Foto completa**: disponible en plan Arquitecto o eligiendo el modo Clásico (verificación previa)',
-                '🎙️ **Notas de voz**: requiere interacción mínima + plan Arquitecto',
-                '📹 **Videollamada**: match mutuo sólido + plan Ingeniero o superior',
+                '🆓 **Gratis para todos**: registro, tests completos, matching, chat, modo cita segura, directorio de especialistas',
+                '📸 **Foto completa**: eligiendo el modo Clásico en tu perfil (requiere verificación de selfie)',
                 '📍 **Cita segura completa**: disponible en todos los planes con contactos de confianza',
+                '📣 **Matches**: disponibles una vez que completes tu perfil relacional y onboarding',
                 '🚫 **Contacto externo (número/email)**: solo después de la primera cita con check-out confirmado',
             ],
         },
         quickReplies: [
-            { label: '💳 Ver precios exactos', intent: 'pricing' },
+            { label: '📊 ¿Cómo obtengo matches?', intent: 'how_matches' },
             { label: '📋 Guía paso a paso', intent: 'step_guide' },
         ],
     },
@@ -149,7 +148,6 @@ export const INTENTS: Record<string, BotMessage> = {
         quickReplies: [
             { label: '📋 Ver directorio completo', intent: 'go_directory' },
             { label: '¿Cuándo se sugiere apoyo?', intent: 'support_trigger' },
-            { label: '💳 Costos de consulta', intent: 'pricing' },
         ],
     },
 
@@ -169,48 +167,6 @@ export const INTENTS: Record<string, BotMessage> = {
         quickReplies: [
             { label: '👩‍⚕️ Ver especialistas ahora', intent: 'go_directory' },
             { label: '📋 Guía paso a paso', intent: 'step_guide' },
-        ],
-    },
-
-    // ── Pricing ──
-    pricing: {
-        text: 'LovIA tiene 4 planes. Las funciones de seguridad y los tests completos **siempre son gratuitos**:',
-        richContent: {
-            type: 'list',
-            items: [
-                '🆓 **Explorador (Gratis)** — Tests completos, 3 matches/día, chat básico, modo cita segura, directorio de especialistas',
-                '💗 **Arquitecto (~$99 MXN/mes)** — Matches ilimitados, foto gradual premium, notas de voz, insights avanzados, sin anuncios',
-                '💜 **Ingeniero (~$179 MXN/mes)** — Todo Arquitecto + videollamada in-app, filtros avanzados, modo "Esencia" (foto al final), compatibilidad profunda detallada',
-                '💎 **Diamante (~$299 MXN/mes)** — Todo Ingeniero + prioridad en matching, acceso anticipado a funciones, badge verificado visible, experiencias curadas',
-            ],
-        },
-        quickReplies: [
-            { label: '🔓 ¿Qué se desbloquea en cada plan?', intent: 'unlocks' },
-            { label: '💳 Quiero actualizar mi plan', intent: 'go_pricing' },
-            { label: '🆓 ¿Qué tengo con el plan gratis?', intent: 'free_plan' },
-        ],
-    },
-
-    // ── Plan gratis ──
-    free_plan: {
-        text: 'Con el plan **Explorador (Gratis)** tienes acceso completo a la experiencia core de LovIA, sin límites en lo que importa:',
-        richContent: {
-            type: 'list',
-            items: [
-                '✅ Tests de momento de vida y vínculo completos',
-                '✅ Tu Readiness Score y narrativa personal',
-                '✅ Hasta 3 matches diarios con perfil textual',
-                '✅ Chat in-app con tus matches',
-                '✅ Modo Cita Segura (check-in/out, contactos de confianza)',
-                '✅ Directorio de especialistas',
-                '✅ Contenido científico y base literaria',
-                '🔒 *Fotos, voz y videollamada son premium*',
-                '🔒 *Matches ilimitados son premium*',
-            ],
-        },
-        quickReplies: [
-            { label: '💳 Ver planes premium', intent: 'pricing' },
-            { label: '📋 Ver guía paso a paso', intent: 'step_guide' },
         ],
     },
 
@@ -245,7 +201,42 @@ export const INTENTS: Record<string, BotMessage> = {
 
     // ── Navegación ──
     go_directory: { text: '📍 Navega a **Comunidad → Directorio** para ver todos los especialistas verificados, filtrar por ciudad o especialidad y contactar directamente.' },
-    go_pricing: { text: '💳 Puedes ver y actualizar tu plan desde **Perfil → Mis Planes** en cualquier momento.' },
+
+    // ✔ Matches: cómo obtenerlos
+    how_matches: {
+        text: 'Para comenzar a ver matches en LovIA, el sistema necesita conocerte primero. Sigue estos pasos:',
+        richContent: {
+            type: 'steps',
+            steps: [
+                { n: 1, title: 'Completa tu Onboarding', desc: 'Responde el Mapa de Momento de Vida (5-7 min). Esto es la base de todo el sistema de compatibilidad.' },
+                { n: 2, title: 'Realiza al menos 1 evaluación', desc: 'Entra a Evaluaciones y completa el test de Regulación Emocional, Tolerancia o Stroop. Cada una mejora tu Readiness Score.' },
+                { n: 3, title: 'Completa tu perfil', desc: 'Agrega foto (selfie verificada recomendada), alias y elige tu modo de visibilidad en tu perfil.' },
+                { n: 4, title: 'El algoritmo te busca pareja', desc: 'Una vez listo, el sistema ejecuta el motor de compatibilidad y asigna matches. Verifica tu sección de Descubrimiento.' },
+            ],
+        },
+        quickReplies: [
+            { label: '📋 Ver guía completa', intent: 'step_guide' },
+            { label: '🔬 ¿En qué ciencia se basa?', intent: 'science' },
+        ],
+    },
+
+    // ✔ Geobooker Ecosystem
+    geobooker: {
+        text: 'LovIA se integra con **Geobooker**, la plataforma de negocios locales, para sugerirte lugares seguros y verificados para tu primera cita:',
+        richContent: {
+            type: 'list',
+            items: [
+                '📍 **Lugares sugeridos**: el sistema recomienda cafés, restaurantes y espacios públicos cercanos verificados en Geobooker',
+                '⭐ **Calificados por la comunidad**: todos los lugares tienen reseñas reales de otros usuarios',
+                '🔒 **Cita segura**: el Plan de Cita usa ubicaciones de Geobooker como punto de encuentro recomendado',
+                '📞 **Negocios verificados**: cada lugar tiene información de contacto, horario y ubicación exacta',
+            ],
+        },
+        quickReplies: [
+            { label: '📋 Plan de cita segura', intent: 'step_guide' },
+            { label: '👩‍⚕️ Especialistas disponibles', intent: 'specialists' },
+        ],
+    },
 }
 
 // ── Detección de intents por palabras clave ──────────────────────────────
@@ -258,10 +249,12 @@ const KEYWORD_MAP: [string[], string][] = [
     [['scoring', 'puntuación', 'score', 'calificación', 'número', 'cómo califica', 'readiness'], 'scoring'],
     [['especialista', 'psicólogo', 'terapeuta', 'médico', 'doctor', 'apoyo', 'ayuda profesional', 'directorio'], 'specialists'],
     [['cuándo sugiere', 'trigger', 'cuándo aparece apoyo', 'cuando me ayuda'], 'support_trigger'],
-    [['precio', 'costo', 'plan', 'cobrar', 'mensualidad', 'cuánto vale', 'cuanto cuesta', 'tarifa', 'pesos', 'mxn', 'pagar'], 'pricing'],
-    [['gratis', 'free', 'explorador', 'sin pagar', 'sin costo', 'qué incluye el gratis'], 'free_plan'],
+    [['precio', 'costo', 'plan', 'cobrar', 'mensualidad', 'cuánto vale', 'cuanto cuesta', 'tarifa', 'pesos', 'mxn', 'pagar'], 'unlocks'],
+    [['gratis', 'free', 'explorador', 'sin pagar', 'sin costo', 'qué incluye el gratis'], 'unlocks'],
     [['desbloqueo', 'desbloquear', 'cuándo puedo', 'foto', 'video', 'videollamada', 'voz', 'nota de voz'], 'unlocks'],
     [['seguridad', 'protección', 'seguro', 'bloquear', 'reportar', 'cita segura', 'check-in', 'ubicación'], 'safety'],
+    [['match', 'matches', 'conectar', 'descubrimiento', 'cómo veo', 'ver perfiles', 'conocer personas'], 'how_matches'],
+    [['geobooker', 'lugares', 'restaurante', 'café', 'primera cita', 'dónde', 'ecosistema'], 'geobooker'],
 ]
 
 export function detectIntent(input: string): string {
@@ -277,10 +270,11 @@ export function detectIntent(input: string): string {
 export const FALLBACK: BotMessage = {
     text: 'Hmm, no estoy seguro de entender tu pregunta. Puedo ayudarte con estos temas:',
     quickReplies: [
+        { label: '📊 ¿Cómo obtengo matches?', intent: 'how_matches' },
         { label: '📋 Guía paso a paso', intent: 'step_guide' },
         { label: '🔬 Base científica', intent: 'science' },
         { label: '👩‍⚕️ Especialistas', intent: 'specialists' },
-        { label: '💳 Costos y planes', intent: 'pricing' },
         { label: '🔒 Seguridad', intent: 'safety' },
+        { label: '📍 Ecosistema Geobooker', intent: 'geobooker' },
     ],
 }

@@ -6,6 +6,7 @@ import { useAuthStore } from './stores/authStore'
 import { Loader2 } from 'lucide-react'
 import ErrorBoundary from './components/shared/ErrorBoundary'
 import OfflineBanner from './components/shared/OfflineBanner'
+import { isIOS } from './lib/platform'
 
 // ─── Eagerly loaded (critical path) ───
 import ProtectedRoute from './components/auth/ProtectedRoute'
@@ -69,7 +70,13 @@ const StroopGame = lazy(() => import('./features/evaluations/StroopGame'))
 const DigitSpanGame = lazy(() => import('./features/evaluations/DigitSpanGame'))
 
 // ─── Lazy loaded: Subscription & Verification ───
-const PricingPage = lazy(() => import('./features/subscription/PricingPage'))
+// ✅ Apple 3.1.1: Pricing completamente bloqueado en iOS nativo
+const SafePricingPage = lazy(() => import('./features/subscription/PricingPage'))
+function PricingGuard() {
+    if (isIOS()) return <Navigate to="/home" replace />
+    return <SafePricingPage />
+}
+const PricingPage = PricingGuard
 const VerificationFlow = lazy(() => import('./features/verification/VerificationFlow'))
 
 // ─── Lazy loaded: Admin Dashboard ───

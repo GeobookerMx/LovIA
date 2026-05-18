@@ -96,6 +96,68 @@ export default function MatchesList() {
         )
     }
 
+    // ✅ Apple 4.3(b): Gate de readiness — diferenciador clave de LovIA
+    // Si no completó el onboarding, mostrar pantalla explicativa en lugar de lista vacía
+    if (!profile?.onboarding_completed) {
+        return (
+            <div className="matches-page">
+                <header className="matches-page__header">
+                    <div>
+                        <h1>Descubrimiento</h1>
+                        <p className="matches-page__subtitle">Basado en tu momento de vida</p>
+                    </div>
+                </header>
+                <div className="matches-page__empty glass animate-scale-in" style={{ padding: '2rem 1.5rem' }}>
+                    <div className="matches-page__empty-icon animate-float" style={{ fontSize: 48, marginBottom: 16 }}>
+                        🔓
+                    </div>
+                    <h2 style={{ marginBottom: 8 }}>Desbloquea el Descubrimiento</h2>
+                    <p style={{ color: 'var(--text-secondary)', marginBottom: 24, lineHeight: 1.6 }}>
+                        LovIA te conecta con personas según tu <strong>momento de vida y readiness relacional</strong>.
+                        Antes de ver matches, necesitas completar estos pasos:
+                    </p>
+
+                    {/* Pasos requeridos */}
+                    <div style={{ display: 'flex', flexDirection: 'column', gap: 12, marginBottom: 28, textAlign: 'left' }}>
+                        {[
+                            { icon: '📋', title: 'Mapa de Momento de Vida', desc: 'Completa el onboarding inicial (5-7 min)', done: !!profile?.onboarding_completed, action: '/onboarding' },
+                            { icon: '🧠', title: 'Al menos 1 Evaluación', desc: 'Regulación emocional, Stroop o Tolerancia', done: false, action: '/evaluations/regulation' },
+                            { icon: '🤳', title: 'Foto de perfil', desc: 'Agrega tu selfie para generar confianza', done: !!profile?.avatar_url, action: '/profile' },
+                        ].map((step, i) => (
+                            <div key={i}
+                                onClick={() => navigate(step.action)}
+                                style={{
+                                    display: 'flex', alignItems: 'center', gap: 14, padding: '14px 16px',
+                                    borderRadius: 14, cursor: 'pointer',
+                                    background: step.done ? 'rgba(0,200,100,0.08)' : 'rgba(255,255,255,0.04)',
+                                    border: `1px solid ${step.done ? 'rgba(0,200,100,0.3)' : 'rgba(255,255,255,0.1)'}`,
+                                    transition: 'all 0.2s'
+                                }}>
+                                <span style={{ fontSize: 28, flexShrink: 0 }}>{step.done ? '✅' : step.icon}</span>
+                                <div style={{ flex: 1 }}>
+                                    <div style={{ fontWeight: 600, fontSize: '0.95rem', color: step.done ? 'var(--success)' : 'var(--text-primary)' }}>
+                                        {step.title}
+                                    </div>
+                                    <div style={{ fontSize: '0.8rem', color: 'var(--text-secondary)', marginTop: 2 }}>
+                                        {step.done ? '¡Completado!' : step.desc}
+                                    </div>
+                                </div>
+                                <span style={{ color: 'var(--text-tertiary)', fontSize: '1.1rem' }}>{step.done ? '' : '›'}</span>
+                            </div>
+                        ))}
+                    </div>
+
+                    <button className="matches-page__cta" onClick={() => navigate('/onboarding')}>
+                        Comenzar mi Perfil Relacional ✨
+                    </button>
+                    <p style={{ fontSize: '0.75rem', color: 'var(--text-tertiary)', marginTop: 16 }}>
+                        LovIA garantiza conexiones reales basadas en compatibilidad genuina,<br />no en swipe aleatorio.
+                    </p>
+                </div>
+            </div>
+        )
+    }
+
     return (
         <div className="matches-page">
             <header className="matches-page__header">

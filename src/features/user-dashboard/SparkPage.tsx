@@ -164,11 +164,40 @@ export default function SparkPage() {
                 </div>
             ) : !spark ? (
                 <div className="spark-page__card glass-strong animate-scale-in" style={{ textAlign: 'center', padding: '3rem 2rem' }}>
-                    <p style={{ color: 'var(--text-secondary)' }}>No hay chispa activa para el día de hoy.</p>
-                    <button className="button button--secondary" style={{ marginTop: '1rem' }} onClick={() => navigate('/home')}>
-                        Volver al inicio
-                    </button>
+                    <div style={{ fontSize: 56, marginBottom: 16 }}>🌙</div>
+                    <h2 style={{ color: 'var(--love-warm)', marginBottom: 12, fontSize: '1.3rem' }}>
+                        La Chispa de hoy aún no está lista
+                    </h2>
+                    <p style={{ color: 'var(--text-secondary)', marginBottom: 8, lineHeight: 1.6 }}>
+                        La pregunta diaria de introspección se actualiza cada mañana.<br />
+                        <strong style={{ color: 'var(--text-primary)' }}>Vuelve mañana para tu nueva Chispa.</strong>
+                    </p>
+                    {streak > 0 && (
+                        <div style={{ margin: '16px auto', display: 'inline-flex', alignItems: 'center', gap: 8,
+                            background: 'rgba(255,120,80,0.12)', border: '1px solid rgba(255,120,80,0.3)',
+                            borderRadius: 12, padding: '10px 20px' }}>
+                            <Flame size={16} color="var(--love-coral)" />
+                            <span style={{ fontSize: '0.9rem', color: 'var(--love-coral)', fontWeight: 600 }}>
+                                Racha actual: {streak} días 🔥 ¡No la rompas!
+                            </span>
+                        </div>
+                    )}
+                    <p style={{ fontSize: '0.85rem', color: 'var(--text-tertiary)', marginTop: 16, marginBottom: 24 }}>
+                        Mientras tanto, puedes continuar con:
+                    </p>
+                    <div style={{ display: 'flex', flexDirection: 'column', gap: 10, maxWidth: 280, margin: '0 auto' }}>
+                        <button className="btn btn-primary" style={{ padding: '12px 20px', borderRadius: 12, fontSize: '0.9rem' }}
+                            onClick={() => navigate('/modules')}>
+                            📚 Continuar mis Módulos
+                        </button>
+                        <button className="btn" style={{ padding: '12px 20px', borderRadius: 12, fontSize: '0.9rem',
+                            background: 'rgba(255,255,255,0.06)', border: '1px solid var(--border-subtle)', color: 'var(--text-primary)' }}
+                            onClick={() => navigate('/home')}>
+                            🏠 Volver al inicio
+                        </button>
+                    </div>
                 </div>
+
             ) : (
                 <>
                     {/* Card */}

@@ -157,10 +157,7 @@ export default function Home() {
                 </div>
             </section>
 
-            {/* Free period banner */}
-            <div className="home__free-banner">
-                🎉 <strong>Acceso GRATIS por 4 meses</strong> — Sin tarjeta requerida
-            </div>
+            {/* ✅ Apple 3.1.1: Banner de 'Sin tarjeta' eliminado */}
 
             {/* Compartir */}
             <button className="home__share-btn" onClick={() => setShowShare(true)} id="home-share-btn">
