@@ -5,6 +5,7 @@
  */
 
 import { useState, useRef, useEffect, useCallback } from 'react'
+import { useNavigate } from 'react-router-dom'
 import { MessageCircle, X, Send } from 'lucide-react'
 import { supabase } from '../../lib/supabase'
 import {
@@ -116,6 +117,7 @@ export default function GuideChatbot() {
     const [hasGreeted, setHasGreeted] = useState(false)
     const messagesEndRef = useRef<HTMLDivElement>(null)
     const inputRef = useRef<HTMLInputElement>(null)
+    const navigate = useNavigate()
 
     // Fetch specialists from Supabase
     useEffect(() => {
@@ -186,13 +188,15 @@ export default function GuideChatbot() {
     }
 
     const handleQuickReply = (qr: QuickReply) => {
-        // Navigate to real pages
+        // Navigate to real pages — use React Router to stay inside the app
         if (qr.intent === 'go_directory') {
-            window.location.href = '/community/directory'
+            setOpen(false)
+            navigate('/community/directory')
             return
         }
         if (qr.intent === 'go_pricing') {
-            window.location.href = '/pricing'
+            setOpen(false)
+            navigate('/pricing')
             return
         }
 
