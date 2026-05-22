@@ -2,10 +2,10 @@ import type { CapacitorConfig } from '@capacitor/cli'
 
 const config: CapacitorConfig = {
   // ── Identidad de la app ───────────────────────────────────────────────────
-  // ⚠️  IMPORTANTE: este appId es el iOS Bundle ID (com.lovia.ios).
-  //   El Android applicationId es com.lovia.app — definido en android/app/build.gradle.
-  //   NO cambiar esto sin actualizar también Xcode, App Store Connect y Play Console.
-  appId: 'com.lovia.ios',
+  // ⚠️  IMPORTANTE: este appId DEBE coincidir con el Bundle ID en App Store Connect.
+  //   App Store Connect: com.geobooker.lovia (Apple ID: 6761621432)
+  //   NO cambiar sin actualizar también Xcode y App Store Connect.
+  appId: 'com.geobooker.lovia',
   appName: 'LovIA!',
 
   // ── Vite genera el build en /dist ─────────────────────────────────────────
