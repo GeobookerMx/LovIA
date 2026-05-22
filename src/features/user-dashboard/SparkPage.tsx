@@ -119,6 +119,14 @@ export default function SparkPage() {
         // RPC de racha — silenciamos error para no bloquear el flujo
         try { await supabase.rpc('update_user_streak', { p_user_id: user.id }) } catch (_) {}
 
+        // Sincronizar spark_streak en profiles para que Home lo pueda leer
+        try {
+            const newStreak = streak + 1
+            await supabase.from('profiles')
+                .update({ spark_streak: newStreak })
+                .eq('id', user.id)
+        } catch (_) {}
+
         // Mostrar pantalla de éxito — el usuario cierra manualmente
         setShowSuccess(true)
     }

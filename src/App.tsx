@@ -71,6 +71,7 @@ const FrustrationTolerance = lazy(() => import('./features/evaluations/Frustrati
 const EmotionalRegulation = lazy(() => import('./features/evaluations/EmotionalRegulation'))
 const StroopGame = lazy(() => import('./features/evaluations/StroopGame'))
 const DigitSpanGame = lazy(() => import('./features/evaluations/DigitSpanGame'))
+const AxisModulePage = lazy(() => import('./features/evaluations/AxisModulePage'))
 
 // ─── Lazy loaded: Subscription & Verification ───
 // ✅ LovIA es completamente GRATUITA en iOS y Android (por ahora).
@@ -185,6 +186,8 @@ function AppRoutes() {
               <Route path="/assessment/attachment" element={<AttachmentQuiz />} />
               <Route path="/assessment/bigfive" element={<BigFiveQuiz />} />
               <Route path="/assessment/values" element={<ValuesSelector />} />
+              {/* Módulos de los 4 ejes del libro — genérico desde BD */}
+              <Route path="/assessment/axis/:axisName" element={<AxisModulePage />} />
               <Route path="/profile/emergency-contacts" element={<EmergencyContacts />} />
               <Route path="/profile/improvement" element={<ImprovementPage />} />
               <Route path="/profile/graph" element={<GraphPage />} />

@@ -1,10 +1,11 @@
-import { useEffect, useState, useRef } from 'react'
+import { useEffect, useState } from 'react'
 import { MapContainer, TileLayer, Marker, Popup, Circle } from 'react-leaflet'
 import 'leaflet/dist/leaflet.css'
 import { supabase } from '../../lib/supabase'
 import { useAuthStore } from '../../stores/authStore'
-import { Navigation, Loader2, Radar } from 'lucide-react'
+import { Navigation, Loader2, Radar, Lock, Eye } from 'lucide-react'
 import L from 'leaflet'
+import { useNavigate } from 'react-router-dom'
 import './RadarMap.css'
 
 // Fix Leaflet default icon paths broken by bundlers
@@ -15,7 +16,6 @@ L.Icon.Default.mergeOptions({
     shadowUrl: 'https://unpkg.com/leaflet@1.9.4/dist/images/marker-shadow.png',
 })
 
-// Custom Icon for nearby sparks (matches)
 const sparkIcon = new L.DivIcon({
     className: '',
     html: `<div style="
@@ -31,7 +31,21 @@ const sparkIcon = new L.DivIcon({
     popupAnchor: [0, -20],
 })
 
-// Custom Icon for current user
+const blurredIcon = new L.DivIcon({
+    className: '',
+    html: `<div style="
+        width:36px;height:36px;border-radius:50%;
+        background:radial-gradient(circle, rgba(255,107,157,0.4), rgba(196,69,105,0.3));
+        border:2px solid rgba(255,255,255,0.2);
+        filter:blur(3px);
+        display:flex;align-items:center;justify-content:center;
+        box-shadow:0 0 12px rgba(254,81,149,0.3);
+    ">?</div>`,
+    iconSize: [36, 36],
+    iconAnchor: [18, 18],
+    popupAnchor: [0, -20],
+})
+
 const userIcon = new L.DivIcon({
     className: '',
     html: `<div style="
@@ -46,6 +60,13 @@ const userIcon = new L.DivIcon({
     popupAnchor: [0, -22],
 })
 
+// ── Discovery gate: calcular estado desde readiness_score ──────────────────
+function getDiscoveryState(readiness: number): 'locked' | 'preview' | 'open' {
+    if (readiness >= 60) return 'open'
+    if (readiness >= 40) return 'preview'
+    return 'locked'
+}
+
 interface RadarProfile {
     id: string
     alias: string
@@ -53,14 +74,67 @@ interface RadarProfile {
     last_lng: number
 }
 
+
 export default function RadarMap() {
-    const { user } = useAuthStore()
+    const { user, profile } = useAuthStore()
+    const navigate = useNavigate()
     const [userLocation, setUserLocation] = useState<[number, number] | null>(null)
     const [nearbyMatches, setNearbyMatches] = useState<RadarProfile[]>([])
     const [loading, setLoading] = useState(false)
     const [permissionGranted, setPermissionGranted] = useState<boolean | null>(null)
     const [showConsentScreen, setShowConsentScreen] = useState(true)
-    const mapRef = useRef<any>(null)
+
+    // Lee readiness del perfil (columna readiness_score que actualizamos en el schema v2)
+    const profileAny  = profile as unknown as Record<string, unknown> | null
+    const readiness   = (profileAny?.readiness_score as number) ?? 0
+    const discovery   = getDiscoveryState(readiness)
+
+    // ── GATE: discovery_locked (readiness < 40) ────────────────────────────
+    if (discovery === 'locked') {
+        return (
+            <div className="radar-page flex-center" style={{ minHeight: '80vh', textAlign: 'center', padding: '2rem' }}>
+                <div className="glass-strong radar-permission-box animate-scale-in" style={{ maxWidth: 340, borderRadius: 20, padding: '2.5rem 2rem' }}>
+                    <Lock size={48} color="var(--text-tertiary)" style={{ margin: '0 auto 16px', display: 'block' }} />
+                    <h2 style={{ marginBottom: 10 }}>Radar no disponible aún</h2>
+                    <p style={{ color: 'var(--text-secondary)', lineHeight: 1.6, marginBottom: 6 }}>
+                        Tu <strong>Frecuencia de Relación</strong> está en proceso.<br />
+                        Completa tus evaluaciones para desbloquear el descubrimiento.
+                    </p>
+                    <div style={{
+                        background: 'rgba(255,255,255,0.04)', borderRadius: 12,
+                        padding: '14px 16px', margin: '16px 0', textAlign: 'left'
+                    }}>
+                        <p style={{ fontSize: '0.8rem', color: 'var(--text-tertiary)', marginBottom: 8 }}>Para desbloquear:</p>
+                        {[
+                            { label: 'Estilo de Apego', route: '/assessment/attachment', icon: '💞' },
+                            { label: 'Personalidad OCEAN', route: '/assessment/bigfive', icon: '🧬' },
+                            { label: 'Valores esenciales', route: '/assessment/values', icon: '🌟' },
+                        ].map(item => (
+                            <button key={item.route}
+                                onClick={() => navigate(item.route)}
+                                style={{
+                                    display: 'flex', alignItems: 'center', gap: 8, width: '100%',
+                                    background: 'rgba(255,77,109,0.08)', border: '1px solid rgba(255,77,109,0.2)',
+                                    borderRadius: 8, padding: '8px 12px', marginBottom: 6,
+                                    color: 'var(--text-primary)', fontSize: '0.85rem', cursor: 'pointer',
+                                }}>
+                                <span>{item.icon}</span> {item.label}
+                            </button>
+                        ))}
+                    </div>
+                    <p style={{ fontSize: '0.75rem', color: 'var(--text-tertiary)' }}>
+                        Readiness actual: <strong style={{ color: 'var(--love-rose)' }}>{readiness}/100</strong> — necesitas 40+ para vista previa
+                    </p>
+                </div>
+            </div>
+        )
+    }
+
+    // ── GATE: discovery_preview (readiness 40-59) — mapa visible, perfiles borrosos ─
+    if (discovery === 'preview' && !userLocation) {
+        // Continúa al flujo normal pero con blurredIcon
+    }
+
 
     // Solicitar GPS solo cuando el usuario lo aprueba explícitamente
     const requestLocation = () => {
@@ -244,19 +318,22 @@ export default function RadarMap() {
                         </Popup>
                     </Marker>
 
-                    {/* Chispas cercanas */}
+                    {/* Chispas cercanas — ícono borroso en preview, normal en open */}
                     {nearbyMatches.map(match => (
                         <Marker
                             key={match.id}
                             position={[match.last_lat, match.last_lng]}
-                            icon={sparkIcon}
+                            icon={discovery === 'preview' ? blurredIcon : sparkIcon}
                         >
                             <Popup>
                                 <div style={{ textAlign: 'center', padding: '4px 8px' }}>
-                                    <strong>Chispa Oculta 💫</strong><br />
-                                    <span style={{ fontSize: '0.8rem', color: '#666' }}>
-                                        Alta compatibilidad · Ubicación protegida
-                                    </span>
+                                    {discovery === 'preview' ? (
+                                        <><strong>Compatibilidad oculta 🔮</strong><br />
+                                        <span style={{ fontSize: '0.75rem', color: '#888' }}>Completa más evaluaciones para revelar</span></>
+                                    ) : (
+                                        <><strong>Chispa Oculta 💫</strong><br />
+                                        <span style={{ fontSize: '0.8rem', color: '#666' }}>Alta compatibilidad · Ubicación protegida</span></>
+                                    )}
                                 </div>
                             </Popup>
                         </Marker>

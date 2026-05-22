@@ -21,6 +21,7 @@ CREATE TABLE IF NOT EXISTS public.journal_entries (
 ALTER TABLE public.journal_entries ENABLE ROW LEVEL SECURITY;
 DROP POLICY IF EXISTS "journal: select own" ON public.journal_entries;
 DROP POLICY IF EXISTS "journal: insert own" ON public.journal_entries;
+DROP POLICY IF EXISTS "journal: delete own" ON public.journal_entries;
 CREATE POLICY "journal: select own" ON public.journal_entries FOR SELECT USING (auth.uid() = user_id);
 CREATE POLICY "journal: insert own" ON public.journal_entries FOR INSERT WITH CHECK (auth.uid() = user_id);
 CREATE POLICY "journal: delete own" ON public.journal_entries FOR DELETE USING (auth.uid() = user_id);
