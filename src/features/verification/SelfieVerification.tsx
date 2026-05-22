@@ -19,11 +19,25 @@ export default function SelfieVerification() {
     const startCamera = async () => {
         try {
             setError(null)
-            const stream = await navigator.mediaDevices.getUserMedia({ video: { facingMode: 'user' } })
+            const constraints = {
+                video: {
+                    facingMode: 'user',
+                    width: { ideal: 640 },
+                    height: { ideal: 480 }
+                }
+            }
+            const stream = await navigator.mediaDevices.getUserMedia(constraints)
             localStream.current = stream
             setStep(2)
-        } catch (err) {
-            setError('No pudimos acceder a tu cámara. Revisa los permisos e inténtalo de nuevo.')
+        } catch (err: any) {
+            console.error('[SelfieVerification] Camera error:', err)
+            if (err.name === 'NotAllowedError' || err.name === 'PermissionDeniedError') {
+                setError('Permiso de cámara denegado. Ve a Configuración → LovIA → Cámara y actívala.')
+            } else if (err.name === 'NotFoundError') {
+                setError('No se encontró una cámara frontal en tu dispositivo.')
+            } else {
+                setError('No pudimos acceder a tu cámara. Revisa los permisos e inténtalo de nuevo.')
+            }
         }
     }
 
@@ -31,6 +45,10 @@ export default function SelfieVerification() {
     useEffect(() => {
         if (step === 2 && videoRef.current && localStream.current) {
             videoRef.current.srcObject = localStream.current
+            // ✅ FIX: Android WebView ignora autoPlay — llamamos play() explícitamente
+            videoRef.current.play().catch(err => {
+                console.warn('[SelfieVerification] video.play() error:', err)
+            })
         }
         
         // Cleanup on unmount
@@ -40,6 +58,7 @@ export default function SelfieVerification() {
             }
         }
     }, [step])
+
 
     // Step 2: Simulate AWS Rekognition Check
     const takeSnapshotAndVerify = async () => {
@@ -54,7 +73,7 @@ export default function SelfieVerification() {
             
             // Actualizar DB base como verificado
             const { error: dbError } = await supabase
-                .from('private_profiles')
+                .from('profiles')
                 .update({ verified_selfie: true })
                 .eq('id', user.id)
                 

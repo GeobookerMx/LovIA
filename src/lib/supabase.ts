@@ -15,7 +15,17 @@ const supabaseKey =
 
 // En Capacitor iOS, detectSessionInUrl puede colgar la inicialización
 // porque el scheme capacitor:// no soporta hash fragments de OAuth.
-const isNative = Capacitor.isNativePlatform()
+const isNative  = Capacitor.isNativePlatform()
+const isAndroid = Capacitor.getPlatform() === 'android'
+const isIOS     = Capacitor.getPlatform() === 'ios'
+
+// ⚠️ CRÍTICO — flowType por plataforma:
+// • Android: 'implicit' — Chrome Custom Tab corre en proceso SEPARADO al WebView.
+//   El code_verifier de PKCE se guarda en localStorage del WebView pero cuando
+//   el deep link regresa, ese storage ya no es accesible → PKCE falla con 401.
+// • iOS: 'pkce' — SFSafariViewController comparte proceso con el WebView → PKCE funciona.
+// • Web: 'implicit' — flujo estándar de Supabase en navegador.
+const flowType = isAndroid ? 'implicit' : (isIOS ? 'pkce' : 'implicit')
 
 export const supabase = createClient(supabaseUrl, supabaseKey, {
   auth: {
@@ -24,9 +34,7 @@ export const supabase = createClient(supabaseUrl, supabaseKey, {
     // false en Capacitor: evita que Supabase intente leer el token del URL
     // (capacitor:// no soporta hash fragments de OAuth)
     detectSessionInUrl: !isNative,
-    // PKCE es obligatorio en iOS nativo para que el deep link funcione
-    // sin abrir Safari externo — el código llega vía lovia://auth/callback?code=XXX
-    flowType: isNative ? 'pkce' : 'implicit',
+    flowType,
   },
 })
 

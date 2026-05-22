@@ -3,15 +3,17 @@
     bottom: 0;
     left: 0;
     right: 0;
-    height: var(--tab-bar-height);
+    /* ✅ Altura total = tab bar + barra de gestos de Android / home indicator de iOS */
+    height: calc(var(--tab-bar-height) + env(safe-area-inset-bottom, 0px));
     display: flex;
-    align-items: center;
+    align-items: flex-start; /* iconos arriba, el padding absorbe la safe area abajo */
     justify-content: space-around;
+    padding-top: 0;
+    padding-bottom: env(safe-area-inset-bottom, 0px);
     background: rgba(10, 10, 26, 0.92);
     backdrop-filter: blur(20px);
     -webkit-backdrop-filter: blur(20px);
     border-top: 1px solid var(--border-subtle);
-    padding-bottom: env(safe-area-inset-bottom, 0);
     z-index: var(--z-sticky);
 }
 
@@ -20,12 +22,15 @@
     flex-direction: column;
     align-items: center;
     gap: 2px;
-    padding: var(--space-1) var(--space-3);
+    padding: var(--space-2) var(--space-3);
     color: var(--text-tertiary);
     text-decoration: none;
     transition: color var(--duration-fast) var(--ease-out),
         transform var(--duration-fast) var(--ease-spring);
     -webkit-tap-highlight-color: transparent;
+    /* Asegura que el área de tap sea suficiente */
+    min-height: var(--tab-bar-height);
+    justify-content: center;
 }
 
 .tab-bar__item:hover {
