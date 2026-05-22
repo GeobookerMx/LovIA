@@ -119,9 +119,8 @@ export default function SparkPage() {
         // RPC de racha — silenciamos error para no bloquear el flujo
         try { await supabase.rpc('update_user_streak', { p_user_id: user.id }) } catch (_) {}
 
-        // Mostrar pantalla de éxito y navegar al home después de 2.5 seg
+        // Mostrar pantalla de éxito — el usuario cierra manualmente
         setShowSuccess(true)
-        setTimeout(() => navigate('/home'), 2500)
     }
 
     return (
@@ -136,21 +135,80 @@ export default function SparkPage() {
                 </div>
             </header>
 
-            {/* Pantalla de éxito post-respuesta */}
+            {/* Modal de éxito + cooldown informativo */}
             {showSuccess && (
-                <div className="spark-page__card glass-strong animate-scale-in" style={{ textAlign: 'center', padding: '3rem 2rem', marginTop: '2rem' }}>
-                    <div style={{ fontSize: 64, marginBottom: 16 }}>✨</div>
-                    <h2 style={{ color: 'var(--success)', marginBottom: 12 }}>¡Chispa registrada!</h2>
-                    <p style={{ color: 'var(--text-secondary)', marginBottom: 8 }}>
-                        Tu respuesta contribuye a tu perfil de compatibilidad.
+                <div className="spark-page__card glass-strong animate-scale-in" style={{ textAlign: 'center', padding: '2.5rem 1.5rem', marginTop: '1rem' }}>
+                    {/* Animación de éxito */}
+                    <div style={{ fontSize: 64, marginBottom: 8, animation: 'sparkPop 0.5s ease' }}>✨</div>
+                    <h2 style={{ color: 'var(--success)', marginBottom: 8, fontSize: '1.4rem' }}>
+                        ¡Chispa del día completada!
+                    </h2>
+                    <p style={{ color: 'var(--text-secondary)', marginBottom: 4, lineHeight: 1.5 }}>
+                        Tu respuesta queda guardada y contribuye a tu<br/>
+                        <strong style={{ color: 'var(--love-rose)' }}>perfil de compatibilidad</strong>.
                     </p>
-                    <p style={{ fontSize: '0.85rem', color: 'var(--text-tertiary)', marginBottom: 24 }}>
-                        🔥 Racha: <strong style={{ color: 'var(--love-coral)' }}>{streak} días</strong>
+
+                    {/* Racha */}
+                    {streak > 0 && (
+                        <div style={{
+                            display: 'inline-flex', alignItems: 'center', gap: 8,
+                            background: 'rgba(255,120,80,0.12)', border: '1px solid rgba(255,120,80,0.35)',
+                            borderRadius: 12, padding: '8px 18px', margin: '12px 0'
+                        }}>
+                            <Flame size={16} color="var(--love-coral)" />
+                            <span style={{ color: 'var(--love-coral)', fontWeight: 700, fontSize: '0.95rem' }}>
+                                🔥 {streak} días de racha — ¡Sigue así!
+                            </span>
+                        </div>
+                    )}
+
+                    {/* Cuándo regresar */}
+                    <div style={{
+                        background: 'rgba(255,255,255,0.04)',
+                        border: '1px solid var(--border-subtle)',
+                        borderRadius: 16, padding: '16px 20px',
+                        margin: '16px 0', textAlign: 'left'
+                    }}>
+                        <p style={{ fontSize: '0.78rem', color: 'var(--text-tertiary)', marginBottom: 6, textTransform: 'uppercase', letterSpacing: '0.08em' }}>
+                            ⏰ Tu próxima Chispa
+                        </p>
+                        <p style={{ fontWeight: 700, color: 'var(--text-primary)', fontSize: '1rem', marginBottom: 4 }}>
+                            Mañana · {(() => {
+                                const tomorrow = new Date()
+                                tomorrow.setDate(tomorrow.getDate() + 1)
+                                tomorrow.setHours(6, 0, 0, 0)
+                                return tomorrow.toLocaleDateString('es-MX', { weekday: 'long', day: 'numeric', month: 'long' })
+                            })()}
+                        </p>
+                        <p style={{ fontSize: '0.82rem', color: 'var(--text-secondary)', lineHeight: 1.5 }}>
+                            Las preguntas de introspección se actualizan <strong>cada mañana a las 6:00 AM</strong>.
+                            El proceso de autoconocimiento funciona mejor con <strong>consistencia diaria</strong> —
+                            pequeñas reflexiones cada día construyen un perfil de compatibilidad más preciso.
+                        </p>
+                    </div>
+
+                    {/* Sugerencias mientras espera */}
+                    <p style={{ fontSize: '0.82rem', color: 'var(--text-tertiary)', marginBottom: 12 }}>
+                        Mientras tanto puedes:
                     </p>
-                    <p style={{ fontSize: '0.8rem', color: 'var(--text-tertiary)' }}>Volviendo al inicio...</p>
+                    <div style={{ display: 'flex', flexDirection: 'column', gap: 8, marginBottom: 20 }}>
+                        <button className="btn" style={{ padding: '10px 16px', borderRadius: 12, fontSize: '0.88rem',
+                            background: 'rgba(255,77,109,0.1)', border: '1px solid rgba(255,77,109,0.25)',
+                            color: 'var(--love-rose)' }}
+                            onClick={() => navigate('/modules')}>
+                            📚 Continuar mis Módulos de Relación
+                        </button>
+                        <button className="btn" style={{ padding: '10px 16px', borderRadius: 12, fontSize: '0.88rem',
+                            background: 'rgba(255,255,255,0.05)', border: '1px solid var(--border-subtle)',
+                            color: 'var(--text-secondary)' }}
+                            onClick={() => navigate('/radar')}>
+                            🗺️ Explorar el Radar
+                        </button>
+                    </div>
+
                     <button
                         className="btn btn-primary"
-                        style={{ marginTop: 16, padding: '12px 28px', borderRadius: 12 }}
+                        style={{ width: '100%', padding: '14px', borderRadius: 14, fontWeight: 700 }}
                         onClick={() => navigate('/home')}
                     >
                         Ir al inicio →
