@@ -21,6 +21,12 @@ export const supabase = createClient(supabaseUrl, supabaseKey, {
   auth: {
     persistSession: true,
     autoRefreshToken: true,
-    detectSessionInUrl: !isNative, // false en Capacitor iOS/Android — evita bug de pantalla blanca
+    // false en Capacitor: evita que Supabase intente leer el token del URL
+    // (capacitor:// no soporta hash fragments de OAuth)
+    detectSessionInUrl: !isNative,
+    // PKCE es obligatorio en iOS nativo para que el deep link funcione
+    // sin abrir Safari externo — el código llega vía lovia://auth/callback?code=XXX
+    flowType: isNative ? 'pkce' : 'implicit',
   },
-})
+})
+

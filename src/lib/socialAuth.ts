@@ -37,10 +37,12 @@ const NATIVE_REDIRECT = 'lovia://auth/callback'
 // ── Browser nativo (solo se importa en entorno Capacitor) ────────────────────
 
 async function openBrowserNative(url: string): Promise<void> {
-  // Carga dinámica para no romper el bundle web donde @capacitor/browser no existe
   const { Browser } = await import('@capacitor/browser')
-  await Browser.open({ url, windowName: '_self' })
+  // ✅ Sin windowName — en iOS usa SFSafariViewController (modal dentro de la app)
+  // Apple Guideline 4.5.4: el flujo OAuth debe sentirse DENTRO de la app
+  await Browser.open({ url })
 }
+
 
 // ── Google Login ─────────────────────────────────────────────────────────────
 
