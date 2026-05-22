@@ -6,7 +6,6 @@ import { useAuthStore } from './stores/authStore'
 import { Loader2 } from 'lucide-react'
 import ErrorBoundary from './components/shared/ErrorBoundary'
 import OfflineBanner from './components/shared/OfflineBanner'
-import { isIOS } from './lib/platform'
 
 // ─── Eagerly loaded (critical path) ───
 import ProtectedRoute from './components/auth/ProtectedRoute'

@@ -25,7 +25,7 @@ const SCALE_LABELS = ['Nada', 'Poco', 'Algo', 'Bastante', 'Mucho']
 export default function AxisModulePage() {
     const { axisName } = useParams<{ axisName: string }>()
     const navigate = useNavigate()
-    const { user, updateProfile } = useAuthStore()
+    const { user } = useAuthStore()
 
     const [questions, setQuestions] = useState<Question[]>([])
     const [moduleId, setModuleId] = useState<string | null>(null)

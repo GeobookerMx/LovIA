@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
-import { TrendingUp, Zap, Target, ChevronRight, Brain, Heart, Star, Shield, Share2, Lock, Eye } from 'lucide-react'
+import { TrendingUp, Zap, Target, ChevronRight, Brain, Star, Share2, Lock, Eye } from 'lucide-react'
 import { useAuthStore } from '../../stores/authStore'
 import { useEvaluationStore } from '../../stores/evaluationStore'
 import { supabase } from '../../lib/supabase'

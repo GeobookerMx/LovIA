@@ -81,6 +81,12 @@ export interface PublicProfile {
     tier: 'free' | 'arquitecto' | 'ingeniero' | 'diamante'
     visibility_mode: 'classic' | 'gradual' | 'essence'
     onboarding_completed: boolean
+    attachment_style?: string | null
+    ocean_scores?: any | null
+    core_values?: string[] | null
+    assessments_done?: string[] | null
+    spark_streak?: number | null
+    readiness_score?: number | null
     created_at: string
     updated_at: string
 }

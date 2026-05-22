@@ -1,9 +1,9 @@
-import { useEffect, useState } from 'react'
+import { useEffect, useState, useRef } from 'react'
 import { MapContainer, TileLayer, Marker, Popup, Circle } from 'react-leaflet'
 import 'leaflet/dist/leaflet.css'
 import { supabase } from '../../lib/supabase'
 import { useAuthStore } from '../../stores/authStore'
-import { Navigation, Loader2, Radar, Lock, Eye } from 'lucide-react'
+import { Navigation, Loader2, Radar, Lock } from 'lucide-react'
 import L from 'leaflet'
 import { useNavigate } from 'react-router-dom'
 import './RadarMap.css'
@@ -83,6 +83,7 @@ export default function RadarMap() {
     const [loading, setLoading] = useState(false)
     const [permissionGranted, setPermissionGranted] = useState<boolean | null>(null)
     const [showConsentScreen, setShowConsentScreen] = useState(true)
+    const mapRef = useRef<any>(null)
 
     // Lee readiness del perfil (columna readiness_score que actualizamos en el schema v2)
     const profileAny  = profile as unknown as Record<string, unknown> | null
