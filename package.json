@@ -9,9 +9,10 @@
     "lint": "eslint .",
     "preview": "vite preview",
     "icons": "node scripts/generate-icons.mjs",
-    "cap:sync": "npm run build && npx cap sync",
+    "build:capacitor": "cross-env VITE_CAPACITOR=true tsc -b && cross-env VITE_CAPACITOR=true vite build",
+    "cap:sync": "npm run build:capacitor && npx cap sync",
     "cap:android": "npm run cap:sync && npx cap open android",
-    "cap:ios": "npm run build && npx cap copy ios && npx cap sync ios && npx cap open ios",
+    "cap:ios": "npm run build:capacitor && npx cap copy ios && npx cap sync ios && npx cap open ios",
     "cap:assets": "npx @capacitor/assets generate --iconBackgroundColor '#0E0B2A' --splashBackgroundColor '#0E0B2A'",
     "verify:env": "node scripts/verify-env.cjs"
   },

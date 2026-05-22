@@ -70,13 +70,17 @@ const StroopGame = lazy(() => import('./features/evaluations/StroopGame'))
 const DigitSpanGame = lazy(() => import('./features/evaluations/DigitSpanGame'))
 
 // ─── Lazy loaded: Subscription & Verification ───
-// ✅ Apple 3.1.1: Pricing completamente bloqueado en iOS nativo
+// ✅ LovIA es completamente GRATUITA en iOS y Android (por ahora).
+// ✅ Apple 3.1.1: Pricing bloqueado en iOS nativo.
+// ✅ Decisión de negocio: sin monetización en Android hasta segunda fase.
 const SafePricingPage = lazy(() => import('./features/subscription/PricingPage'))
 function PricingGuard() {
-    if (isIOS()) return <Navigate to="/home" replace />
+    // Bloqueamos pricing en TODOS los dispositivos nativos (iOS + Android)
+    if (isNative) return <Navigate to="/home" replace />
     return <SafePricingPage />
 }
 const PricingPage = PricingGuard
+
 const VerificationFlow = lazy(() => import('./features/verification/VerificationFlow'))
 
 // ─── Lazy loaded: Admin Dashboard ───

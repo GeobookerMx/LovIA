@@ -35,9 +35,15 @@ export default function EditProfilePage() {
         e.preventDefault()
         setIsSaving(true)
         setSuccessMsg('')
-        
-        const { error } = await updateProfile(formData as any)
-        
+
+        // Solo enviamos los campos que SÍ existen en la tabla profiles de Supabase.
+        // bio y full_name aún no están en el schema — se agregarán en una migración futura.
+        const safeUpdates: Record<string, string> = {}
+        if (formData.alias) safeUpdates.alias = formData.alias
+        if (formData.city) safeUpdates.city = formData.city
+
+        const { error } = await updateProfile(safeUpdates as any)
+
         setIsSaving(false)
         if (!error) {
             setSuccessMsg('¡Perfil actualizado con éxito!')
@@ -46,6 +52,7 @@ export default function EditProfilePage() {
             alert('Error al guardar: ' + error)
         }
     }
+
 
     return (
         <div className="profile-sub">

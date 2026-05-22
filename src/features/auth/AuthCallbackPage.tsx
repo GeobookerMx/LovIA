@@ -9,13 +9,37 @@ export default function AuthCallbackPage() {
   const [errorMsg, setErrorMsg] = useState<string | null>(null)
 
   useEffect(() => {
+    let navigated = false
+
+    // Fallback: listen for auth state change in case the hash is processed AFTER mount
+    // (common on Android Chrome WebView where OAuth token arrives asynchronously)
+    const { data: { subscription } } = supabase.auth.onAuthStateChange(async (event, session) => {
+      if (navigated) return
+      if ((event === 'SIGNED_IN' || event === 'TOKEN_REFRESHED') && session?.user) {
+        navigated = true
+        subscription.unsubscribe()
+        console.log('[LovIA] AuthCallback onAuthStateChange SIGNED_IN:', session.user.id)
+
+        const { data: profile } = await supabase
+          .from('profiles')
+          .select('onboarding_completed')
+          .eq('id', session.user.id)
+          .maybeSingle()
+
+        const destination = profile?.onboarding_completed ? '/home' : '/onboarding'
+        navigate(destination, { replace: true })
+      }
+    })
+
     const finish = async () => {
       try {
         console.log('[LovIA] AuthCallbackPage: procesando callback OAuth...')
 
         // Dar tiempo a Supabase para procesar el hash fragment (OAuth PKCE)
-        // antes de llamar getSession — evita race condition en iOS WKWebView.
-        await new Promise((r) => setTimeout(r, 300))
+        // 800ms en lugar de 300ms para Android WebView que puede ser más lento
+        await new Promise((r) => setTimeout(r, 800))
+
+        if (navigated) return // el listener ya lo manejó
 
         const {
           data: { session },
@@ -25,16 +49,23 @@ export default function AuthCallbackPage() {
         if (sessionError) {
           console.error('[LovIA] AuthCallback getSession error:', sessionError.message)
           setErrorMsg('Error al verificar la sesión. Por favor intenta de nuevo.')
+          subscription.unsubscribe()
           return
         }
 
         if (!session?.user) {
           // Puede pasar si el token expiró o el callback llegó tarde
           console.warn('[LovIA] AuthCallback: sin sesión activa — redirigiendo a /login')
+          // No redirigir inmediatamente — esperar al listener hasta 5 segundos más
+          await new Promise((r) => setTimeout(r, 5000))
+          if (navigated) return
+          subscription.unsubscribe()
           navigate('/login', { replace: true })
           return
         }
 
+        navigated = true
+        subscription.unsubscribe()
         console.log('[LovIA] AuthCallback: sesión verificada para user:', session.user.id)
 
         const next = searchParams.get('next')
@@ -63,12 +94,18 @@ export default function AuthCallbackPage() {
 
       } catch (err: any) {
         console.error('[LovIA] AuthCallback: error inesperado:', err)
+        subscription.unsubscribe()
         setErrorMsg('Error inesperado. Por favor regresa e intenta de nuevo.')
       }
     }
 
     finish()
+
+    return () => {
+      subscription.unsubscribe()
+    }
   }, [navigate, searchParams])
+
 
   if (errorMsg) {
     return (
