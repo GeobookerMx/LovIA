@@ -89,10 +89,14 @@ export default function Home() {
 
     // Módulos de introspección por eje
     const ejes = [
-        { key: 'amor',        icon: '💞', label: 'Amor', done: assessmentsDone.includes('attachment') || assessmentsDone.includes('amor') },
-        { key: 'intimidad',   icon: '🔥', label: 'Intimidad', done: assessmentsDone.includes('intimidad') },
-        { key: 'realizacion', icon: '🌟', label: 'Realización', done: assessmentsDone.includes('realizacion') || assessmentsDone.includes('values') },
-        { key: 'seguridad',   icon: '🛡️', label: 'Seguridad', done: assessmentsDone.includes('bigfive') || assessmentsDone.includes('seguridad') },
+        { key: 'amor',        icon: '💞', label: 'Amor', done: assessmentsDone.includes('attachment') || assessmentsDone.includes('amor'),
+          route: '/assessment/attachment' },
+        { key: 'intimidad',   icon: '🔥', label: 'Intimidad', done: assessmentsDone.includes('intimidad'),
+          route: '/assessment/axis/intimidad' },
+        { key: 'realizacion', icon: '🌟', label: 'Realización', done: assessmentsDone.includes('realizacion') || assessmentsDone.includes('values'),
+          route: '/assessment/values' },
+        { key: 'seguridad',   icon: '🛡️', label: 'Seguridad', done: assessmentsDone.includes('bigfive') || assessmentsDone.includes('seguridad'),
+          route: '/assessment/bigfive' },
     ]
     const ejesPct = Math.round(ejes.filter(e => e.done).length / 4 * 100)
 
@@ -169,7 +173,7 @@ export default function Home() {
                 <div className="home__axes">
                     {ejes.map(eje => (
                         <div key={eje.key} className={`home__axis ${eje.done ? 'home__axis--done' : ''}`}
-                            onClick={() => !eje.done && navigate('/assessment/' + (eje.key === 'amor' ? 'attachment' : eje.key === 'realizacion' ? 'values' : eje.key === 'seguridad' ? 'bigfive' : eje.key))}>
+                            onClick={() => !eje.done && navigate(eje.route)}>
                             <span className="home__axis-icon">{eje.icon}</span>
                             <span className="home__axis-label">{eje.label}</span>
                             {eje.done
