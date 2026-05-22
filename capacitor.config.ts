@@ -20,10 +20,10 @@ const config: CapacitorConfig = {
       '*.google.com',
       '*.googleapis.com',
       '*.gstatic.com',
+      // Apple Sign In — requerido para OAuth con Apple en iOS y Android
+      'appleid.apple.com',
+      '*.apple.com',
     ],
-    // Para desarrollo local con `npx cap run android --livereload`:
-    // url: 'http://TU_IP_LOCAL:5173',
-    // cleartext: true,
   },
 
   // ── iOS ───────────────────────────────────────────────────────────────────

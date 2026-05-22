@@ -251,15 +251,13 @@ CREATE TABLE IF NOT EXISTS public.trust_flags (
   flagged_at timestamptz DEFAULT now()
 );
 ALTER TABLE public.trust_flags ENABLE ROW LEVEL SECURITY;
--- Solo admin puede ver trust_flags
+-- Solo admin puede ver trust_flags (usa app_metadata igual que AdminGuard)
 DROP POLICY IF EXISTS "trust_flags: admin only" ON public.trust_flags;
 CREATE POLICY "trust_flags: admin only"
   ON public.trust_flags FOR ALL
   USING (
-    EXISTS (
-      SELECT 1 FROM public.profiles
-      WHERE id = auth.uid() AND role = 'admin'
-    )
+    auth.jwt() ->> 'email' IN ('juanpablopg0416@gmail.com', 'juan.pablo.pg@hotmail.com')
+    OR (auth.jwt() -> 'app_metadata' ->> 'role') = 'admin'
   );
 
 -- ══════════════════════════════════════════════════════════════════════════

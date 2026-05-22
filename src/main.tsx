@@ -30,24 +30,37 @@ if (Capacitor.isNativePlatform()) {
 
         const urlObj = new URL(url)
 
-        // ── FLUJO 1: PKCE (Supabase v2 por defecto en iOS nativo) ──────────
+        // ── Helper: navegar a /home de forma segura con HashRouter ──────
+        const navigateToHome = () => {
+          setTimeout(() => {
+            // Solo si el usuario está en login/root; no redirigir si ya está en la app
+            const hash = window.location.hash
+            const isAuthPage = !hash || hash === '#/' || hash.startsWith('#/login')
+            if (isAuthPage) {
+              console.log('[LovIA] Navegando a /home post-OAuth...')
+              window.location.hash = '#/home'
+            }
+          }, 500) // Esperar a que onAuthStateChange actualice el store
+        }
+
+        // ── FLUJO 1: PKCE (iOS — SFSafariViewController) ──────────────
         // El proveedor redirige a: lovia://auth/callback?code=XXXX
         const code = urlObj.searchParams.get('code')
         if (code) {
           console.log('[LovIA] Código PKCE recibido — intercambiando por sesión...')
           const { error } = await supabase.auth.exchangeCodeForSession(code)
-          // Pequeño delay para evitar race condition con el WebContent
-          await new Promise(resolve => setTimeout(resolve, 300))
           await Browser.close()
           if (error) {
             console.error('[LovIA] exchangeCodeForSession error:', error.message)
           } else {
-            console.log('[LovIA] Sesión PKCE establecida correctamente ✅')
+            console.log('[LovIA] Sesión PKCE establecida ✅')
+            navigateToHome()
           }
           return
         }
 
-        // ── FLUJO 2: Implicit / Legacy (#access_token=X&refresh_token=Y) ───
+        // ── FLUJO 2: Implicit / Legacy (#access_token=X&refresh_token=Y) ─
+        // Android: Chrome Custom Tab usa implicit flow (PKCE falla entre procesos)
         const fragmentIndex = url.indexOf('#')
         const queryIndex    = url.indexOf('?')
         const rawParams     = fragmentIndex !== -1
@@ -69,12 +82,12 @@ if (Capacitor.isNativePlatform()) {
         if (access_token && refresh_token) {
           console.log('[LovIA] Tokens recibidos — iniciando sesión con setSession...')
           const { error } = await supabase.auth.setSession({ access_token, refresh_token })
-          await new Promise(resolve => setTimeout(resolve, 300))
           await Browser.close()
           if (error) {
             console.error('[LovIA] setSession error:', error.message)
           } else {
-            console.log('[LovIA] Sesión (implicit) establecida correctamente ✅')
+            console.log('[LovIA] Sesión (implicit) establecida ✅')
+            navigateToHome()
           }
         } else {
           const errorDesc = params.get('error_description') || params.get('error')
