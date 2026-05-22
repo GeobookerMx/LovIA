@@ -31,6 +31,9 @@ const MeetingPlan = lazy(() => import('./components/matching/MeetingPlan'))
 const PostEncounterReview = lazy(() => import('./components/matching/PostEncounterReview'))
 const ChatRoom = lazy(() => import('./features/matching/ChatRoom'))
 const SelfieVerification = lazy(() => import('./features/verification/SelfieVerification'))
+const AttachmentQuiz = lazy(() => import('./features/evaluations/AttachmentQuiz'))
+const BigFiveQuiz = lazy(() => import('./features/evaluations/BigFiveQuiz'))
+const ValuesSelector = lazy(() => import('./features/evaluations/ValuesSelector'))
 const RadarMap = lazy(() => import('./features/user-dashboard/RadarMap'))
 
 // ─── Lazy loaded: Profile & Charts ───
@@ -179,6 +182,9 @@ function AppRoutes() {
               <Route path="/community/directory/register" element={<SpecialistRegisterPage />} />
               <Route path="/profile" element={<ProfilePage />} />
               <Route path="/selfie-verification" element={<SelfieVerification />} />
+              <Route path="/assessment/attachment" element={<AttachmentQuiz />} />
+              <Route path="/assessment/bigfive" element={<BigFiveQuiz />} />
+              <Route path="/assessment/values" element={<ValuesSelector />} />
               <Route path="/profile/emergency-contacts" element={<EmergencyContacts />} />
               <Route path="/profile/improvement" element={<ImprovementPage />} />
               <Route path="/profile/graph" element={<GraphPage />} />

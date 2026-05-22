@@ -190,6 +190,36 @@ export default function ProfilePage() {
                 <h3 className="profile-page__menu-title">Cuenta</h3>
                 <MenuItem icon={<Shield size={18} />} label="Verificación (Selfie)" color="var(--love-warm)" onClick={() => navigate('/selfie-verification')} />
                 <MenuItem icon={<ShieldAlert size={18} />} label="Contactos de Emergencia" color="var(--warning)" onClick={() => navigate('/profile/emergency-contacts')} />
+
+                <h3 className="profile-page__menu-title">🧠 Conócete Más</h3>
+                <MenuItem
+                    icon={<span style={{ fontSize: 18 }}>💚</span>}
+                    label={`Estilo de Apego ${profile?.attachment_style ? '✓' : ''}`}
+                    sublabel={profile?.attachment_style
+                        ? { secure:'Apego Seguro', anxious:'Apego Ansioso', avoidant:'Apego Evitativo', disorganized:'Apego Desorganizado' }[profile.attachment_style] ?? ''
+                        : 'Hazan & Shaver · Sin completar'}
+                    color="var(--success)"
+                    onClick={() => navigate('/assessment/attachment')}
+                />
+                <MenuItem
+                    icon={<span style={{ fontSize: 18 }}>🧬</span>}
+                    label={`Personalidad OCEAN ${profile?.ocean_scores && Object.keys(profile.ocean_scores).length > 0 ? '✓' : ''}`}
+                    sublabel={profile?.ocean_scores && Object.keys(profile.ocean_scores).length > 0
+                        ? 'Big Five completado'
+                        : 'BFI-10 · Sin completar'}
+                    color="var(--line-sex)"
+                    onClick={() => navigate('/assessment/bigfive')}
+                />
+                <MenuItem
+                    icon={<span style={{ fontSize: 18 }}>🌟</span>}
+                    label={`Valores Esenciales ${profile?.core_values?.length ? '✓' : ''}`}
+                    sublabel={profile?.core_values?.length
+                        ? profile.core_values.slice(0,2).join(', ')
+                        : 'Schwartz · Sin completar'}
+                    color="var(--love-warm)"
+                    onClick={() => navigate('/assessment/values')}
+                />
+
                 {/* ✅ Apple 3.1.1: ocultar Suscripción en iOS nativo */}
                 {!isIOS() && (
                     <MenuItem icon={<CreditCard size={18} />} label="Suscripción" color="var(--love-rose)" onClick={() => navigate('/pricing')} />
@@ -211,11 +241,14 @@ export default function ProfilePage() {
     )
 }
 
-function MenuItem({ icon, label, color, onClick }: { icon: React.ReactNode; label: string; color: string; onClick?: () => void }) {
+function MenuItem({ icon, label, sublabel, color, onClick }: { icon: React.ReactNode; label: string; sublabel?: string; color: string; onClick?: () => void }) {
     return (
         <button className="profile-page__menu-item glass" onClick={onClick}>
             <div className="profile-page__menu-icon" style={{ color }}>{icon}</div>
-            <span>{label}</span>
+            <div style={{ flex: 1, minWidth: 0, textAlign: 'left' }}>
+                <span>{label}</span>
+                {sublabel && <p style={{ margin: 0, fontSize: '0.72rem', color: 'var(--text-tertiary)', marginTop: 2, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{sublabel}</p>}
+            </div>
             <ChevronRight size={16} className="profile-page__menu-arrow" />
         </button>
     )
