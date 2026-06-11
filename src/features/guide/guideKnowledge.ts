@@ -192,10 +192,20 @@ export const INTENTS: Record<string, BotMessage> = {
 
     // ── Bloqueo de Seguridad ──
     security_block: {
-        text: 'Soy el Dr. LovIA, enfocado en guiar tu experiencia relacional y de bienestar. Por políticas de protección, no estoy autorizado a discutir detalles técnicos, lógicas de programación, ni configuraciones de seguridad de la plataforma.',
+        text: 'Soy **Dr. LovIA**, tu guía de bienestar relacional. No estoy diseñado para responder preguntas técnicas, de privacidad interna ni relacionadas con datos de usuarios. Si tienes una duda de seguridad o privacidad real, escríbenos a **evosocial@hotmail.com**.',
         quickReplies: [
             { label: '📋 ¿Cómo funciona LovIA?', intent: 'how_it_works' },
             { label: '🔬 Base científica', intent: 'science' },
+            { label: '🔒 Seguridad de la plataforma', intent: 'safety' },
+        ],
+    },
+
+    // ── Bloqueo de datos de usuario ──
+    privacy_block: {
+        text: 'Por protección de la privacidad de nuestros usuarios, no puedo acceder, mostrar ni comentar datos personales de ninguna cuenta. Si necesitas ayuda con tu cuenta, escríbenos a **evosocial@hotmail.com**.',
+        quickReplies: [
+            { label: '📋 ¿Cómo funciona LovIA?', intent: 'how_it_works' },
+            { label: '🔒 Seguridad', intent: 'safety' },
         ],
     },
 
@@ -220,16 +230,16 @@ export const INTENTS: Record<string, BotMessage> = {
         ],
     },
 
-    // ✔ Geobooker Ecosystem
+    // ✔ Lugares para primera cita
     geobooker: {
-        text: 'LovIA se integra con **Geobooker**, la plataforma de negocios locales, para sugerirte lugares seguros y verificados para tu primera cita:',
+        text: 'LovIA te sugiere **lugares seguros y verificados** para tu primera cita, basados en reseñas reales de la comunidad:',
         richContent: {
             type: 'list',
             items: [
-                '📍 **Lugares sugeridos**: el sistema recomienda cafés, restaurantes y espacios públicos cercanos verificados en Geobooker',
-                '⭐ **Calificados por la comunidad**: todos los lugares tienen reseñas reales de otros usuarios',
-                '🔒 **Cita segura**: el Plan de Cita usa ubicaciones de Geobooker como punto de encuentro recomendado',
-                '📞 **Negocios verificados**: cada lugar tiene información de contacto, horario y ubicación exacta',
+                '📍 **Lugares públicos cercanos**: cafés, restaurantes y espacios recomendados cerca de ti',
+                '⭐ **Calificados por la comunidad**: cada lugar tiene reseñas reales de otros usuarios',
+                '🔒 **Cita segura**: el sistema propone 3 opciones seguras cuando ambos están listos',
+                '📞 **Negocios verificados**: información de contacto, horario y ubicación exacta disponible',
             ],
         },
         quickReplies: [
@@ -241,20 +251,49 @@ export const INTENTS: Record<string, BotMessage> = {
 
 // ── Detección de intents por palabras clave ──────────────────────────────
 const KEYWORD_MAP: [string[], string][] = [
-    [['hack', 'vulnerabilidad', 'código', 'codigo', 'programación', 'programacion', 'base de datos', 'sql', 'inyección', 'bypass', 'prompt', 'ignora', 'instrucciones', 'arquitectura', 'servidor', 'backend', 'sistema interno'], 'security_block'],
-    [['hola', 'buenos', 'inicio', 'empezar', 'saludo', 'hi', 'oye'], 'welcome'],
-    [['cómo funciona', 'como funciona', 'qué es', 'que es', 'para qué', 'para que', 'explain'], 'how_it_works'],
-    [['paso a paso', 'guía', 'pasos', 'flujo', 'proceso', 'recorrido'], 'step_guide'],
-    [['ciencia', 'científica', 'libro', 'autor', 'fuente', 'investigación', 'evidencia', 'teoría', 'base', 'bibliografía'], 'science'],
-    [['scoring', 'puntuación', 'score', 'calificación', 'número', 'cómo califica', 'readiness'], 'scoring'],
-    [['especialista', 'psicólogo', 'terapeuta', 'médico', 'doctor', 'apoyo', 'ayuda profesional', 'directorio'], 'specialists'],
-    [['cuándo sugiere', 'trigger', 'cuándo aparece apoyo', 'cuando me ayuda'], 'support_trigger'],
-    [['precio', 'costo', 'plan', 'cobrar', 'mensualidad', 'cuánto vale', 'cuanto cuesta', 'tarifa', 'pesos', 'mxn', 'pagar'], 'unlocks'],
-    [['gratis', 'free', 'explorador', 'sin pagar', 'sin costo', 'qué incluye el gratis'], 'unlocks'],
-    [['desbloqueo', 'desbloquear', 'cuándo puedo', 'foto', 'video', 'videollamada', 'voz', 'nota de voz'], 'unlocks'],
-    [['seguridad', 'protección', 'seguro', 'bloquear', 'reportar', 'cita segura', 'check-in', 'ubicación'], 'safety'],
-    [['match', 'matches', 'conectar', 'descubrimiento', 'cómo veo', 'ver perfiles', 'conocer personas'], 'how_matches'],
-    [['geobooker', 'lugares', 'restaurante', 'café', 'primera cita', 'dónde', 'ecosistema'], 'geobooker'],
+    // 🔴 BLOQUEOS DE SEGURIDAD — Primero siempre (mayor prioridad)
+    [[
+        // Ataques técnicos y de inyección
+        'hack', 'hacker', 'vulnerabilidad', 'exploit', 'inyeccion', 'inyección',
+        'sql', 'xss', 'csrf', 'injection', 'bypass', 'jailbreak', 'override',
+        // Ingeniería de prompts
+        'ignora', 'ignore', 'olvida', 'forget', 'instrucciones anteriores',
+        'previous instructions', 'system prompt', 'actua como', 'actúa como',
+        'pretend', 'simulate', 'dan mode', 'modo sin filtros',
+        // Infraestructura interna
+        'supabase', 'postgresql', 'base de datos', 'database', 'backend',
+        'servidor', 'server', 'api key', 'apikey', 'secret', 'token jwt',
+        'jwt', 'env', '.env', 'variable de entorno', 'arquitectura',
+        'código fuente', 'codigo fuente', 'source code', 'github', 'repositorio',
+        'tabla', 'schema', 'rls', 'bucket', 'storage', 'webhook',
+        // Administración
+        'admin panel', 'panel admin', 'dashboard admin', 'como entrar al admin',
+        'credencial', 'contraseña admin', 'password admin',
+    ], 'security_block'],
+
+    // 🔴 BLOQUEOS DE PRIVACIDAD — Datos de usuarios
+    [[
+        'datos de usuario', 'datos personales', 'perfil de otro', 'ver perfil de',
+        'información de otro', 'correo de', 'email de', 'teléfono de',
+        'quién es', 'quien es el usuario', 'dame los datos',
+        'contraseña', 'password', 'clave de acceso', 'cambiar contraseña de otro',
+        'datos privados', 'historial de otro', 'ver matches de otro',
+    ], 'privacy_block'],
+
+    // ✅ Intenciones normales
+    [['hola', 'buenos', 'inicio', 'empezar', 'saludo', 'hi', 'oye', 'buenas'], 'welcome'],
+    [['cómo funciona', 'como funciona', 'qué es', 'que es', 'para qué', 'para que', 'explain', 'cuéntame', 'cuentame'], 'how_it_works'],
+    [['paso a paso', 'guía', 'guia', 'pasos', 'flujo', 'proceso', 'recorrido', 'tutorial'], 'step_guide'],
+    [['ciencia', 'científica', 'libro', 'autor', 'fuente', 'investigación', 'evidencia', 'teoría', 'base', 'bibliografía', 'estudios'], 'science'],
+    [['scoring', 'puntuación', 'score', 'calificación', 'número', 'cómo califica', 'readiness', 'como me evalua'], 'scoring'],
+    [['especialista', 'psicólogo', 'psicologo', 'terapeuta', 'médico', 'doctor', 'apoyo', 'ayuda profesional', 'directorio', 'terapia'], 'specialists'],
+    [['cuándo sugiere', 'cuando sugiere', 'trigger', 'cuándo aparece apoyo', 'cuando me ayuda', 'necesito ayuda'], 'support_trigger'],
+    [['precio', 'costo', 'plan', 'cobrar', 'mensualidad', 'cuánto vale', 'cuanto cuesta', 'tarifa', 'pesos', 'mxn', 'pagar', 'suscripcion'], 'unlocks'],
+    [['gratis', 'free', 'explorador', 'sin pagar', 'sin costo', 'qué incluye el gratis', 'gratuito'], 'unlocks'],
+    [['desbloqueo', 'desbloquear', 'cuándo puedo', 'cuando puedo', 'foto', 'video', 'videollamada', 'voz', 'nota de voz'], 'unlocks'],
+    [['seguridad', 'protección', 'proteccion', 'seguro', 'bloquear', 'reportar', 'cita segura', 'check-in', 'ubicación', 'ubicacion'], 'safety'],
+    [['match', 'matches', 'conectar', 'descubrimiento', 'cómo veo', 'como veo', 'ver perfiles', 'conocer personas', 'compatibilidad'], 'how_matches'],
+    [['geobooker', 'lugares', 'restaurante', 'café', 'cafe', 'primera cita', 'dónde', 'donde', 'ecosistema', 'negocios'], 'geobooker'],
 ]
 
 export function detectIntent(input: string): string {

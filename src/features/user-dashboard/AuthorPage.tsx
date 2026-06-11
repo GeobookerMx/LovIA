@@ -33,7 +33,7 @@ export default function AuthorPage() {
                 <div className="author__hero">
                     <div className="author__avatar-ring">
                         <img
-                            src="https://images.unsplash.com/photo-1612349317150-e413f6a5b16d?q=80&w=400&auto=format&fit=crop"
+                            src="/author.jpg"
                             alt="Juan Pablo Peña García — Psicólogo"
                             className="author__avatar"
                         />

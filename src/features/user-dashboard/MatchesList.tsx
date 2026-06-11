@@ -172,7 +172,22 @@ export default function MatchesList() {
                     onClick={async () => {
                         setLoading(true)
                         await supabase.functions.invoke('run-matching')
-                        window.location.reload()
+                        // ✅ Re-fetch en lugar de window.location.reload() que rompe Capacitor
+                        const { data, error } = await supabase
+                            .from('matches')
+                            .select(`id, current_level, compatibility_score,
+                                user_a:profiles!matches_user_a_id_fkey(id, alias, age, city, avatar_url, visibility_mode),
+                                user_b:profiles!matches_user_b_id_fkey(id, alias, age, city, avatar_url, visibility_mode)`)
+                            .or(`user_a_id.eq.${user?.id},user_b_id.eq.${user?.id}`)
+                            .eq('status', 'active')
+                        if (!error && data) {
+                            const formatted: MatchData[] = data.map((m: any) => {
+                                const other = m.user_a.id === user?.id ? m.user_b : m.user_a
+                                return { match_id: m.id, target_user_id: other.id, alias: other.alias || 'Anónimo', age: other.age, city: other.city || '', avatar_url: other.avatar_url || '', visibility_mode: other.visibility_mode || 'gradual', compatibility_score: m.compatibility_score, current_level: m.current_level }
+                            })
+                            setMatches(formatted.sort((a, b) => b.compatibility_score - a.compatibility_score))
+                        }
+                        setLoading(false)
                     }}
                 >
                     <Search size={18}/>

@@ -16,6 +16,7 @@ import Register from './features/auth/Register'
 import Home from './features/user-dashboard/Home'
 import GuideChatbot from './features/guide/GuideChatbot'
 const AuthCallbackPage = lazy(() => import('./features/auth/AuthCallbackPage'))
+const PrivacyPolicyPage = lazy(() => import('./features/auth/PrivacyPolicyPage'))
 import './index.css'
 
 // ─── Lazy loaded: Onboarding ───
@@ -149,11 +150,14 @@ function AppRoutes() {
     <ErrorBoundary>
       <Suspense fallback={<LoadingFallback />}>
         <Routes>
-          {/* Public */}
+          {/* Public — sin autenticación requerida */}
           <Route path="/" element={<Landing />} />
           <Route path="/login" element={<Login />} />
           <Route path="/register" element={<Register />} />
           <Route path="/auth/callback" element={<AuthCallbackPage />} />
+          {/* Política de Privacidad pública — requerida por Google Play y App Store */}
+          <Route path="/privacy" element={<PrivacyPolicyPage />} />
+          <Route path="/privacy-policy" element={<PrivacyPolicyPage />} />
 
           {/* Protected */}
           <Route element={<ProtectedRoute />}>

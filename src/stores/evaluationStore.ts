@@ -49,6 +49,7 @@ const DEV_BYPASS = import.meta.env.VITE_DEV_BYPASS === 'true'
 /**
  * Persist evaluation result to Supabase.
  * Uses UPSERT so retaking a test overwrites the old result.
+ * After saving, recalculates readiness_score in profiles.
  */
 async function persistToServer(
     testType: string,
@@ -71,8 +72,64 @@ async function persistToServer(
             }, {
                 onConflict: 'user_id,test_type',
             })
+
+        // ✅ NUEVO: Recalcular y guardar readiness_score en profiles para desbloquear el Radar
+        await recalculateReadiness(user.id)
     } catch (err) {
         console.warn('[EvaluationStore] Server sync failed, data saved locally:', err)
+    }
+}
+
+/**
+ * Calcula el readiness_score (0-100) y lo guarda en profiles.
+ * Radar se desbloquea cuando score >= 40 (preview) o >= 60 (open).
+ *
+ * Pesos por test:
+ * - stroop:               20 pts si passed
+ * - digit_span:           20 pts si passed
+ * - frustration_tolerance: 30 pts (siempre passed, score proporcional)
+ * - emotional_regulation:  30 pts (siempre passed, score proporcional)
+ */
+async function recalculateReadiness(userId: string) {
+    try {
+        const { data } = await supabase
+            .from('evaluations')
+            .select('test_type, score, passed')
+            .eq('user_id', userId)
+
+        if (!data) return
+
+        let readiness = 0
+        for (const row of data) {
+            switch (row.test_type) {
+                case 'stroop':
+                    if (row.passed) readiness += 20
+                    break
+                case 'digit_span':
+                    if (row.passed) readiness += 20
+                    break
+                case 'frustration_tolerance':
+                    // Score 0-100 → aporta hasta 30 puntos
+                    readiness += Math.round((Number(row.score) / 100) * 30)
+                    break
+                case 'emotional_regulation':
+                    // Score 0-100 → aporta hasta 30 puntos
+                    readiness += Math.round((Number(row.score) / 100) * 30)
+                    break
+            }
+        }
+
+        // Clamp 0-100
+        readiness = Math.min(100, Math.max(0, readiness))
+
+        await supabase
+            .from('profiles')
+            .update({ readiness_score: readiness })
+            .eq('id', userId)
+
+        console.log(`[EvaluationStore] ✅ readiness_score actualizado: ${readiness}`)
+    } catch (err) {
+        console.warn('[EvaluationStore] readiness recalc failed:', err)
     }
 }
 

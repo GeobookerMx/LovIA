@@ -1,5 +1,7 @@
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { Mail, Camera, CreditCard, Video, Check, ArrowRight, Shield } from 'lucide-react'
+import { useNavigate } from 'react-router-dom'
+import { useAuthStore } from '../../stores/authStore'
 import './Verification.css'
 
 interface VerificationStep {
@@ -13,12 +15,22 @@ interface VerificationStep {
 }
 
 export default function VerificationFlow() {
-    const [steps, setSteps] = useState<VerificationStep[]>([
-        { id: 'email', label: 'Email', desc: 'Código de 6 dígitos', icon: <Mail size={20} />, when: 'Registro', cost: 'Gratis', completed: true },
-        { id: 'selfie', label: 'Selfie', desc: 'IA compara con foto de perfil', icon: <Camera size={20} />, when: 'Al activar matching', cost: 'Gratis (badge ✓)', completed: false },
-        { id: 'ine', label: 'INE', desc: 'Foto → IA extrae datos + compara rostro', icon: <CreditCard size={20} />, when: 'Antes de encuentro', cost: 'Tier 3+ / Compra única', completed: false },
-        { id: 'video', label: 'Video-verificación', desc: 'Gesto aleatorio en llamada 30s', icon: <Video size={20} />, when: 'Badge Diamante', cost: 'Tier 4', completed: false },
-    ])
+    const navigate = useNavigate()
+    const { profile, loadProfile } = useAuthStore()
+
+    // Cargar perfil actualizado al entrar
+    useEffect(() => {
+        loadProfile()
+    }, [])
+
+    const [simulatedSteps, setSimulatedSteps] = useState<Record<string, boolean>>({})
+
+    const steps: VerificationStep[] = [
+        { id: 'email', label: 'Email', desc: 'Código de 6 dígitos', icon: <Mail size={20} />, when: 'Registro', cost: 'Gratis', completed: !!(profile as any)?.verified_email || simulatedSteps['email'] },
+        { id: 'selfie', label: 'Selfie', desc: 'IA compara con foto de perfil', icon: <Camera size={20} />, when: 'Al activar matching', cost: 'Gratis (badge ✓)', completed: !!(profile as any)?.verified_selfie || simulatedSteps['selfie'] },
+        { id: 'ine', label: 'INE', desc: 'Foto → IA extrae datos + compara rostro', icon: <CreditCard size={20} />, when: 'Antes de encuentro', cost: 'Tier 3+ / Compra única', completed: !!(profile as any)?.verified_ine || simulatedSteps['ine'] },
+        { id: 'video', label: 'Video-verificación', desc: 'Gesto aleatorio en llamada 30s', icon: <Video size={20} />, when: 'Badge Diamante', cost: 'Tier 4', completed: !!(profile as any)?.verified_video || simulatedSteps['video'] },
+    ]
 
     const completedCount = steps.filter((s) => s.completed).length
     const trustScore = completedCount * 25  // Simplified: 25 pts per step
@@ -35,10 +47,12 @@ export default function VerificationFlow() {
     }
 
     const handleVerify = (stepId: string) => {
-        // Simulate verification
-        setSteps((prev) =>
-            prev.map((s) => (s.id === stepId ? { ...s, completed: true } : s))
-        )
+        if (stepId === 'selfie') {
+            navigate('/selfie-verification')
+        } else {
+            // Simular otros pasos localmente
+            setSimulatedSteps(prev => ({ ...prev, [stepId]: true }))
+        }
     }
 
     return (

@@ -7,13 +7,17 @@ import './Verification.css'
 
 export default function SelfieVerification() {
     const navigate = useNavigate()
-    const { user } = useAuthStore()
+    const { user, loadProfile } = useAuthStore()
     
     const [step, setStep] = useState<1 | 2 | 3>(1)
     const [isSimulating, setIsSimulating] = useState(false)
     const [error, setError] = useState<string | null>(null)
     const videoRef = useRef<HTMLVideoElement>(null)
     const localStream = useRef<MediaStream | null>(null)
+    const fileInputRef = useRef<HTMLInputElement>(null)
+    
+    const [capturedFile, setCapturedFile] = useState<File | null>(null)
+    const [previewUrl, setPreviewUrl] = useState<string | null>(null)
 
     // Step 1: Request Camera
     const startCamera = async () => {
@@ -31,19 +35,28 @@ export default function SelfieVerification() {
             setStep(2)
         } catch (err: any) {
             console.error('[SelfieVerification] Camera error:', err)
-            if (err.name === 'NotAllowedError' || err.name === 'PermissionDeniedError') {
-                setError('Permiso de cámara denegado. Ve a Configuración → LovIA → Cámara y actívala.')
-            } else if (err.name === 'NotFoundError') {
-                setError('No se encontró una cámara frontal en tu dispositivo.')
+            // Fallback: abrir selector de cámara nativa del sistema
+            if (fileInputRef.current) {
+                fileInputRef.current.click()
             } else {
                 setError('No pudimos acceder a tu cámara. Revisa los permisos e inténtalo de nuevo.')
             }
         }
     }
 
+    const handleFileCapture = (e: React.ChangeEvent<HTMLInputElement>) => {
+        const file = e.target.files?.[0]
+        if (file) {
+            setCapturedFile(file)
+            const url = URL.createObjectURL(file)
+            setPreviewUrl(url)
+            setStep(2)
+        }
+    }
+
     // Connect stream to video element when step 2 loads
     useEffect(() => {
-        if (step === 2 && videoRef.current && localStream.current) {
+        if (step === 2 && videoRef.current && localStream.current && !previewUrl) {
             videoRef.current.srcObject = localStream.current
             // ✅ FIX: Android WebView ignora autoPlay — llamamos play() explícitamente
             videoRef.current.play().catch(err => {
@@ -57,19 +70,40 @@ export default function SelfieVerification() {
                 localStream.current.getTracks().forEach(t => t.stop())
             }
         }
-    }, [step])
+    }, [step, previewUrl])
 
 
-    // Step 2: Simulate AWS Rekognition Check
+    // Step 2: Simulate AWS Rekognition Check and upload
     const takeSnapshotAndVerify = async () => {
         setIsSimulating(true)
+        setError(null)
         
         // Simular latencia de red hacia AWS Rekognition
         setTimeout(async () => {
             if (!user) return
             
-            // Aquí iría la llamada real a la Edge Function de AWS
-            // await supabase.functions.invoke('verify-selfie', { body: { imageBase64 } })
+            let documentUrl = null
+            
+            if (capturedFile) {
+                try {
+                    const fileExt = capturedFile.name.split('.').pop() || 'jpg'
+                    const filePath = `${user.id}/selfie_${Date.now()}.${fileExt}`
+                    
+                    // Subir archivo al bucket 'selfies'
+                    const { error: uploadError } = await supabase.storage
+                        .from('selfies')
+                        .upload(filePath, capturedFile, { upsert: true })
+                        
+                    if (uploadError) {
+                        console.warn('[SelfieVerification] Storage upload error:', uploadError.message)
+                    } else {
+                        const { data: urlData } = supabase.storage.from('selfies').getPublicUrl(filePath)
+                        documentUrl = urlData.publicUrl
+                    }
+                } catch (storageErr) {
+                    console.warn('[SelfieVerification] Storage try-catch error:', storageErr)
+                }
+            }
             
             // Actualizar DB base como verificado
             const { error: dbError } = await supabase
@@ -77,11 +111,23 @@ export default function SelfieVerification() {
                 .update({ verified_selfie: true })
                 .eq('id', user.id)
                 
+            // También insertar en la tabla de verificación de pasos
+            await supabase
+                .from('verification_steps')
+                .upsert({
+                    user_id: user.id,
+                    step_type: 'selfie',
+                    status: 'approved',
+                    document_url: documentUrl
+                }, { onConflict: 'user_id,step_type' })
+                
             setIsSimulating(false)
             
             if (dbError) {
                 setError('Hubo un error guardando tu verificación. Intenta más tarde.')
             } else {
+                // Forzar recarga del perfil en authStore
+                await loadProfile()
                 setStep(3)
                 // Detener cámara
                 if (localStream.current) {
@@ -111,8 +157,17 @@ export default function SelfieVerification() {
                     </p>
                     
                     {error && (
-                        <div className="alert-error" style={{ marginBottom: '16px', display: 'flex', gap: 8 }}>
-                            <AlertTriangle size={18} /> {error}
+                        <div style={{ width: '100%' }}>
+                            <div className="alert-error" style={{ marginBottom: '16px', display: 'flex', gap: 8 }}>
+                                <AlertTriangle size={18} /> {error}
+                            </div>
+                            <button 
+                                className="matches-page__cta" 
+                                style={{ width: '100%', marginBottom: '16px', background: 'rgba(255,255,255,0.05)', border: '1px solid var(--border-subtle)' }}
+                                onClick={() => fileInputRef.current?.click()}
+                            >
+                                <Camera size={18} /> Usar Cámara del Sistema
+                            </button>
                         </div>
                     )}
                     
@@ -131,7 +186,11 @@ export default function SelfieVerification() {
                         <div className="verification__camera-overlay">
                             <div className="verification__face-guide"></div>
                         </div>
-                        <video ref={videoRef} autoPlay playsInline muted className="verification__video" />
+                        {previewUrl ? (
+                            <img src={previewUrl} className="verification__video" style={{ transform: 'none' }} alt="Selfie preview" />
+                        ) : (
+                            <video ref={videoRef} autoPlay playsInline muted className="verification__video" />
+                        )}
                     </div>
                     
                     <button 
@@ -164,6 +223,16 @@ export default function SelfieVerification() {
                     </button>
                 </div>
             )}
+
+            {/* Hidden Input file capture */}
+            <input 
+                type="file" 
+                ref={fileInputRef} 
+                accept="image/*" 
+                capture="user" 
+                onChange={handleFileCapture} 
+                style={{ display: 'none' }} 
+            />
         </div>
     )
 }

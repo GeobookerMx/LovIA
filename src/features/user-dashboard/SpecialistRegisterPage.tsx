@@ -28,6 +28,7 @@ export default function SpecialistRegisterPage() {
     const [step, setStep] = useState(1)
     const [loading, setLoading] = useState(false)
     const [success, setSuccess] = useState(false)
+    const [submitError, setSubmitError] = useState<string | null>(null)
 
     const [form, setForm] = useState({
         // Personal & credentials
@@ -85,6 +86,7 @@ export default function SpecialistRegisterPage() {
     const handleSubmit = async () => {
         if (!user) return
         setLoading(true)
+        setSubmitError(null)
         try {
             const { error } = await supabase.from('specialists').insert({
                 user_id: user.id,
@@ -115,10 +117,24 @@ export default function SpecialistRegisterPage() {
                 instagram: form.instagram,
                 calendly_link: form.calendly_link,
                 cross_register_geobooker: form.cross_register_geobooker,
-                status: 'pending',  // Requires admin approval
+                status: 'pending',
                 verified: false,
             })
-            if (!error) setSuccess(true)
+            if (error) {
+                console.error('[Specialist] Insert error:', error)
+                setSubmitError(
+                    error.code === '42P01'
+                        ? 'El sistema está en configuración. Contacta a soporte: soporte@lovia.com.mx'
+                        : error.code === '42501'
+                        ? 'Error de permisos. Tu sesión pudo haber expirado. Cierra sesión y vuelve a entrar.'
+                        : `Error al enviar: ${error.message}`
+                )
+            } else {
+                setSuccess(true)
+            }
+        } catch (err: any) {
+            setSubmitError('Error inesperado. Verifica tu conexión e inténtalo de nuevo.')
+            console.error('[Specialist] Unexpected error:', err)
         } finally {
             setLoading(false)
         }
@@ -425,6 +441,19 @@ export default function SpecialistRegisterPage() {
                         </button>
                     )}
                 </div>
+
+                {/* Error message */}
+                {submitError && (
+                    <div style={{
+                        marginTop: 12, padding: '12px 16px',
+                        background: 'rgba(220,50,50,0.12)',
+                        border: '1px solid rgba(220,50,50,0.35)',
+                        borderRadius: 10, color: '#ff6b6b',
+                        fontSize: '0.85rem', lineHeight: 1.5
+                    }}>
+                        ⚠️ {submitError}
+                    </div>
+                )}
             </div>
         </div>
     )

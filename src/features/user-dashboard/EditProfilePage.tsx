@@ -25,8 +25,10 @@ export default function EditProfilePage() {
     useEffect(() => {
         if (profile) {
             setFormData({
-                alias: profile.alias || '',
-                city: profile.city || '',
+                alias: (profile as any).alias || '',
+                city: (profile as any).city || '',
+                full_name: (profile as any).full_name || '',
+                bio: (profile as any).bio || '',
             })
         }
     }, [profile])
@@ -36,18 +38,19 @@ export default function EditProfilePage() {
         setIsSaving(true)
         setSuccessMsg('')
 
-        // Solo enviamos los campos que SÍ existen en la tabla profiles de Supabase.
-        // bio y full_name aún no están en el schema — se agregarán en una migración futura.
-        const safeUpdates: Record<string, string> = {}
-        if (formData.alias) safeUpdates.alias = formData.alias
-        if (formData.city) safeUpdates.city = formData.city
+        // Guardar todos los campos editables del perfil
+        const updates: Record<string, string> = {}
+        if (formData.alias)     updates.alias     = formData.alias
+        if (formData.city)      updates.city      = formData.city
+        if (formData.full_name) updates.full_name = formData.full_name
+        if (formData.bio !== undefined) updates.bio = formData.bio ?? ''
 
-        const { error } = await updateProfile(safeUpdates as any)
+        const { error } = await updateProfile(updates as any)
 
         setIsSaving(false)
         if (!error) {
             setSuccessMsg('¡Perfil actualizado con éxito!')
-            setTimeout(() => navigate(-1), 1500)
+            setTimeout(() => navigate('/profile'), 1500)
         } else {
             alert('Error al guardar: ' + error)
         }

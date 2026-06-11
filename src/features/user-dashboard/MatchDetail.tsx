@@ -110,11 +110,12 @@ export default function MatchDetail() {
         if (action.route) {
             navigate(`/matches/${match.id}/${action.route}`)
         } else {
-            // Next Level Logic 
-            await supabase.from('matches').update({
+            // Next Level Logic
+            const { data: updated } = await supabase.from('matches').update({
                 current_level: match.current_level + 1
-            }).eq('id', match.id)
-            window.location.reload()
+            }).eq('id', match.id).select().single()
+            // ✅ Actualizar estado local en lugar de window.location.reload() que rompe Capacitor
+            if (updated) setMatch(updated)
         }
     }
 

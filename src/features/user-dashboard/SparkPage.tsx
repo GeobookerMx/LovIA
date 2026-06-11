@@ -38,14 +38,29 @@ export default function SparkPage() {
     const loadTodayData = async () => {
         try {
             setLoading(true)
-            const today = new Date().toISOString().split('T')[0]
+            // ✅ FIX TIMEZONE: usar zona horaria de México, no UTC
+            // new Date().toISOString() da fecha UTC — a las 6 PM MX ya es mañana en UTC
+            const today = new Date().toLocaleDateString('en-CA', { timeZone: 'America/Mexico_City' })
 
             // 1. Get today's spark
-            const { data: sparkData } = await supabase
+            let { data: sparkData } = await supabase
                 .from('sparks')
                 .select('*')
                 .eq('active_date', today)
                 .maybeSingle()
+
+            // ✅ FALLBACK: si no hay chispa para hoy, tomar una aleatoria
+            if (!sparkData) {
+                const { data: anySpark } = await supabase
+                    .from('sparks')
+                    .select('*')
+                    .lte('active_date', today)
+                    .order('active_date', { ascending: false })
+                    .limit(10)
+                if (anySpark && anySpark.length > 0) {
+                    sparkData = anySpark[Math.floor(Math.random() * anySpark.length)]
+                }
+            }
 
             if (sparkData) setSpark(sparkData)
 
