@@ -39,12 +39,8 @@
   status = 200
   force  = true
 
-# ── Dominio canónico ──────────────────────────────────────────────────────────
-[[redirects]]
-  from = "https://lovia.com.mx/*"
-  to   = "https://www.lovia.com.mx/:splat"
-  status = 301
-  force  = true
+# El dominio canónico se maneja automáticamente desde el panel de Netlify.
+# No agregar redirección de dominio aquí para evitar bucles (loops) con la configuración del panel.
 
 # ── SPA fallback (React Router) ───────────────────────────────────────────────
 [[redirects]]
