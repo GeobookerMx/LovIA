@@ -18,17 +18,19 @@
   status = 200
   force  = true
 
-# Página de privacidad pública — sirve la SPA (React Router renderiza PrivacyPolicyPage)
-# Google Play y Apple App Store requieren esta URL accesible sin login ni redirecciones extrañas.
+# Política de privacidad — sirve el HTML ESTÁTICO directamente (sin React, sin JS)
+# Funciona aunque el CDN tenga el build anterior en caché.
 [[redirects]]
   from   = "/privacy"
-  to     = "/index.html"
+  to     = "/privacy.html"
   status = 200
+  force  = true
 
 [[redirects]]
   from   = "/privacy-policy"
-  to     = "/index.html"
+  to     = "/privacy.html"
   status = 200
+  force  = true
 
 # assetlinks para TWA / Capacitor Android (Digital Asset Links)
 [[redirects]]
