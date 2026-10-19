@@ -19,21 +19,17 @@ export default function DirectoryManager() {
     const [statusFilter, setStatusFilter] = useState<string>('all')
     const [specialists, setSpecialists] = useState<Specialist[]>([])
     const [loading, setLoading] = useState(true)
+    const [loadError, setLoadError] = useState<string | null>(null)
 
     const fetchSpecialists = async () => {
         setLoading(true)
         const { data, error } = await supabase.from('specialists').select('*').order('created_at', { ascending: false })
-        if (!error && data) setSpecialists(data as any)
+        if (error) setLoadError('No se pudo cargar el directorio.')
+        else { setLoadError(null); setSpecialists((data ?? []) as Specialist[]) }
         setLoading(false)
     }
 
     useEffect(() => { fetchSpecialists() }, [])
-
-    const handleUpdateStatus = async (id: string, status: string) => {
-        if (!confirm(`¿Seguro que deseas cambiar el profesional a ${status}?`)) return
-        await supabase.from('specialists').update({ status }).eq('id', id)
-        fetchSpecialists()
-    }
 
     const filtered = specialists.filter(p => {
         const nameMatch = `${p.first_name} ${p.last_name}`.toLowerCase()
@@ -54,6 +50,8 @@ export default function DirectoryManager() {
                 </button>
             </div>
 
+            {loadError && <div role="alert" className="alert-error">{loadError}</div>}
+            <p>Las aprobaciones y sanciones están desactivadas hasta validar permisos y registro de actos en staging.</p>
             {/* KPIs */}
             <div className="admin-kpi-grid stagger-children" style={{ gridTemplateColumns: 'repeat(4, 1fr)' }}>
                 {[
@@ -122,10 +120,10 @@ export default function DirectoryManager() {
                                 </td>
                                 <td>
                                     <div className="admin-actions">
-                                        {pro.status === 'pending' && <button title="Aprobar" onClick={() => handleUpdateStatus(pro.id, 'active')}><CheckCircle2 size={16} color="var(--success)" /></button>}
-                                        {pro.status === 'pending' && <button title="Rechazar" onClick={() => handleUpdateStatus(pro.id, 'rejected')}><XCircle size={16} color="var(--danger)" /></button>}
-                                        {pro.status === 'active' && <button title="Suspender" onClick={() => handleUpdateStatus(pro.id, 'suspended')}><XCircle size={16} color="var(--warning)" /></button>}
-                                        {pro.status === 'suspended' && <button title="Reactivar" onClick={() => handleUpdateStatus(pro.id, 'active')}><CheckCircle2 size={16} color="var(--success)" /></button>}
+                                        {pro.status === 'pending' && <button disabled title="Aprobación pendiente de servidor"><CheckCircle2 size={16} color="var(--success)" /></button>}
+                                        {pro.status === 'pending' && <button disabled title="Rechazo pendiente de servidor"><XCircle size={16} color="var(--danger)" /></button>}
+                                        {pro.status === 'active' && <button disabled title="Suspensión pendiente de servidor"><XCircle size={16} color="var(--warning)" /></button>}
+                                        {pro.status === 'suspended' && <button disabled title="Reactivación pendiente de servidor"><CheckCircle2 size={16} color="var(--success)" /></button>}
                                     </div>
                                 </td>
                             </tr>

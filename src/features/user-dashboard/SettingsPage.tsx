@@ -14,6 +14,8 @@ import { supabase } from '../../lib/supabase'
 import './ProfilePages.css'
 
 export default function SettingsPage() {
+    // El endpoint existe en código local, pero aún no está desplegado ni probado.
+    const accountDeletionAvailable = false
     const navigate = useNavigate()
     const settings = useSettingsStore()
     const { signOut } = useAuthStore()
@@ -157,13 +159,14 @@ export default function SettingsPage() {
                         <User size={18} className="settings-item__icon" />
                         <div>
                             <div className="settings-item__label">Editar perfil</div>
-                            <div className="settings-item__desc">Nombre, bio, foto</div>
+                            <div className="settings-item__desc">Nombre, alias, ciudad y foto</div>
                         </div>
                     </div>
                 </div>
 
                 {/* Paso 1: botón inicial */}
-                {deleteStep === 0 && (
+                <p className="settings-item__desc">La eliminación automática está temporalmente desactivada mientras se verifica el borrado completo de datos y archivos. Para solicitarla, escribe a clienteslovia@gmail.com.</p>
+                {accountDeletionAvailable && deleteStep === 0 && (
                     <button
                         className="settings-item glass"
                         onClick={handleDeleteAccount}
@@ -180,7 +183,7 @@ export default function SettingsPage() {
                 )}
 
                 {/* Paso 2: panel de confirmación explícita */}
-                {deleteStep === 1 && (
+                {accountDeletionAvailable && deleteStep === 1 && (
                     <div className="glass-strong animate-fade-in" style={{
                         borderRadius: 'var(--radius-md)',
                         border: '1px solid rgba(239,68,68,0.4)',

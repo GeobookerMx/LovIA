@@ -4,11 +4,6 @@ import { supabase } from '../../lib/supabase'
 import { Shield, LogIn, AlertTriangle, Loader } from 'lucide-react'
 
 // ── Correos autorizados como admin ───────────────────────────────────────────
-const ADMIN_EMAILS = [
-  'juanpablopg0416@gmail.com',
-  'juan.pablo.pg@hotmail.com',
-]
-
 type State = 'loading' | 'allowed' | 'denied' | 'unauthenticated'
 
 export default function AdminGuard() {
@@ -16,44 +11,26 @@ export default function AdminGuard() {
   const [userEmail, setUserEmail] = useState<string | null>(null)
 
   useEffect(() => {
+    let active = true
     const check = async () => {
-      const { data: sessionData } = await supabase.auth.getSession()
-      const user = sessionData.session?.user
-
-      if (!user) {
+      setState('loading')
+      const { data: { user }, error: authError } = await supabase.auth.getUser()
+      if (!active) return
+      if (authError || !user) {
         setState('unauthenticated')
         return
       }
 
       setUserEmail(user.email ?? null)
-
-      // Capa 1: email en whitelist
-      if (user.email && ADMIN_EMAILS.includes(user.email)) {
-        setState('allowed')
-        return
-      }
-
-      // Capa 2: JWT app_metadata
-      if (user.app_metadata?.role === 'admin') {
-        setState('allowed')
-        return
-      }
-
-      // Capa 3: tabla user_roles
-      const { data } = await supabase
-        .from('user_roles')
-        .select('role')
-        .eq('user_id', user.id)
-
-      if (data?.some(r => r.role === 'admin')) {
-        setState('allowed')
-        return
-      }
-
-      setState('denied')
+      const { data: allowed, error } = await supabase.rpc('is_admin')
+      if (active) setState(!error && allowed === true && user.app_metadata?.role === 'admin' ? 'allowed' : 'denied')
     }
 
-    check()
+    void check()
+    const { data: { subscription } } = supabase.auth.onAuthStateChange(() => {
+      void check()
+    })
+    return () => { active = false; subscription.unsubscribe() }
   }, [])
 
   // ── Loading ────────────────────────────────────────────────────────────────

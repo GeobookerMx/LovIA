@@ -17,12 +17,15 @@ export default function UsersManager() {
     const [filter, setFilter] = useState<'all' | 'active' | 'suspended' | 'banned'>('all')
     const [users, setUsers] = useState<UserData[]>([])
     const [loading, setLoading] = useState(true)
+    const [loadError, setLoadError] = useState<string | null>(null)
 
     const fetchUsers = async () => {
         setLoading(true)
         const { data, error } = await supabase.from('profiles').select('id, email, full_name, onboarding_completed, created_at, status')
 
-        if (!error && data) {
+        if (error) setLoadError('No se pudo cargar la lista de usuarios.')
+        else if (data) {
+            setLoadError(null)
             const list: UserData[] = data.map((row: any) => ({
                 id: row.id,
                 email: row.email,
@@ -40,24 +43,9 @@ export default function UsersManager() {
 
     useEffect(() => { fetchUsers() }, [])
 
-    const handleAction = async (userId: string, currentStatus: string) => {
-        const newStatus = currentStatus === 'banned' ? 'active' : 'banned'
-        const confirmMsg = newStatus === 'banned' ? '¿Estás seguro de banear a este usuario permanentemente?' : '¿Quieres quitarle el baneo de la plataforma?'
-        
-        if (!window.confirm(confirmMsg)) return
-
-        const { error } = await supabase.from('profiles').update({ status: newStatus }).eq('id', userId)
-        
-        if (error) {
-            alert('Error al actualizar el usuario. Ejecuta el script SQL para la columna "status".')
-        } else {
-            fetchUsers()
-        }
-    }
-
     const filteredUsers = users.filter((u) => {
         const matchSearch = u.full_name.toLowerCase().includes(search.toLowerCase()) || u.email?.toLowerCase().includes(search.toLowerCase())
-        return matchSearch
+        return matchSearch && (filter === 'all' || u.status === filter)
     })
 
     return (
@@ -72,6 +60,8 @@ export default function UsersManager() {
                 </button>
             </div>
 
+            {loadError && <div role="alert" className="alert-error">{loadError}</div>}
+            <p>Las sanciones están desactivadas hasta disponer de una operación autorizada, auditable y probada en staging.</p>
             {/* Toolbar */}
             <div className="admin-toolbar glass">
                 <div className="admin-toolbar__search">
@@ -131,7 +121,7 @@ export default function UsersManager() {
                                 <td style={{ fontSize: 'var(--fs-xs)', color: 'var(--text-tertiary)' }}>{new Date(u.created_at).toLocaleDateString('es-MX')}</td>
                                 <td>
                                     <div className="admin-actions">
-                                        <button title={u.status === 'banned' ? "Desbanear" : "Banear"} onClick={() => handleAction(u.id, u.status || 'active')}>
+                                        <button disabled title="Sanción pendiente de validación del servidor" aria-label="Sanción no disponible">
                                             <Ban size={16} color={u.status === 'banned' ? "var(--danger)" : "var(--text-tertiary)"}/>
                                         </button>
                                     </div>

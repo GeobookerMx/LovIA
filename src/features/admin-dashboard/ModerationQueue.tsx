@@ -46,6 +46,7 @@ export default function ModerationQueue() {
     const [reports, setReports] = useState<Report[]>([])
     const [loading, setLoading] = useState(true)
     const [feedback, setFeedback] = useState<string | null>(null)
+    const [loadError, setLoadError] = useState<string | null>(null)
 
     const fetchReports = async () => {
         setLoading(true)
@@ -55,20 +56,25 @@ export default function ModerationQueue() {
             .order('created_at', { ascending: false })
             .limit(50)
 
-        if (!error && data) setReports(data as any)
+        if (error) setLoadError('No se pudieron cargar los reportes. Vuelve a intentar.')
+        else { setLoadError(null); setReports((data ?? []) as Report[]) }
         setLoading(false)
     }
 
     useEffect(() => { fetchReports() }, [])
 
-    const handleAction = async (reportId: string, action: 'dismissed' | 'action_taken', reportedId?: string) => {
-        if (action === 'action_taken' && reportedId) {
-            await supabase.from('private_profiles').update({ account_status: 'banned' }).eq('id', reportedId)
+    const handleDismiss = async (reportId: string) => {
+        setFeedback(null)
+        const { data, error } = await supabase.from('moderation_reports')
+            .update({ status: 'dismissed' }).eq('id', reportId)
+            .select('id, status').single()
+        if (error || data?.status !== 'dismissed') {
+            setFeedback('No se pudo descartar el reporte. Comprueba los permisos.')
+            return
         }
-        await supabase.from('moderation_reports').update({ status: action }).eq('id', reportId)
-        setFeedback(action === 'dismissed' ? '✓ Reporte descartado' : '✅ Usuario suspendido de la plataforma')
+        setFeedback('Reporte descartado')
         setTimeout(() => setFeedback(null), 3500)
-        fetchReports()
+        void fetchReports()
     }
 
     const filtered = filter === 'all' ? reports : reports.filter(r => r.status === filter)
@@ -87,6 +93,7 @@ export default function ModerationQueue() {
                 </button>
             </div>
 
+            {loadError && <div role="alert" className="alert-error">{loadError}</div>}
             {feedback && (
                 <div style={{ padding: '12px 16px', marginBottom: 16, background: 'rgba(16,185,129,0.15)', border: '1px solid rgba(16,185,129,0.3)', borderRadius: '10px', color: 'var(--success)', fontSize: '14px', fontWeight: 500 }}>
                     {feedback}
@@ -168,10 +175,10 @@ export default function ModerationQueue() {
                                         </span>
                                         {report.status === 'pending' && (
                                             <div className="admin-actions">
-                                                <button title="Descartar" onClick={() => handleAction(report.id, 'dismissed')}>
+                                                <button title="Descartar" onClick={() => handleDismiss(report.id)}>
                                                     <XCircle size={14} color="var(--text-tertiary)" />
                                                 </button>
-                                                <button title="Banear usuario" onClick={() => handleAction(report.id, 'action_taken', report.reported_id)}>
+                                                <button title="Suspensión pendiente de autorización del servidor" disabled aria-label="Suspensión no disponible hasta validar el servidor">
                                                     <CheckCircle2 size={14} color="var(--danger)" />
                                                 </button>
                                             </div>

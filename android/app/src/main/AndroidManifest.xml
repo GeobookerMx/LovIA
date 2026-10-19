@@ -23,11 +23,11 @@
 
             <!-- ✅ Deep link lovia:// para OAuth callback (Google/Apple) -->
             <!-- Chrome Custom Tab redirige aquí después del login -->
-            <intent-filter android:autoVerify="true">
+            <intent-filter>
                 <action android:name="android.intent.action.VIEW" />
                 <category android:name="android.intent.category.DEFAULT" />
                 <category android:name="android.intent.category.BROWSABLE" />
-                <data android:scheme="lovia" />
+                <data android:scheme="lovia" android:host="auth" android:path="/callback" />
             </intent-filter>
 
         </activity>

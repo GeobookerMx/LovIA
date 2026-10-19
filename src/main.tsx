@@ -21,7 +21,16 @@ window.addEventListener('unhandledrejection', () => {
 //   4. Supabase procesa el token y dispara onAuthStateChange → authStore actualiza
 if (Capacitor.isNativePlatform()) {
   import('@capacitor/app').then(({ App: CapApp }) => {
-    CapApp.addListener('appUrlOpen', async ({ url }) => {
+    let processingUrl: string | null = null
+    const handleDeepLink = async (url: string) => {
+      if (processingUrl === url) return
+      let parsed: URL
+      try { parsed = new URL(url) } catch { return }
+      if (parsed.protocol !== 'lovia:' || parsed.hostname !== 'auth' || parsed.pathname !== '/callback' || parsed.username || parsed.password || parsed.port) {
+        console.warn('[LovIA] [DeepLink] Destino no permitido.')
+        return
+      }
+      processingUrl = url
       console.log('[LovIA] [DeepLink] Callback recibido.')
  
       try {
@@ -29,8 +38,7 @@ if (Capacitor.isNativePlatform()) {
         const { Browser }  = await import('@capacitor/browser')
  
         console.log('[LovIA] [DeepLink] Parseando URL...')
-        const urlObj = new URL(url)
-        console.log('[LovIA] [DeepLink] Hostname:', urlObj.hostname, 'Pathname:', urlObj.pathname)
+        const urlObj = parsed
  
         // ── Helper: navegar a /home de forma segura con HashRouter ──────
         const navigateToHome = () => {
@@ -101,8 +109,12 @@ if (Capacitor.isNativePlatform()) {
         }
       } catch {
         console.error('[LovIA] [DeepLink] No se pudo procesar el callback.')
+      } finally {
+        processingUrl = null
       }
-    })
+    }
+    void CapApp.addListener('appUrlOpen', ({ url }) => { void handleDeepLink(url) })
+    void CapApp.getLaunchUrl().then(result => { if (result?.url) void handleDeepLink(result.url) })
     console.log('[LovIA] appUrlOpen listener registrado con logs enriquecidos ✅')
   }).catch(() => {
     console.error('[LovIA] No se pudo cargar el controlador de enlaces.')
