@@ -1,3 +1,6 @@
+-- ARCHIVADO FASE 1 (2026-10-19): NO EJECUTAR. Requiere inventario remoto y migración revisada.
+-- El contenido histórico se conserva como comentario para trazabilidad.
+/*
 -- ═══════════════════════════════════════════════════════════════════════
 -- LovIA! — FIXES DE SEGURIDAD URGENTES
 -- INSTRUCCIÓN: Copia y pega TODO esto en Supabase → SQL Editor → Run
@@ -157,3 +160,5 @@ ORDER BY tablename, policyname;
 -- ✅ LISTO. Todos los fixes de seguridad aplicados.
 -- Próximo paso: Ejecutar MERCADO_PAGO_SETUP.sql para pasarela de pagos.
 -- ═══════════════════════════════════════════════════════════════════════
+
+*/

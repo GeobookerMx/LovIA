@@ -1,9 +1,25 @@
 import { defineConfig, loadEnv } from 'vite'
 import react from '@vitejs/plugin-react'
 import { VitePWA } from 'vite-plugin-pwa'
+import { validatePublicEnvironment } from './src/lib/environment'
 
 export default defineConfig(({ mode }) => {
   const env = loadEnv(mode, process.cwd(), '')
+  validatePublicEnvironment({
+    mode,
+    appEnvironment: env.VITE_APP_ENV,
+    supabaseUrl: env.VITE_SUPABASE_URL,
+    expectedRef: env.VITE_SUPABASE_EXPECTED_REF,
+    publishableKey: env.VITE_SUPABASE_PUBLISHABLE_KEY,
+    anonKey: env.VITE_SUPABASE_ANON_KEY,
+    devBypass: env.VITE_DEV_BYPASS,
+    netlifyContext: process.env.CONTEXT,
+  })
+  for (const name of Object.keys(env)) {
+    if (/^VITE_.*(?:SERVICE_ROLE|SECRET|PASSWORD|PRIVATE_KEY)/i.test(name)) {
+      throw new Error(`La variable ${name} no puede exponerse en un build web.`)
+    }
+  }
   // Cuando se compila para Capacitor (build nativo iOS/Android),
   // se debe usar base './' y desactivar el Service Worker del PWA
   // para evitar el error "Failed to fetch dynamically imported module: https://localhost/..."
@@ -22,7 +38,7 @@ export default defineConfig(({ mode }) => {
         manifest: {
           name: 'LovIA! — Parejas de Calidad',
           short_name: 'LovIA!',
-          description: 'Herramienta de ingeniería relacional fundamentada en ciencia. Compatibilidad basada en 15+ estudios publicados.',
+          description: 'Conoce personas y explora herramientas para cuidar tus relaciones a tu ritmo.',
           theme_color: '#0E0B2A',
           background_color: '#0E0B2A',
           display: 'standalone',

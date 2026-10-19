@@ -43,6 +43,17 @@ Deno.serve(async (req) => {
     return new Response('ok', { headers: corsHeaders })
   }
 
+  // Protección del servidor: también cubre clientes antiguos que aún ofrecen checkout.
+  const mexicoDay = new Intl.DateTimeFormat('en-CA', {
+    timeZone: 'America/Mexico_City', year: 'numeric', month: '2-digit', day: '2-digit',
+  }).format(new Date())
+  if (req.method !== 'POST') return new Response('Method not allowed', { status: 405, headers: corsHeaders })
+  if (mexicoDay <= '2027-01-31' || Deno.env.get('LOVIA_ENABLE_PAID_CHECKOUT') !== 'true') {
+    return new Response(JSON.stringify({ error: 'Los pagos aún no están disponibles' }), {
+      headers: { ...corsHeaders, 'Content-Type': 'application/json' }, status: 403,
+    })
+  }
+
   try {
     // 1. Validar autenticación del usuario
     const authHeader = req.headers.get('Authorization')
@@ -70,7 +81,7 @@ Deno.serve(async (req) => {
     }
 
     // 2. Leer el cuerpo de la petición
-    const { tier, returnUrl } = await req.json()
+    const { tier } = await req.json()
 
     if (!tier || !PLANES[tier]) {
       return new Response(
@@ -91,7 +102,12 @@ Deno.serve(async (req) => {
     }
 
     // 3. Crear preferencia en Mercado Pago
-    const baseUrl = returnUrl || 'https://lovia.app'
+    const baseUrl = Deno.env.get('LOVIA_PUBLIC_SITE_ORIGIN')
+    if (!baseUrl || !/^https:\/\/[^/?#]+$/.test(baseUrl)) {
+      return new Response(JSON.stringify({ error: 'Origen de retorno no configurado' }), {
+        headers: { ...corsHeaders, 'Content-Type': 'application/json' }, status: 503,
+      })
+    }
 
     const preference = {
       items: [
@@ -152,7 +168,7 @@ Deno.serve(async (req) => {
 
     const mpData = await mpResponse.json()
 
-    console.log(`✅ Preferencia creada para ${user.email} — Plan: ${tier} — ID: ${mpData.id}`)
+    console.log(`Preferencia creada para plan ${tier}`)
 
     return new Response(
       JSON.stringify({

@@ -4,6 +4,7 @@ import { supabase } from '../../lib/supabase'
 import { TIERS, useSubscriptionStore } from '../../stores/subscriptionStore'
 import type { Tier } from '../../stores/subscriptionStore'
 import { isIOS } from '../../lib/platform'
+import { FREE_ACCESS_END_LABEL, isFreeAccessPeriod } from '../../lib/campaignDates'
 import './Pricing.css'
 
 const tierIcons: Record<Tier, React.ReactNode> = {
@@ -20,6 +21,7 @@ export default function PricingPage() {
     const [paymentError, setPaymentError] = useState<string | null>(null)
 
     const handleSubscribe = async (tierId: Tier) => {
+        if (isFreeAccessPeriod() || import.meta.env.VITE_ENABLE_PAID_CHECKOUT !== 'true') return
         if (tierId === 'free') return
         if (currentTier === tierId) return
 
@@ -55,6 +57,18 @@ export default function PricingPage() {
         }
     }
 
+    if (isFreeAccessPeriod() || import.meta.env.VITE_ENABLE_PAID_CHECKOUT !== 'true') {
+        return (
+            <div className="pricing-page">
+                <div className="pricing-page__header">
+                    <h1>LovIA es gratis</h1>
+                    <p>Acceso completo sin tarjeta hasta el {FREE_ACCESS_END_LABEL}, inclusive.</p>
+                    <p>Al terminar este periodo no se iniciará ningún cobro automático. Cualquier plan futuro será opcional y requerirá tu aceptación.</p>
+                </div>
+            </div>
+        )
+    }
+
     // ── iOS nativo: no mostrar pagos externos (Apple Guideline 3.1.1) ──
     if (isIOS()) {
         return (
@@ -82,7 +96,7 @@ export default function PricingPage() {
                 <h1>Elige tu plan</h1>
                 <p>Invierte en ti. Cada tier desbloquea herramientas más profundas para tu crecimiento.</p>
 
-                {/* Banner 4 meses gratis */}
+                {/* Los cobros permanecen desactivados por defecto en servidor. */}
                 <div style={{
                     display: 'inline-flex', alignItems: 'center', gap: '8px',
                     padding: '10px 20px', borderRadius: '40px', margin: '12px auto 8px',
@@ -90,7 +104,7 @@ export default function PricingPage() {
                     border: '1px solid rgba(16,185,129,0.4)', color: '#34d399',
                     fontSize: '0.9rem', fontWeight: 600
                 }}>
-                    🎉 <strong>Acceso completo GRATIS por 4 meses</strong> — No se requiere tarjeta
+                    🎉 <strong>Acceso gratuito hasta el {FREE_ACCESS_END_LABEL}</strong>
                 </div>
 
                 <p style={{ fontSize: '0.8rem', color: 'var(--text-tertiary)', marginTop: 8 }}>

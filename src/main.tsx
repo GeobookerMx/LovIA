@@ -6,8 +6,8 @@ import { Capacitor } from '@capacitor/core'
 // ── Observabilidad en Release ─────────────────────────────────────────────────
 // Captura errores JS no manejados para ayudar a diagnosticar rechazos de App Review.
 // En producción estos van a consola nativa (visible con Xcode → Devices & Simulators).
-window.addEventListener('unhandledrejection', (event) => {
-  console.error('[LovIA] Unhandled Promise Rejection:', event.reason)
+window.addEventListener('unhandledrejection', () => {
+  console.error('[LovIA] Ocurrió un error no controlado.')
 })
 
 // ── Deep Link Handler para OAuth Nativo ──────────────────────────────────────
@@ -22,45 +22,48 @@ window.addEventListener('unhandledrejection', (event) => {
 if (Capacitor.isNativePlatform()) {
   import('@capacitor/app').then(({ App: CapApp }) => {
     CapApp.addListener('appUrlOpen', async ({ url }) => {
-      console.log('[LovIA] appUrlOpen recibido:', url)
-
+      console.log('[LovIA] [DeepLink] Callback recibido.')
+ 
       try {
         const { supabase } = await import('./lib/supabase')
         const { Browser }  = await import('@capacitor/browser')
-
+ 
+        console.log('[LovIA] [DeepLink] Parseando URL...')
         const urlObj = new URL(url)
-
+        console.log('[LovIA] [DeepLink] Hostname:', urlObj.hostname, 'Pathname:', urlObj.pathname)
+ 
         // ── Helper: navegar a /home de forma segura con HashRouter ──────
         const navigateToHome = () => {
           setTimeout(() => {
-            // Solo si el usuario está en login/root; no redirigir si ya está en la app
             const hash = window.location.hash
+            console.log('[LovIA] [DeepLink] Verificando navegación tras autenticación.')
             const isAuthPage = !hash || hash === '#/' || hash.startsWith('#/login')
             if (isAuthPage) {
-              console.log('[LovIA] Navegando a /home post-OAuth...')
+              console.log('[LovIA] [DeepLink] Redirigiendo a #/home...')
               window.location.hash = '#/home'
+            } else {
+              console.log('[LovIA] [DeepLink] Navegación actual conservada.')
             }
-          }, 500) // Esperar a que onAuthStateChange actualice el store
+          }, 800) // Esperar a que onAuthStateChange actualice el store
         }
-
+ 
         // ── FLUJO 1: PKCE (iOS — SFSafariViewController) ──────────────
-        // El proveedor redirige a: lovia://auth/callback?code=XXXX
         const code = urlObj.searchParams.get('code')
         if (code) {
-          console.log('[LovIA] Código PKCE recibido — intercambiando por sesión...')
+          console.log('[LovIA] [DeepLink] Código PKCE detectado.')
           const { error } = await supabase.auth.exchangeCodeForSession(code)
-          await Browser.close()
+          console.log('[LovIA] [DeepLink] Intentando cerrar Browser...')
+          await Browser.close().catch(() => console.warn('[LovIA] No se pudo cerrar el navegador.'))
           if (error) {
-            console.error('[LovIA] exchangeCodeForSession error:', error.message)
+            console.error('[LovIA] [DeepLink] Falló el intercambio PKCE.')
           } else {
-            console.log('[LovIA] Sesión PKCE establecida ✅')
+            console.log('[LovIA] [DeepLink] Sesión PKCE establecida con éxito ✅')
             navigateToHome()
           }
           return
         }
-
+ 
         // ── FLUJO 2: Implicit / Legacy (#access_token=X&refresh_token=Y) ─
-        // Android: Chrome Custom Tab usa implicit flow (PKCE falla entre procesos)
         const fragmentIndex = url.indexOf('#')
         const queryIndex    = url.indexOf('?')
         const rawParams     = fragmentIndex !== -1
@@ -68,41 +71,41 @@ if (Capacitor.isNativePlatform()) {
           : queryIndex !== -1
             ? url.slice(queryIndex + 1)
             : ''
-
+ 
         if (!rawParams) {
-          console.warn('[LovIA] appUrlOpen: URL sin tokens ni código, ignorando.')
-          await Browser.close()
+          console.warn('[LovIA] [DeepLink] URL no contiene parámetros legibles. Ignorando.')
+          await Browser.close().catch(() => console.warn('[LovIA] No se pudo cerrar el navegador.'))
           return
         }
-
+ 
         const params        = new URLSearchParams(rawParams)
         const access_token  = params.get('access_token')
         const refresh_token = params.get('refresh_token')
-
+ 
         if (access_token && refresh_token) {
-          console.log('[LovIA] Tokens recibidos — iniciando sesión con setSession...')
+          console.log('[LovIA] [DeepLink] Tokens OAuth detectados. setSession iniciando...')
           const { error } = await supabase.auth.setSession({ access_token, refresh_token })
-          await Browser.close()
+          await Browser.close().catch(() => console.warn('[LovIA] No se pudo cerrar el navegador.'))
           if (error) {
-            console.error('[LovIA] setSession error:', error.message)
+            console.error('[LovIA] [DeepLink] Falló la sesión OAuth.')
           } else {
-            console.log('[LovIA] Sesión (implicit) establecida ✅')
+            console.log('[LovIA] [DeepLink] Sesión OAuth establecida con éxito ✅')
             navigateToHome()
           }
         } else {
           const errorDesc = params.get('error_description') || params.get('error')
           if (errorDesc) {
-            console.warn('[LovIA] OAuth regresó con error:', errorDesc)
+            console.warn('[LovIA] [DeepLink] OAuth regresó con error del proveedor.')
           }
-          await Browser.close()
+          await Browser.close().catch(() => console.warn('[LovIA] No se pudo cerrar el navegador.'))
         }
-      } catch (err) {
-        console.error('[LovIA] Error en appUrlOpen handler:', err)
+      } catch {
+        console.error('[LovIA] [DeepLink] No se pudo procesar el callback.')
       }
     })
-    console.log('[LovIA] appUrlOpen listener registrado ✅')
-  }).catch((err) => {
-    console.error('[LovIA] No se pudo cargar @capacitor/app:', err)
+    console.log('[LovIA] appUrlOpen listener registrado con logs enriquecidos ✅')
+  }).catch(() => {
+    console.error('[LovIA] No se pudo cargar el controlador de enlaces.')
   })
 }
 

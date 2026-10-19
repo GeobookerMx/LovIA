@@ -35,11 +35,11 @@ export const useSettingsStore = create<SettingsState>()(
     persist(
         (set) => ({
             // Defaults
-            pushEnabled: true,
-            weeklyEmail: true,
-            sparkReminder: true,
+            pushEnabled: false,
+            weeklyEmail: false,
+            sparkReminder: false,
             profileVisible: true,
-            anonymousData: true,
+            anonymousData: false,
             theme: 'dark',
             language: 'es',
 
@@ -50,6 +50,14 @@ export const useSettingsStore = create<SettingsState>()(
         }),
         {
             name: 'lovia-settings',
+            version: 1,
+            migrate: (persisted) => ({
+                ...(persisted as SettingsState),
+                pushEnabled: false,
+                weeklyEmail: false,
+                sparkReminder: false,
+                anonymousData: false,
+            }),
         }
     )
 )

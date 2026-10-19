@@ -4,10 +4,9 @@ import { supabase } from '../../lib/supabase'
 // Esto evita que el 301 redirect de lovia.com.mx → www.lovia.com.mx
 // destruya el token OAuth (el hash fragment se pierde en redirects).
 const getOAuthRedirectUrl = (path = '/auth/callback') => {
-  if (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1') {
-    return `${window.location.origin}${path}`
-  }
-  return `https://www.lovia.com.mx${path}`
+  const host = window.location.hostname
+  if (host === 'lovia.com.mx' || host === 'www.lovia.com.mx') return `https://www.lovia.com.mx${path}`
+  return `${window.location.origin}${path}`
 }
 
 export async function signInWithGoogle() {

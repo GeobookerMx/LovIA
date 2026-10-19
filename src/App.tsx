@@ -6,6 +6,7 @@ import { useAuthStore } from './stores/authStore'
 import { Loader2 } from 'lucide-react'
 import ErrorBoundary from './components/shared/ErrorBoundary'
 import OfflineBanner from './components/shared/OfflineBanner'
+import SeasonalBanner from './components/shared/SeasonalBanner'
 
 // ─── Eagerly loaded (critical path) ───
 import ProtectedRoute from './components/auth/ProtectedRoute'
@@ -16,6 +17,7 @@ import Register from './features/auth/Register'
 import Home from './features/user-dashboard/Home'
 import GuideChatbot from './features/guide/GuideChatbot'
 const AuthCallbackPage = lazy(() => import('./features/auth/AuthCallbackPage'))
+const RecoverAccount = lazy(() => import('./features/auth/RecoverAccount'))
 const PrivacyPolicyPage = lazy(() => import('./features/auth/PrivacyPolicyPage'))
 import './index.css'
 
@@ -35,6 +37,7 @@ const AttachmentQuiz = lazy(() => import('./features/evaluations/AttachmentQuiz'
 const BigFiveQuiz = lazy(() => import('./features/evaluations/BigFiveQuiz'))
 const ValuesSelector = lazy(() => import('./features/evaluations/ValuesSelector'))
 const RadarMap = lazy(() => import('./features/user-dashboard/RadarMap'))
+const SafeRadarGate = lazy(() => import('./features/user-dashboard/SafeRadarGate'))
 
 // ─── Lazy loaded: Profile & Charts ───
 const ProfilePage = lazy(() => import('./features/user-dashboard/ProfilePage'))
@@ -148,6 +151,8 @@ function AppRoutes() {
 
   return (
     <ErrorBoundary>
+      {import.meta.env.VITE_APP_ENV === 'staging' && <div role="status" style={{ background: '#713f12', color: '#fff', textAlign: 'center', padding: '0.4rem', fontWeight: 700 }}>LovIA · ENTORNO DE PRUEBAS</div>}
+      <SeasonalBanner />
       <Suspense fallback={<LoadingFallback />}>
         <Routes>
           {/* Public — sin autenticación requerida */}
@@ -155,6 +160,7 @@ function AppRoutes() {
           <Route path="/login" element={<Login />} />
           <Route path="/register" element={<Register />} />
           <Route path="/auth/callback" element={<AuthCallbackPage />} />
+          <Route path="/recover" element={<RecoverAccount />} />
           {/* Política de Privacidad pública — requerida por Google Play y App Store */}
           <Route path="/privacy" element={<PrivacyPolicyPage />} />
           <Route path="/privacy-policy" element={<PrivacyPolicyPage />} />
@@ -170,7 +176,7 @@ function AppRoutes() {
             {/* User Dashboard (with tab bar) */}
             <Route element={<UserLayout />}>
               <Route path="/home" element={<Home />} />
-              <Route path="/radar" element={<RadarMap />} />
+              <Route path="/radar" element={import.meta.env.VITE_ENABLE_RADAR === 'true' ? <RadarMap /> : <SafeRadarGate />} />
               <Route path="/matches" element={<MatchesList />} />
               <Route path="/matches/:id" element={<MatchDetail />} />
               <Route path="/matches/:id/date-readiness" element={<DateReadinessCheck />} />
@@ -249,6 +255,11 @@ function App() {
     <QueryClientProvider client={queryClient}>
       <Router>
         <OfflineBanner />
+        {import.meta.env.VITE_APP_ENV !== 'production' && (
+          <div role="status" style={{ position: 'fixed', top: 0, right: 0, zIndex: 10000, padding: '4px 10px', background: '#aa5b00', color: '#fff', fontSize: 12 }}>
+            Entorno de pruebas: {import.meta.env.VITE_APP_ENV}
+          </div>
+        )}
         <AppRoutes />
       </Router>
     </QueryClientProvider>

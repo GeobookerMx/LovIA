@@ -21,14 +21,10 @@ import { isNative } from './platform'
 // ── URL Helpers ──────────────────────────────────────────────────────────────
 
 const getWebRedirectUrl = (path = '/auth/callback') => {
-  if (
-    window.location.hostname === 'localhost' ||
-    window.location.hostname === '127.0.0.1'
-  ) {
-    return `${window.location.origin}${path}`
-  }
-  // Siempre www para evitar que el 301 redirect destruya el token OAuth
-  return `https://www.lovia.com.mx${path}`
+  const host = window.location.hostname
+  // The production apex redirects to www. Staging must stay on its own origin.
+  if (host === 'lovia.com.mx' || host === 'www.lovia.com.mx') return `https://www.lovia.com.mx${path}`
+  return `${window.location.origin}${path}`
 }
 
 // Deep link para app nativa (se configura en Xcode y AndroidManifest)
@@ -75,20 +71,47 @@ export async function signInWithGoogle(): Promise<void> {
 
 export async function signInWithApple(): Promise<void> {
   if (isNative()) {
-    // Mismo patrón: URL interno en SFSafariViewController.
-    // Para Fase 2 se puede migrar a @capacitor-community/apple-sign-in
-    // para un flujo completamente nativo (sin browser), pero Supabase OAuth
-    // ya cumple los requisitos de Apple App Review.
-    const { data, error } = await supabase.auth.signInWithOAuth({
-      provider: 'apple',
-      options: {
-        redirectTo: NATIVE_REDIRECT,
-        skipBrowserRedirect: true,
-      },
-    })
-    if (error) throw error
-    if (data?.url) {
-      await openBrowserNative(data.url)
+    try {
+      const { SignInWithApple } = await import('@capacitor-community/apple-sign-in')
+      
+      // 1. Generar un nonce aleatorio seguro
+      const rawNonce = Array.from(window.crypto.getRandomValues(new Uint8Array(32)))
+        .map(b => b.toString(16).padStart(2, '0')).join('')
+      
+      // 2. Generar el hash SHA-256 del nonce (requerido para verificación de Apple y Supabase)
+      const msgBuffer = new TextEncoder().encode(rawNonce)
+      const hashBuffer = await window.crypto.subtle.digest('SHA-256', msgBuffer)
+      const hashArray = Array.from(new Uint8Array(hashBuffer))
+      const hashedNonce = hashArray.map(b => b.toString(16).padStart(2, '0')).join('')
+
+
+      const options = {
+        clientId: 'com.geobooker.lovia', // Bundle ID de la app iOS
+        redirectURI: 'https://www.lovia.com.mx/auth/callback',
+        scopes: 'email name',
+        nonce: hashedNonce,
+      }
+
+      console.log('[Apple Sign In] Iniciando flujo nativo...')
+      const result = await SignInWithApple.authorize(options)
+      
+      const { identityToken } = result.response
+      if (!identityToken) {
+        throw new Error('No se recibió identityToken del proveedor de Apple')
+      }
+
+      console.log('[Apple Sign In] Intercambiando idToken con Supabase...')
+      const { error } = await supabase.auth.signInWithIdToken({
+        provider: 'apple',
+        token: identityToken,
+        nonce: rawNonce, // Enviamos el nonce original (sin hashear) a Supabase
+      })
+
+      if (error) throw error
+      console.log('[Apple Sign In] Sesión nativa establecida.')
+    } catch (err: any) {
+      console.error('[Apple Sign In] Error en el flujo nativo.')
+      throw err
     }
   } else {
     // Modo web: flujo normal
@@ -99,3 +122,4 @@ export async function signInWithApple(): Promise<void> {
     if (error) throw error
   }
 }
+

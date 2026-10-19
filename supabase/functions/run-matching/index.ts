@@ -17,13 +17,39 @@ function getDistanceInKm(lat1: number, lon1: number, lat2: number, lon2: number)
     return R * c
 }
 
-const supabaseUrl = Deno.env.get('SUPABASE_URL') || ''
-const supabaseKey = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY') || ''
-const supabase = createClient(supabaseUrl, supabaseKey)
+let runInProgress = false
+
+async function sameSecret(received: string, expected: string): Promise<boolean> {
+    const encode = (value: string) => new TextEncoder().encode(value)
+    const [a, b] = await Promise.all([
+        crypto.subtle.digest('SHA-256', encode(received)),
+        crypto.subtle.digest('SHA-256', encode(expected)),
+    ])
+    const left = new Uint8Array(a)
+    const right = new Uint8Array(b)
+    let difference = 0
+    for (let i = 0; i < left.length; i++) difference |= left[i] ^ right[i]
+    return difference === 0
+}
 
 // ── LovIA Matching Engine V2 (Readiness & Saftey First) ──
 Deno.serve(async (req) => {
+    if (req.method !== 'POST') return new Response('Method not allowed', { status: 405 })
+    const jobSecret = Deno.env.get('LOVIA_MATCHING_JOB_SECRET')
+    const supabaseUrl = Deno.env.get('SUPABASE_URL')
+    const supabaseKey = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')
+    if (Deno.env.get('LOVIA_MATCHING_ENABLED') !== 'true' || !jobSecret || jobSecret.length < 32 || !supabaseUrl || !supabaseKey) {
+        return new Response('Matching job unavailable', { status: 503 })
+    }
+    if (!await sameSecret(req.headers.get('X-LovIA-Job-Secret') || '', jobSecret)) {
+        return new Response('Unauthorized', { status: 401 })
+    }
+    // This prevents concurrent runs in one isolate. A database lease is required before enabling
+    // multiple workers or deploying the scheduled job in production.
+    if (runInProgress) return new Response('Matching job already running', { status: 409 })
+    runInProgress = true
     try {
+        const supabase = createClient(supabaseUrl, supabaseKey)
         console.log("Iniciando Motor de Matching V2 (Readiness-First)...")
 
         // 1. Fetch only users who have COMPLETE onboarding AND are active AND have high Readiness
@@ -42,6 +68,7 @@ Deno.serve(async (req) => {
             .eq('onboarding_completed', true)
 
         if (fetchError) throw fetchError
+        if ((candidates?.length || 0) > 500) throw new Error('Candidate limit exceeded')
 
         // 2. Filter out anyone paused or needing support (Readiness Gate)
         const activeCandidates = candidates?.filter(c =>
@@ -111,6 +138,8 @@ Deno.serve(async (req) => {
             }
         }
 
+        if (newMatches.length > 1000) throw new Error('Match limit exceeded')
+
         // 4. Batch Insert Matches (Ignoring conflicts to avoid duplicates)
         if (newMatches.length > 0) {
             console.log(`Insertando ${newMatches.length} posibles matches...`)
@@ -130,7 +159,9 @@ Deno.serve(async (req) => {
         })
 
     } catch (err: any) {
-        console.error("Match Engine Error:", err)
-        return new Response(JSON.stringify({ error: err.message }), { status: 500 })
+        console.error('Match Engine Error')
+        return new Response(JSON.stringify({ error: 'Matching job failed' }), { status: 500 })
+    } finally {
+        runInProgress = false
     }
 })

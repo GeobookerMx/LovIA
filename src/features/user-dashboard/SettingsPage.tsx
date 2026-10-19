@@ -61,6 +61,7 @@ export default function SettingsPage() {
             {/* Notifications */}
             <div className="settings-section">
                 <div className="settings-section__title">🔔 Notificaciones</div>
+                <p className="settings-item__desc">Estas preferencias se guardan en este dispositivo. El envío todavía requiere sincronización con el servidor.</p>
 
                 <ToggleItem
                     icon={<Bell size={18} />}
@@ -89,17 +90,19 @@ export default function SettingsPage() {
             <div className="settings-section">
                 <div className="settings-section__title">🔒 Privacidad</div>
 
-                <ToggleItem
-                    icon={<Eye size={18} />}
-                    label="Perfil visible en matching"
-                    desc="Si desactivas, no aparecerás en el pool"
-                    active={settings.profileVisible}
-                    onToggle={() => settings.toggle('profileVisible')}
-                />
+                <div className="settings-item glass" role="status">
+                    <div className="settings-item__left">
+                        <Eye size={18} className="settings-item__icon" />
+                        <div>
+                            <div className="settings-item__label">Visibilidad del perfil</div>
+                            <div className="settings-item__desc">El control de visibilidad requiere verificación en el servidor y aún no está disponible aquí. Contacta a soporte si necesitas ocultar tu perfil.</div>
+                        </div>
+                    </div>
+                </div>
                 <ToggleItem
                     icon={<Shield size={18} />}
-                    label="Compartir datos anónimos"
-                    desc="Contribuye a mejorar el algoritmo (datos no identificables)"
+                    label="Enviar métricas de uso"
+                    desc="Eventos básicos asociados a tu cuenta, sin contenido íntimo. Se guarda en este dispositivo y está desactivado por defecto."
                     active={settings.anonymousData}
                     onToggle={() => settings.toggle('anonymousData')}
                 />
@@ -249,7 +252,7 @@ function ToggleItem({
                     <div className="settings-item__desc">{desc}</div>
                 </div>
             </div>
-            <button className={`toggle ${active ? 'toggle--active' : ''}`} onClick={onToggle}>
+            <button className={`toggle ${active ? 'toggle--active' : ''}`} onClick={onToggle} aria-label={label} aria-pressed={active}>
                 <div className="toggle__knob" />
             </button>
         </div>

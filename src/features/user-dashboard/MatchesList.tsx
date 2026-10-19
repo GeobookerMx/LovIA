@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
-import { Heart, Search, Loader2 } from 'lucide-react'
+import { Heart, Loader2 } from 'lucide-react'
 import { supabase } from '../../lib/supabase'
 import { useAuthStore } from '../../stores/authStore'
 import './MatchesList.css'
@@ -97,8 +97,11 @@ export default function MatchesList() {
     }
 
     // ✅ Apple 4.3(b): Gate de readiness — diferenciador clave de LovIA
-    // Si no completó el onboarding, mostrar pantalla explicativa en lugar de lista vacía
-    if (!profile?.onboarding_completed) {
+    // Si no completó el onboarding o su readiness_score es < 40, mostrar pantalla explicativa en lugar de lista de matches
+    const readiness = profile?.readiness_score ?? 0
+    const isUnlocked = readiness >= 40
+
+    if (!profile?.onboarding_completed || !isUnlocked) {
         return (
             <div className="matches-page">
                 <header className="matches-page__header">
@@ -113,16 +116,34 @@ export default function MatchesList() {
                     </div>
                     <h2 style={{ marginBottom: 8 }}>Desbloquea el Descubrimiento</h2>
                     <p style={{ color: 'var(--text-secondary)', marginBottom: 24, lineHeight: 1.6 }}>
-                        LovIA te conecta con personas según tu <strong>momento de vida y readiness relacional</strong>.
-                        Antes de ver matches, necesitas completar estos pasos:
+                        LovIA te conecta con personas según tu <strong>momento de vida y preparación (Readiness) relacional</strong>.
+                        Antes de ver matches, necesitas completar los siguientes avances mínimos:
                     </p>
 
                     {/* Pasos requeridos */}
                     <div style={{ display: 'flex', flexDirection: 'column', gap: 12, marginBottom: 28, textAlign: 'left' }}>
                         {[
-                            { icon: '📋', title: 'Mapa de Momento de Vida', desc: 'Completa el onboarding inicial (5-7 min)', done: !!profile?.onboarding_completed, action: '/onboarding' },
-                            { icon: '🧠', title: 'Al menos 1 Evaluación', desc: 'Regulación emocional, Stroop o Tolerancia', done: false, action: '/evaluations/regulation' },
-                            { icon: '🤳', title: 'Foto de perfil', desc: 'Agrega tu selfie para generar confianza', done: !!profile?.avatar_url, action: '/profile' },
+                            { 
+                                icon: '📋', 
+                                title: 'Mapa de Momento de Vida', 
+                                desc: 'Completa el onboarding inicial (5-7 min)', 
+                                done: !!profile?.onboarding_completed, 
+                                action: '/onboarding' 
+                            },
+                            { 
+                                icon: '🧠', 
+                                title: 'Puntaje de Preparación (Readiness)', 
+                                desc: `Completa evaluaciones psicológicas y cognitivas (Necesitas 40+ pts. Tienes: ${readiness}/100)`, 
+                                done: isUnlocked, 
+                                action: '/modules' 
+                            },
+                            { 
+                                icon: '🤳', 
+                                title: 'Foto de perfil', 
+                                desc: 'Agrega tu selfie para generar confianza', 
+                                done: !!profile?.avatar_url, 
+                                action: '/profile' 
+                            },
                         ].map((step, i) => (
                             <div key={i}
                                 onClick={() => navigate(step.action)}
@@ -165,33 +186,6 @@ export default function MatchesList() {
                     <h1>Descubrimiento</h1>
                     <p className="matches-page__subtitle">Basado en tu momento de vida</p>
                 </div>
-                {/* Trigger Manual Matching para pruebas */}
-                <button 
-                    className="icon-btn glass" 
-                    title="Buscar nuevos matches (Solo dev)"
-                    onClick={async () => {
-                        setLoading(true)
-                        await supabase.functions.invoke('run-matching')
-                        // ✅ Re-fetch en lugar de window.location.reload() que rompe Capacitor
-                        const { data, error } = await supabase
-                            .from('matches')
-                            .select(`id, current_level, compatibility_score,
-                                user_a:profiles!matches_user_a_id_fkey(id, alias, age, city, avatar_url, visibility_mode),
-                                user_b:profiles!matches_user_b_id_fkey(id, alias, age, city, avatar_url, visibility_mode)`)
-                            .or(`user_a_id.eq.${user?.id},user_b_id.eq.${user?.id}`)
-                            .eq('status', 'active')
-                        if (!error && data) {
-                            const formatted: MatchData[] = data.map((m: any) => {
-                                const other = m.user_a.id === user?.id ? m.user_b : m.user_a
-                                return { match_id: m.id, target_user_id: other.id, alias: other.alias || 'Anónimo', age: other.age, city: other.city || '', avatar_url: other.avatar_url || '', visibility_mode: other.visibility_mode || 'gradual', compatibility_score: m.compatibility_score, current_level: m.current_level }
-                            })
-                            setMatches(formatted.sort((a, b) => b.compatibility_score - a.compatibility_score))
-                        }
-                        setLoading(false)
-                    }}
-                >
-                    <Search size={18}/>
-                </button>
             </header>
 
             {matches.length === 0 ? (

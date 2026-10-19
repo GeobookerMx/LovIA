@@ -1,40 +1,21 @@
-const { createClient } = require('@supabase/supabase-js');
-const fs = require('fs');
-const dotenv = require('dotenv');
+// Repairs only the currently authenticated fictional test account.
+const { reviewerClient } = require('./scripts/reviewer-test-client.cjs')
 
-const env = dotenv.parse(fs.readFileSync('.env'));
-const url = env.VITE_SUPABASE_URL;
-const key = env.VITE_SUPABASE_PUBLISHABLE_KEY?.replace(/['"`]+/g, '');
+async function fixDemo() {
+  const { client, email, password } = reviewerClient()
+  const { data, error: authError } = await client.auth.signInWithPassword({ email, password })
+  if (authError || !data.user) throw new Error('No se pudo iniciar sesión con la cuenta ficticia.')
 
-const supabase = createClient(url, key);
-
-async function fixProfile() {
-  console.log('Verificando perfil en LOVIA...');
-  const userId = '993291cf-24dc-4686-8dee-77131932be27'; // ID del demo
-  
-  // Como usamos la clave pública, iniciaremos sesión primero para tener permisos de insertar/actualizar su propio perfil
-  const { data: authData, error: authError } = await supabase.auth.signInWithPassword({
-    email: 'demo@lovia.com.mx',
-    password: 'Demo1234'
-  });
-  
-  if (authError) {
-    console.log('Error auth:', authError.message);
-    return;
-  }
-  
-  // Insertar/Upsert el perfil
-  const { data, error } = await supabase.from('profiles').upsert({
-    id: userId,
-    alias: 'Demo Apple',
-    email: 'demo@lovia.com.mx',
+  const { error } = await client.from('profiles').upsert({
+    id: data.user.id,
+    alias: 'Revisor LovIA',
     onboarding_completed: true,
-    tier: 'free',
-    visibility_mode: 'classic'
-  });
-  
-  if (error) console.log('❌ Error al crear perfil:', error);
-  else console.log('✅ Perfil de LovIA reparado y listo!');
+  })
+  if (error) throw new Error('No se pudo actualizar el perfil ficticio.')
+  console.log('Perfil ficticio actualizado en el proyecto de pruebas.')
 }
 
-fixProfile();
+fixDemo().catch((error) => {
+  console.error(error.message)
+  process.exitCode = 1
+})

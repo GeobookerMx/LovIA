@@ -15,6 +15,7 @@ dist-ssr
 # Environment variables (protect API keys)
 .env*
 !.env.example
+!.env.staging.example
 
 # Editor directories and files
 .vscode/*
@@ -51,7 +52,7 @@ private/
 # Env files
 .env
 .env.local
-# .env.production → NO ignorar: contiene solo VITE_ vars públicas necesarias para el build de iOS en Mac
+# .env.production también está ignorado; el build requiere variables explícitas por entorno.
 .env.development
 
 # Build / cache
@@ -59,6 +60,7 @@ node_modules/
 dist/
 .netlify/
 coverage/
+.local-resguardos/
 
 # Android / iOS signing keys — NUNCA subir a Git
 keys-NO-SUBIR/

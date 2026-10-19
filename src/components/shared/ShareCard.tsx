@@ -7,7 +7,7 @@ interface ShareCardProps {
 }
 
 const SHARE_URL = 'https://lovia.com.mx'
-const SHARE_TEXT = '🧠❤️ Descubrí LovIA! — La primera app de relaciones basada en ciencia y psicología evolutiva. ¡¡Acceso GRATIS por 4 meses!! Conéctate desde quien eres.'
+const SHARE_TEXT = '❤️ Descubrí LovIA! Conecta desde quien eres. Acceso gratis hasta el 31 de enero de 2027, sin tarjeta.'
 const SHARE_HASHTAGS = '#LovIA #PsicologiaEvolutiva #RelacionesDeParejas'
 
 const WA_TEXT = encodeURIComponent(`${SHARE_TEXT}\n\n${SHARE_URL}\n\n${SHARE_HASHTAGS}`)
@@ -71,7 +71,7 @@ export default function ShareCard({ onClose }: ShareCardProps) {
                             <span className="share-card-visual__title">LovIA!</span>
                         </div>
                         <p className="share-card-visual__tagline">Conecta desde quien eres</p>
-                        <div className="share-card-visual__badge">🎉 4 meses GRATIS</div>
+                        <div className="share-card-visual__badge">🎉 Gratis hasta enero de 2027</div>
                         <p className="share-card-visual__url">lovia.com.mx</p>
                     </div>
                 </div>

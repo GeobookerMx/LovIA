@@ -1,0 +1,31 @@
+.seasonal-banner {
+  position: relative;
+  z-index: 20;
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  min-height: 4.25rem;
+  padding: 0.5rem 1rem;
+  color: #fff7ed;
+  background: linear-gradient(110deg, #542188, #6b21a8 55%, #9a3412);
+  border-bottom: 2px solid #fb923c;
+}
+.seasonal-banner__icon { width: 2.5rem; height: 2.5rem; flex: none; }
+.seasonal-banner__copy { display: flex; flex-direction: column; gap: 0.15rem; line-height: 1.3; }
+.seasonal-banner__copy strong { font-size: 0.95rem; }
+.seasonal-banner__copy span { font-size: 0.85rem; }
+.seasonal-banner__close {
+  margin-left: auto;
+  flex: none;
+  width: 2.75rem;
+  height: 2.75rem;
+  border: 1px solid #fff7ed;
+  border-radius: 0.6rem;
+  color: #fff7ed;
+  background: transparent;
+  cursor: pointer;
+  font-size: 1.5rem;
+  line-height: 1;
+}
+.seasonal-banner__close:hover, .seasonal-banner__close:focus-visible { background: #ffffff26; outline: 2px solid #fff7ed; outline-offset: 2px; }
+@media (max-width: 420px) { .seasonal-banner__copy span { font-size: 0.76rem; } }

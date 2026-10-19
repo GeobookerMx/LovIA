@@ -1,5 +1,11 @@
 const fs   = require('fs')
 const path = require('path')
+const expectedRef = process.env.VITE_SUPABASE_EXPECTED_REF
+
+if (!expectedRef || !/^[a-z0-9]{20}$/.test(expectedRef)) {
+  console.error('ERROR: indica VITE_SUPABASE_EXPECTED_REF para verificar el artefacto.')
+  process.exit(1)
+}
 
 const assetsDir = path.join(__dirname, '..', 'dist', 'assets')
 
@@ -17,12 +23,12 @@ if (!files.length) {
 
 const found = files.some(f => {
   const content = fs.readFileSync(path.join(assetsDir, f), 'utf8')
-  return content.includes('nbpidjpkanwynlhdxowx')
+  return content.includes(expectedRef)
 })
 
 if (found) {
-  console.log('OK: Supabase URL embedida correctamente en el build.')
+  console.log('OK: el build contiene la referencia Supabase esperada.')
 } else {
-  console.error('ERROR: Supabase URL NO esta en el bundle. Verifica que .env tenga VITE_SUPABASE_URL correcto.')
+  console.error('ERROR: el build no contiene la referencia Supabase esperada.')
   process.exit(1)
 }

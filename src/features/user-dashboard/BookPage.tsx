@@ -17,13 +17,13 @@ import ShareCard from '../../components/shared/ShareCard'
 import './BookPage.css'
 
 // ─── URL del libro en Supabase Storage ───────────────────────────────────────
-const BOOK_PDF_URL = 'https://nbpidjpkanwynlhdxowx.supabase.co/storage/v1/object/public/books/Evolucion%20de%20las%20Relaciones%20de%20Pareja%20PDF.pdf'
+const BOOK_PDF_URL = `${import.meta.env.VITE_SUPABASE_URL}/storage/v1/object/public/books/Evolucion%20de%20las%20Relaciones%20de%20Pareja%20PDF.pdf`
 const BOOK_FILENAME = 'Evolucion-de-las-Relaciones-de-Pareja-JuanPablo-Pena.pdf'
 // ─────────────────────────────────────────────────────────────────────────────
 
 
-// Fecha de fin del período gratuito (6 meses desde lanzamiento)
-const FREE_UNTIL = new Date('2026-10-20')
+// 01/02/2027 00:00 en Ciudad de México. El acceso termina después del 31/01 inclusive.
+const FREE_UNTIL = new Date('2027-02-01T06:00:00.000Z')
 
 interface DownloadLog {
     downloaded: boolean

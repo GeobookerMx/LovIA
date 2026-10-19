@@ -1,128 +1,121 @@
+import { useEffect, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
-import { ArrowLeft, Lock, CheckCircle, Clock, BookOpen, Brain, Heart, MessageCircle, Shield, Flame } from 'lucide-react'
+import { ArrowLeft, Lock, CheckCircle, Clock, BookOpen, Brain, Heart, MessageCircle, Shield, Flame, Loader2 } from 'lucide-react'
+import { supabase } from '../../lib/supabase'
+import { useAuthStore } from '../../stores/authStore'
 import './ModulesPages.css'
 
-/**
- * LovIA! — Catálogo de Módulos de Mejora Personal
- *
- * Los módulos están diseñados con base en investigación científica para
- * desarrollar competencias relacionales específicas. Cada módulo incluye
- * autor/fuente, duración estimada, y beneficio medible.
- *
- * Sources:
- * - IE: Salovey & Mayer (1990), Brackett et al. (2005)
- * - CNV: Rosenberg (2015), Gottman (1999)
- * - Regulación: Gross & John (2003)
- * - Apego: Bowlby (1969), Hazan & Shaver (1987)
- * - Sexualidad: Perel (2006), Masters & Johnson
- */
-
-export interface Module {
+export interface DBModule {
     id: string
     title: string
     subtitle: string
-    icon: React.ReactNode
+    icon_name: string
     color: string
     author: string
     duration: string
-    lessons: number
     benefit: string
-    locked: boolean
-    completed: boolean
-    progress: number
-    requiredTier: 'free' | 'explorador' | 'constructor' | 'visionario'
+    required_tier: string
+    science_basis: string
+    key_research: string
 }
 
-const modules: Module[] = [
-    {
-        id: 'ie',
-        title: 'Inteligencia Emocional',
-        subtitle: 'Reconoce, comprende y gestiona tus emociones',
-        icon: <Brain size={24} />,
-        color: 'var(--line-love)',
-        author: 'Salovey & Mayer (1990)',
-        duration: '3 semanas',
-        lessons: 8,
-        benefit: '+36% satisfacción relacional (Brackett et al., 2005)',
-        locked: false,
-        completed: false,
-        progress: 37,
-        requiredTier: 'free',
-    },
-    {
-        id: 'cnv',
-        title: 'Comunicación No Violenta',
-        subtitle: 'Expresa necesidades sin atacar ni retraerte',
-        icon: <MessageCircle size={24} />,
-        color: 'var(--line-sex)',
-        author: 'Rosenberg (2015) + Gottman (1999)',
-        duration: '4 semanas',
-        lessons: 10,
-        benefit: 'Reduce 94% de los patrones que predicen ruptura',
-        locked: false,
-        completed: false,
-        progress: 0,
-        requiredTier: 'free',
-    },
-    {
-        id: 'regulation',
-        title: 'Regulación Emocional',
-        subtitle: 'Estrategias para manejar emociones intensas',
-        icon: <Shield size={24} />,
-        color: 'var(--line-realization)',
-        author: 'Gross & John (2003)',
-        duration: '2 semanas',
-        lessons: 6,
-        benefit: 'Las personas con alta RE tienen relaciones 40% más estables',
-        locked: false,
-        completed: true,
-        progress: 100,
-        requiredTier: 'explorador',
-    },
-    {
-        id: 'attachment',
-        title: 'Estilos de Apego',
-        subtitle: 'Comprende tu patrón de vinculación',
-        icon: <Heart size={24} />,
-        color: 'var(--love-warm)',
-        author: 'Bowlby (1969) + Hazan & Shaver (1987)',
-        duration: '3 semanas',
-        lessons: 7,
-        benefit: 'El apego seguro predice 50% más estabilidad (Mikulincer, 2003)',
-        locked: true,
-        completed: false,
-        progress: 0,
-        requiredTier: 'constructor',
-    },
-    {
-        id: 'sexuality',
-        title: 'Sexualidad Consciente',
-        subtitle: 'Intimidad, deseo y comunicación sexual',
-        icon: <Flame size={24} />,
-        color: 'var(--love-coral)',
-        author: 'Perel (2006) + Masters & Johnson',
-        duration: '3 semanas',
-        lessons: 8,
-        benefit: 'Parejas que hablan de deseo reportan 60% más satisfacción',
-        locked: true,
-        completed: false,
-        progress: 0,
-        requiredTier: 'visionario',
-    },
-]
+interface ModuleWithProgress extends DBModule {
+    lessonsCount: number
+    completed: boolean
+    progress: number
+    locked: boolean
+}
 
-const tierLabels: Record<string, string> = {
-    free: 'Gratis',
-    explorador: 'Explorador',
-    constructor: 'Constructor',
-    visionario: 'Visionario',
+const ICON_MAP: Record<string, React.ReactNode> = {
+    'brain': <Brain size={24} />,
+    'message-circle': <MessageCircle size={24} />,
+    'shield': <Shield size={24} />,
+    'heart': <Heart size={24} />,
+    'flame': <Flame size={24} />,
 }
 
 export default function ModulesList() {
     const navigate = useNavigate()
+    const { user, profile } = useAuthStore()
+    const [modules, setModules] = useState<ModuleWithProgress[]>([])
+    const [loading, setLoading] = useState(true)
+
+    useEffect(() => {
+        if (!user) return
+
+        async function fetchModulesAndProgress() {
+            setLoading(true)
+            try {
+                // 1. Obtener módulos de la BD
+                const { data: dbMods, error: modsError } = await supabase
+                    .from('growth_modules')
+                    .select('*')
+                    .order('order_index', { ascending: true })
+
+                if (modsError) throw modsError
+
+                // 2. Obtener lecciones de la BD para contar lecciones por módulo
+                const { data: dbLessons, error: lessonsError } = await supabase
+                    .from('growth_module_lessons')
+                    .select('id, module_id')
+
+                if (lessonsError) throw lessonsError
+
+                // 3. Obtener el progreso del usuario
+                const { data: userProgress, error: progressError } = await supabase
+                    .from('growth_progress')
+                    .select('lesson_id')
+                    .eq('user_id', user!.id)
+
+                if (progressError) throw progressError
+
+                const completedLessonIds = new Set(userProgress?.map(p => p.lesson_id) || [])
+
+                // 4. Mapear y calcular progreso
+                const mapped: ModuleWithProgress[] = (dbMods || []).map(mod => {
+                    const lessons = dbLessons?.filter(l => l.module_id === mod.id) || []
+                    const totalLessons = lessons.length
+                    
+                    const completedLessons = lessons.filter(l => completedLessonIds.has(l.id)).length
+                    const progress = totalLessons > 0 ? Math.round((completedLessons / totalLessons) * 100) : 0
+                    
+                    // Lógica de bloqueo según Readiness Score
+                    // ie, cnv y regulation son libres, attachment pide 40+, sexuality pide 60+
+                    const readiness = profile?.readiness_score ?? 0
+                    let locked = false
+                    if (mod.id === 'attachment' && readiness < 40) locked = true
+                    if (mod.id === 'sexuality' && readiness < 60) locked = true
+
+                    return {
+                        ...mod,
+                        lessonsCount: totalLessons,
+                        completed: progress === 100 && totalLessons > 0,
+                        progress,
+                        locked
+                    }
+                })
+
+                setModules(mapped)
+            } catch (err) {
+                console.error('[ModulesList] Error al cargar datos:', err)
+            } finally {
+                setLoading(false)
+            }
+        }
+
+        fetchModulesAndProgress()
+    }, [user, profile])
 
     const completedCount = modules.filter((m) => m.completed).length
     const inProgressCount = modules.filter((m) => m.progress > 0 && !m.completed).length
+
+    if (loading) {
+        return (
+            <div className="modules-page flex-center" style={{ minHeight: '60vh' }}>
+                <Loader2 className="animate-spin text-tertiary" size={32} />
+            </div>
+        )
+    }
 
     return (
         <div className="modules-page">
@@ -169,15 +162,15 @@ export default function ModulesList() {
                         disabled={mod.locked}
                     >
                         <div className="modules-page__card-icon" style={{ color: mod.color, background: `${mod.color}15` }}>
-                            {mod.locked ? <Lock size={24} /> : mod.completed ? <CheckCircle size={24} /> : mod.icon}
+                            {mod.locked ? <Lock size={24} /> : mod.completed ? <CheckCircle size={24} /> : (ICON_MAP[mod.icon_name] || <BookOpen size={24} />)}
                         </div>
 
                         <div className="modules-page__card-content">
                             <div className="modules-page__card-top">
                                 <h3>{mod.title}</h3>
                                 {mod.locked && (
-                                    <span className="modules-page__tier-badge">
-                                        {tierLabels[mod.requiredTier]}
+                                    <span className="modules-page__tier-badge" style={{ background: 'var(--love-rose)', color: 'white' }}>
+                                        Bloqueado
                                     </span>
                                 )}
                             </div>
@@ -185,7 +178,7 @@ export default function ModulesList() {
 
                             <div className="modules-page__card-meta">
                                 <span><Clock size={12} /> {mod.duration}</span>
-                                <span><BookOpen size={12} /> {mod.lessons} lecciones</span>
+                                <span><BookOpen size={12} /> {mod.lessonsCount} lecciones</span>
                             </div>
 
                             <div className="modules-page__card-author">
@@ -197,7 +190,7 @@ export default function ModulesList() {
                             </div>
 
                             {mod.progress > 0 && !mod.completed && (
-                                <div className="modules-page__progress-bar">
+                                <div className="modules-page__progress-bar" style={{ marginTop: '8px' }}>
                                     <div className="modules-page__progress-fill" style={{ width: `${mod.progress}%`, background: mod.color }} />
                                 </div>
                             )}

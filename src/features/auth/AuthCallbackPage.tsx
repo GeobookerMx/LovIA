@@ -92,8 +92,8 @@ export default function AuthCallbackPage() {
         console.log('[LovIA] AuthCallback: navegando a', destination)
         navigate(destination, { replace: true })
 
-      } catch (err: any) {
-        console.error('[LovIA] AuthCallback: error inesperado:', err)
+      } catch {
+        console.error('[LovIA] AuthCallback: error inesperado.')
         subscription.unsubscribe()
         setErrorMsg('Error inesperado. Por favor regresa e intenta de nuevo.')
       }

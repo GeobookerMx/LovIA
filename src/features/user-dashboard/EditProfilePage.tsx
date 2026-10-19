@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { ArrowLeft, Save, User, MapPin, AlignLeft } from 'lucide-react'
 import { useAuthStore } from '../../stores/authStore'
+import { trackEvent } from '../../lib/analytics'
 import './ProfilePages.css'
 
 export default function EditProfilePage() {
@@ -49,9 +50,11 @@ export default function EditProfilePage() {
 
         setIsSaving(false)
         if (!error) {
+            trackEvent('profile_saved')
             setSuccessMsg('¡Perfil actualizado con éxito!')
             setTimeout(() => navigate('/profile'), 1500)
         } else {
+            trackEvent('error_profile_save', { error })
             alert('Error al guardar: ' + error)
         }
     }

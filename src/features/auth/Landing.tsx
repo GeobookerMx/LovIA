@@ -34,12 +34,12 @@ export default function Landing() {
                         Conecta desde quien eres
                     </p>
                     <p className="landing__description">
-                        Descubre tu <strong>Frecuencia de Relación</strong> basada en ciencia,
-                        y conecta con personas en tu misma sintonía.
+                        Descubre herramientas para conocerte mejor y conectar con personas
+                        según intereses y preferencias recíprocas.
                     </p>
 
                     <div className="landing__free-banner">
-                        🎉 <strong>Acceso completo GRATIS por 4 meses</strong> — Sin tarjeta requerida
+                        🎉 <strong>Acceso completo gratis hasta el 31 de enero de 2027</strong> — Sin tarjeta requerida
                     </div>
 
                     <div className="landing__cta-group">
@@ -64,7 +64,7 @@ export default function Landing() {
                         <Heart size={24} color="var(--line-love)" />
                     </div>
                     <h3>3 Líneas de Análisis</h3>
-                    <p>Amor, Sexual y Realización — basado en la Teoría Triangular de Sternberg (1986).</p>
+                    <p>Amor, sexualidad y realización son temas de exploración de LovIA; conoce sus fuentes y límites.</p>
                 </div>
 
                 <div className="landing__feature glass">
@@ -72,7 +72,7 @@ export default function Landing() {
                         <Brain size={24} color="var(--line-sex)" />
                     </div>
                     <h3>27+ Factores</h3>
-                    <p>Inteligencia emocional, comunicación, valores — evaluados con instrumentos validados.</p>
+                    <p>Reflexiona sobre comunicación, valores y bienestar con actividades opcionales.</p>
                 </div>
 
                 <div className="landing__feature glass">
@@ -80,7 +80,7 @@ export default function Landing() {
                         <Shield size={24} color="var(--line-realization)" />
                     </div>
                     <h3>Seguridad Multi-Capa</h3>
-                    <p>5 niveles de verificación progresiva. Tu seguridad es nuestra arquitectura.</p>
+                    <p>Herramientas de reporte y bloqueo para cuidar tu experiencia.</p>
                 </div>
 
                 <div className="landing__feature glass">
@@ -88,7 +88,7 @@ export default function Landing() {
                         <Sparkles size={24} color="var(--success)" />
                     </div>
                     <h3>Mejora Continua</h3>
-                    <p>Cada área que trabajas mejora tu Frecuencia y abre nuevas conexiones.</p>
+                    <p>Aprende a tu ritmo sin que tus ejercicios condicionen el descubrimiento.</p>
                 </div>
             </section>
 
@@ -97,7 +97,7 @@ export default function Landing() {
                 <div className="landing__science-header animate-fade-in-up">
                     <BookOpen size={28} color="var(--love-warm)" />
                     <h2>Respaldado por <span className="text-gradient">Ciencia</span></h2>
-                    <p>Cada test, variable y algoritmo está fundamentado en investigación publicada y revisada por pares.</p>
+                    <p>Consulta las fuentes y los límites de cada herramienta antes de usarla.</p>
                 </div>
 
                 <div className="landing__science-counter glass-strong animate-fade-in-up">

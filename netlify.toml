@@ -2,6 +2,12 @@
   command = "npm run build"
   publish = "dist"
 
+[context.deploy-preview]
+  command = "npm run build:staging"
+
+[context.branch-deploy]
+  command = "npm run build:staging"
+
   # Variables de entorno para producción — se sobreescriben en el panel de Netlify
   # VITE_DEV_BYPASS DEBE ser "false" en producción
 

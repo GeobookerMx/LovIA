@@ -81,7 +81,7 @@ export default function AuthorPage() {
                         <BookOpen size={28} color="var(--warning)" />
                         <div>
                             <h4>Mi Libro</h4>
-                            <p style={{ fontSize: '0.75rem', color: 'var(--text-tertiary)' }}>Escritor y autor · Descarga gratis 6 meses</p>
+                            <p style={{ fontSize: '0.75rem', color: 'var(--text-tertiary)' }}>Escritor y autor · Descarga gratis hasta el 31 de enero de 2027</p>
                         </div>
                     </div>
                     <h3 className="author__book-title">"Evolución de las Relaciones de Pareja"</h3>
@@ -101,7 +101,7 @@ export default function AuthorPage() {
                         onClick={() => navigate('/book')}
                         style={{ marginTop: '14px' }}
                     >
-                        📖 Descargar libro — GRATIS por 6 meses
+                        📖 Descargar libro — Gratis hasta el 31 de enero de 2027
                     </button>
                 </div>
 
@@ -143,7 +143,7 @@ export default function AuthorPage() {
                         if (navigator.share) {
                             navigator.share({
                                 title: 'LovIA! — Relaciones basadas en ciencia',
-                                text: 'Descubrí esta app increíble de relaciones basada en psicología evolutiva. ¡Únete gratis 4 meses!',
+                                text: 'Descubrí LovIA: acceso gratis hasta el 31 de enero de 2027, sin tarjeta.',
                                 url: 'https://lovia.com.mx'
                             })
                         } else {

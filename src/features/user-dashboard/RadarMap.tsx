@@ -72,7 +72,23 @@ interface RadarProfile {
     alias: string
     last_lat: number
     last_lng: number
+    last_seen_at?: string
 }
+
+function getActivityStatus(lastSeenStr: string | undefined): string {
+    if (!lastSeenStr) return 'Activo recientemente'
+    const lastSeen = new Date(lastSeenStr)
+    const now = new Date()
+    const diffMs = now.getTime() - lastSeen.getTime()
+    const diffMins = Math.floor(diffMs / 60000)
+    const diffHours = Math.floor(diffMins / 60)
+    
+    if (diffMins < 5) return 'Activo ahora'
+    if (diffHours < 24) return 'Activo hoy'
+    if (diffHours < 72) return 'Activo recientemente'
+    return 'Activo hace unos días'
+}
+
 
 
 export default function RadarMap() {
@@ -175,7 +191,7 @@ export default function RadarMap() {
         async function fetchNearby() {
             const { data, error } = await supabase
                 .from('profiles')
-                .select('id, alias, last_lat, last_lng')
+                .select('id, alias, last_lat, last_lng, last_seen_at')
                 .neq('id', user!.id)
                 .not('last_lat', 'is', null)
                 .not('last_lng', 'is', null)
@@ -329,11 +345,57 @@ export default function RadarMap() {
                             <Popup>
                                 <div style={{ textAlign: 'center', padding: '4px 8px' }}>
                                     {discovery === 'preview' ? (
-                                        <><strong>Compatibilidad oculta 🔮</strong><br />
-                                        <span style={{ fontSize: '0.75rem', color: '#888' }}>Completa más evaluaciones para revelar</span></>
+                                        <>
+                                            <strong>Compatibilidad oculta 🔮</strong><br />
+                                            <span style={{ fontSize: '0.75rem', color: '#888' }}>Completa más evaluaciones para revelar</span>
+                                            {match.last_seen_at && (
+                                                <div style={{
+                                                    fontSize: '0.72rem',
+                                                    color: 'var(--text-tertiary)',
+                                                    marginTop: '6px',
+                                                    display: 'flex',
+                                                    alignItems: 'center',
+                                                    justifyContent: 'center',
+                                                    gap: '4px'
+                                                }}>
+                                                    <span style={{
+                                                        display: 'inline-block',
+                                                        width: '5px',
+                                                        height: '5px',
+                                                        borderRadius: '50%',
+                                                        backgroundColor: 'var(--text-tertiary)'
+                                                    }}></span>
+                                                    {getActivityStatus(match.last_seen_at)}
+                                                </div>
+                                            )}
+                                        </>
                                     ) : (
-                                        <><strong>Chispa Oculta 💫</strong><br />
-                                        <span style={{ fontSize: '0.8rem', color: '#666' }}>Alta compatibilidad · Ubicación protegida</span></>
+                                        <>
+                                            <strong>Chispa Oculta 💫</strong><br />
+                                            {match.last_seen_at && (
+                                                <div style={{
+                                                    fontSize: '0.75rem',
+                                                    color: '#10b981', // green activity color
+                                                    fontWeight: 'bold',
+                                                    marginTop: '4px',
+                                                    marginBottom: '4px',
+                                                    display: 'flex',
+                                                    alignItems: 'center',
+                                                    justifyContent: 'center',
+                                                    gap: '4px'
+                                                }}>
+                                                    <span style={{
+                                                        display: 'inline-block',
+                                                        width: '6px',
+                                                        height: '6px',
+                                                        borderRadius: '50%',
+                                                        backgroundColor: '#10b981'
+                                                    }}></span>
+                                                    {getActivityStatus(match.last_seen_at)}
+                                                </div>
+                                            )}
+                                            <span style={{ fontSize: '0.8rem', color: '#666' }}>Alta compatibilidad · Ubicación protegida</span>
+                                        </>
                                     )}
                                 </div>
                             </Popup>

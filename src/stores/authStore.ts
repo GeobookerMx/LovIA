@@ -146,17 +146,61 @@ export const useAuthStore = create<AuthState>((set, get) => ({
             const { data: { user } } = await supabase.auth.getUser()
             if (!user) return
 
-            const { data, error } = await supabase
+            let { data, error } = await supabase
                 .from('profiles')
                 .select('*')
                 .eq('id', user.id)
                 .maybeSingle()
 
-            if (!error && data) {
-                set({ profile: data as PublicProfile })
+            if (error) {
+                console.warn('[AuthStore] Error fetching profile:', error.message)
+            }
+
+            // Si el perfil no existe, creamos una fila por defecto (upsert robusto)
+            if (!error && !data) {
+                console.log('[AuthStore] Perfil no encontrado, creando perfil por defecto...')
+                const defaultProfile = {
+                    id: user.id,
+                    email: user.email,
+                    alias: user.user_metadata?.alias || user.user_metadata?.full_name || 'Usuario LovIA',
+                    full_name: user.user_metadata?.full_name || '',
+                    onboarding_completed: false,
+                    readiness_score: 0,
+                    assessments_done: [],
+                    last_seen_at: new Date().toISOString()
+                }
+                
+                const { data: inserted, error: insertError } = await supabase
+                    .from('profiles')
+                    .upsert(defaultProfile)
+                    .select()
+                    .single()
+
+                if (insertError) {
+                    console.error('[AuthStore] Error insertando perfil por defecto:', insertError.message)
+                } else {
+                    data = inserted
+                }
+            }
+
+            if (data) {
+                (set as any)({ profile: data as PublicProfile })
+                
+                // Actualizar la última fecha de actividad (last_seen_at) en segundo plano
+                (async () => {
+                    try {
+                        await supabase
+                            .from('profiles')
+                            .update({ last_seen_at: new Date().toISOString() })
+                            .eq('id', user.id)
+                        console.log('[AuthStore] last_seen_at actualizado ✅')
+                    } catch (err) {
+                        console.warn('[AuthStore] Error actualizando last_seen_at:', err)
+                    }
+                })()
             }
         } catch (err) {
-            console.warn('[AuthStore] Profile load failed:', err)
+            console.warn('[AuthStore] loadProfile failed:', err)
         }
     },
 
@@ -165,16 +209,20 @@ export const useAuthStore = create<AuthState>((set, get) => ({
             const { data: { user } } = await supabase.auth.getUser()
             if (!user) return { error: 'No user logged in' }
 
-            const { error } = await supabase
+            // Cambiamos a upsert para evitar fallos si la fila no existe en la BD
+            const { data, error } = await supabase
                 .from('profiles')
-                .update(updates)
-                .eq('id', user.id)
+                .upsert({
+                    id: user.id,
+                    ...updates,
+                    updated_at: new Date().toISOString()
+                })
+                .select()
+                .single()
 
             if (error) return { error: error.message }
 
-            set((s) => ({
-                profile: s.profile ? { ...s.profile, ...updates } : null,
-            }))
+            set({ profile: data as PublicProfile })
 
             return { error: null }
         } catch (err) {

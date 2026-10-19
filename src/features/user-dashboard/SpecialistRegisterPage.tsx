@@ -3,6 +3,7 @@ import { useNavigate } from 'react-router-dom'
 import { ArrowLeft, MapPin, Clock, DollarSign, Phone, Globe, BookOpen, CheckCircle } from 'lucide-react'
 import { supabase } from '../../lib/supabase'
 import { useAuthStore } from '../../stores/authStore'
+import { trackEvent } from '../../lib/analytics'
 import './SpecialistForm.css'
 
 const SPECIALTIES = [
@@ -84,7 +85,11 @@ export default function SpecialistRegisterPage() {
     }
 
     const handleSubmit = async () => {
-        if (!user) return
+        if (!user) {
+            setSubmitError('Debes iniciar sesión para poder enviar una solicitud.')
+            trackEvent('error_submit', { error: 'Usuario no autenticado' })
+            return
+        }
         setLoading(true)
         setSubmitError(null)
         try {
@@ -122,18 +127,21 @@ export default function SpecialistRegisterPage() {
             })
             if (error) {
                 console.error('[Specialist] Insert error:', error)
-                setSubmitError(
-                    error.code === '42P01'
-                        ? 'El sistema está en configuración. Contacta a soporte: soporte@lovia.com.mx'
-                        : error.code === '42501'
-                        ? 'Error de permisos. Tu sesión pudo haber expirado. Cierra sesión y vuelve a entrar.'
-                        : `Error al enviar: ${error.message}`
-                )
+                const errMsg = error.code === '42P01'
+                    ? 'El sistema está en configuración. Contacta a soporte: soporte@lovia.com.mx'
+                    : error.code === '42501'
+                    ? 'Error de permisos. Tu sesión pudo haber expirado. Cierra sesión y vuelve a entrar.'
+                    : `Error al enviar: ${error.message}`
+                setSubmitError(errMsg)
+                trackEvent('error_submit', { error: errMsg })
             } else {
+                trackEvent('doctor_application_submitted')
                 setSuccess(true)
             }
         } catch (err: any) {
-            setSubmitError('Error inesperado. Verifica tu conexión e inténtalo de nuevo.')
+            const errMsg = err.message || 'Error inesperado. Verifica tu conexión.'
+            setSubmitError(errMsg)
+            trackEvent('error_submit', { error: errMsg })
             console.error('[Specialist] Unexpected error:', err)
         } finally {
             setLoading(false)

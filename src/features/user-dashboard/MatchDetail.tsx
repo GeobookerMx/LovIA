@@ -43,7 +43,7 @@ const gateRequirements: Record<number, {
 export default function MatchDetail() {
     const { id } = useParams<{ id: string }>()
     const navigate = useNavigate()
-    const { user, profile } = useAuthStore()
+    const { user } = useAuthStore()
     const canAccessLevel2 = useEvaluationStore((s) => s.canAccessLevel2)
     const canAccessLevel3 = useEvaluationStore((s) => s.canAccessLevel3)
 
@@ -225,76 +225,10 @@ export default function MatchDetail() {
                 </div>
             </div>
 
-            {/* Premium Insights */}
-            <div className="match-detail__premium-insights glass-strong animate-fade-in-up" style={{ marginTop: '1.5rem', marginBottom: '1.5rem', padding: '1.5rem', position: 'relative', overflow: 'hidden', borderRadius: 'var(--radius-lg)' }}>
-                <h3 style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '1rem', color: 'var(--love-rose)', fontSize: '1.1rem' }}>
-                    <Brain size={20} /> Análisis Profundo (Premium)
-                </h3>
-                
-                {profile?.tier === 'free' ? (
-                    <>
-                        <div style={{ filter: 'blur(6px)', opacity: 0.5, pointerEvents: 'none', userSelect: 'none' }}>
-                            <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '8px', fontSize: 'var(--fs-sm)' }}>
-                                <span>Apego Evitativo vs Ansioso</span>
-                                <span style={{ color: 'var(--success)' }}>Favorable</span>
-                            </div>
-                            <div style={{ background: 'var(--bg-input)', height: '6px', borderRadius: '4px', marginBottom: '16px' }}>
-                                <div style={{ background: 'var(--success)', width: '85%', height: '100%', borderRadius: '4px' }}></div>
-                            </div>
-                            
-                            <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '8px', fontSize: 'var(--fs-sm)' }}>
-                                <span>Visión de Familia</span>
-                                <span style={{ color: 'var(--warning)' }}>Fricción Detectada</span>
-                            </div>
-                            <div style={{ background: 'var(--bg-input)', height: '6px', borderRadius: '4px' }}>
-                                <div style={{ background: 'var(--warning)', width: '40%', height: '100%', borderRadius: '4px' }}></div>
-                            </div>
-                        </div>
-
-                        <div style={{ position: 'absolute', inset: 0, display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', background: 'rgba(10, 10, 12, 0.4)', zIndex: 10 }}>
-                            <Lock size={32} color="var(--freq-high)" style={{ marginBottom: '12px' }}/>
-                            <h4 style={{ margin: 0, marginBottom: '8px', fontSize: 'var(--fs-md)' }}>Contenido Exclusivo</h4>
-                            <p style={{ fontSize: 'var(--fs-sm)', color: 'var(--text-secondary)', textAlign: 'center', maxWidth: '80%', marginBottom: '16px' }}>
-                                Descubre las áreas exactas donde sintonizan y los retos psicológicos de esta conexión.
-                            </p>
-                            <button className="landing__cta landing__cta--primary" onClick={() => navigate('/pricing')} style={{ padding: '8px 24px', fontSize: 'var(--fs-sm)', borderRadius: '24px' }}>
-                                Desbloquear Insights
-                            </button>
-                        </div>
-                    </>
-                ) : (
-                    <div className="stagger-children">
-                        <div style={{ marginBottom: '16px' }}>
-                            <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '8px', fontSize: 'var(--fs-sm)' }}>
-                                <span>Regulación Emocional Conjunta</span>
-                                <span style={{ color: match.compatibility_score > 60 ? 'var(--success)' : 'var(--warning)', fontWeight: 'bold' }}>
-                                    {match.compatibility_score > 60 ? 'Sinergia Fuerte' : 'Atención Requerida'}
-                                </span>
-                            </div>
-                            <div style={{ background: 'var(--bg-input)', height: '6px', borderRadius: '4px' }}>
-                                <div style={{ background: match.compatibility_score > 60 ? 'var(--success)' : 'var(--warning)', width: `${Math.min(95, match.compatibility_score + 15)}%`, height: '100%', borderRadius: '4px' }}></div>
-                            </div>
-                            <p style={{ fontSize: '11px', color: 'var(--text-tertiary)', marginTop: '6px', lineHeight: 1.4 }}>
-                                {match.compatibility_score > 60 
-                                    ? "Ambos demostraron herramientas maduras de tolerancia a la frustración en el test ICI." 
-                                    : "Mucha precaución en la resolución de conflictos. Recomendamos la guía LovIA de Tiempos Fuera."}
-                            </p>
-                        </div>
-
-                        <div>
-                            <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '8px', fontSize: 'var(--fs-sm)' }}>
-                                <span>Logística y Momento de Vida</span>
-                                <span style={{ color: 'var(--freq-mid)', fontWeight: 'bold' }}>Balanceado</span>
-                            </div>
-                            <div style={{ background: 'var(--bg-input)', height: '6px', borderRadius: '4px' }}>
-                                <div style={{ background: 'var(--freq-mid)', width: `${Math.min(80, match.compatibility_score)}%`, height: '100%', borderRadius: '4px' }}></div>
-                            </div>
-                            <p style={{ fontSize: '11px', color: 'var(--text-tertiary)', marginTop: '6px', lineHeight: 1.4 }}>
-                                Tienen expectativas alineadas sobre el futuro cercano, aunque difieren ligeramente en su disposición geográfica a largo plazo.
-                            </p>
-                        </div>
-                    </div>
-                )}
+            {/* El cálculo heredado de readiness no representa afinidad psicológica validada. */}
+            <div className="match-detail__premium-insights glass-strong" style={{ padding: '1.5rem', margin: '1.5rem 0' }}>
+                <h3>Conoce a esta persona a tu ritmo</h3>
+                <p>Las sugerencias de LovIA son un punto de partida. Conversa, comprueba afinidades reales y usa las herramientas de seguridad cuando lo necesites.</p>
             </div>
 
             {/* Cognitive Gate Warning */}

@@ -3,6 +3,7 @@ import { Link, useNavigate } from 'react-router-dom'
 import { useAuthStore } from '../../stores/authStore'
 import { signInWithGoogle, signInWithApple } from '../../lib/socialAuth'
 import { Mail, Lock, User, ArrowRight, Eye, EyeOff, AlertCircle, CheckCircle, Loader2 } from 'lucide-react'
+import { trackEvent } from '../../lib/analytics'
 import LegalModal from '../../components/ui/LegalModal'
 import './Auth.css'
 
@@ -20,6 +21,10 @@ export default function Register() {
     const [oauthLoading, setOauthLoading] = useState<'google' | 'apple' | null>(null)
     const { signUp, user, initialized } = useAuthStore()
     const navigate = useNavigate()
+
+    useEffect(() => {
+        trackEvent('signup_started')
+    }, [])
 
     // Redirigir si ya está autenticado — cubre el caso OAuth nativo.
     useEffect(() => {
@@ -60,6 +65,7 @@ export default function Register() {
             const result = await signUp(email, password, name)
 
             if (result.error) {
+                trackEvent('error_profile_save', { error: result.error, context: 'signup' })
                 if (result.error.includes('already registered')) {
                     setError('Este email ya está registrado. ¿Quieres iniciar sesión?')
                 } else if (result.error.includes('invalid')) {
@@ -72,6 +78,7 @@ export default function Register() {
                 return
             }
 
+            trackEvent('signup_completed')
             setSuccess(true)
             setTimeout(() => navigate('/onboarding'), 1500)
         } finally {

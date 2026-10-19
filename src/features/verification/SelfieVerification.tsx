@@ -3,6 +3,9 @@ import { useNavigate } from 'react-router-dom'
 import { Shield, Camera, Check, AlertTriangle, Loader2, ArrowLeft } from 'lucide-react'
 import { supabase } from '../../lib/supabase'
 import { useAuthStore } from '../../stores/authStore'
+import { Capacitor } from '@capacitor/core'
+import { Camera as CapCamera, CameraResultType, CameraSource } from '@capacitor/camera'
+import { trackEvent } from '../../lib/analytics'
 import './Verification.css'
 
 export default function SelfieVerification() {
@@ -19,10 +22,47 @@ export default function SelfieVerification() {
     const [capturedFile, setCapturedFile] = useState<File | null>(null)
     const [previewUrl, setPreviewUrl] = useState<string | null>(null)
 
-    // Step 1: Request Camera
+    // Step 1: Request Camera (Nativo o Web)
     const startCamera = async () => {
+        setError(null)
+        trackEvent('selfie_started')
+        
+        // ── FLUJO NATIVO: Usar @capacitor/camera ──────────────────────────────
+        if (Capacitor.isNativePlatform()) {
+            try {
+                console.log('[SelfieVerification] Iniciando cámara nativa con Capacitor...')
+                const image = await CapCamera.getPhoto({
+                    quality: 85,
+                    allowEditing: false,
+                    resultType: CameraResultType.Uri,
+                    source: CameraSource.Camera // Abre la cámara frontal directamente
+                })
+                
+                if (image.webPath) {
+                    console.log('[SelfieVerification] Foto capturada.')
+                    setPreviewUrl(image.webPath)
+                    
+                    // Convertir la ruta local en un Blob y crear el File objeto para Supabase
+                    const res = await fetch(image.webPath)
+                    const blob = await res.blob()
+                    const file = new File([blob], `selfie_${Date.now()}.jpg`, { type: 'image/jpeg' })
+                    
+                    setCapturedFile(file)
+                    setStep(2)
+                } else {
+                    throw new Error('No se obtuvo ruta web de la imagen capturada')
+                }
+            } catch (err: any) {
+                console.error('[SelfieVerification] Error con cámara nativa.')
+                const errMsg = err.message || String(err)
+                setError(`Error al abrir la cámara: ${errMsg}`)
+                trackEvent('error_camera')
+            }
+            return
+        }
+
+        // ── FLUJO WEB: Usar getUserMedia tradicional o input file selector ────────
         try {
-            setError(null)
             const constraints = {
                 video: {
                     facingMode: 'user',
@@ -33,8 +73,9 @@ export default function SelfieVerification() {
             const stream = await navigator.mediaDevices.getUserMedia(constraints)
             localStream.current = stream
             setStep(2)
-        } catch (err: any) {
-            console.error('[SelfieVerification] Camera error:', err)
+        } catch {
+            console.error('[SelfieVerification] Error con cámara web.')
+            trackEvent('error_camera')
             // Fallback: abrir selector de cámara nativa del sistema
             if (fileInputRef.current) {
                 fileInputRef.current.click()
@@ -54,11 +95,11 @@ export default function SelfieVerification() {
         }
     }
 
-    // Connect stream to video element when step 2 loads
+    // Connect stream to video element when step 2 loads (Solo Web)
     useEffect(() => {
         if (step === 2 && videoRef.current && localStream.current && !previewUrl) {
             videoRef.current.srcObject = localStream.current
-            // ✅ FIX: Android WebView ignora autoPlay — llamamos play() explícitamente
+            // ✅ FIX: Android/iOS WebView ignora autoPlay — llamamos play() explícitamente
             videoRef.current.play().catch(err => {
                 console.warn('[SelfieVerification] video.play() error:', err)
             })
@@ -125,7 +166,9 @@ export default function SelfieVerification() {
             
             if (dbError) {
                 setError('Hubo un error guardando tu verificación. Intenta más tarde.')
+                trackEvent('error_camera')
             } else {
+                trackEvent('selfie_uploaded')
                 // Forzar recarga del perfil en authStore
                 await loadProfile()
                 setStep(3)

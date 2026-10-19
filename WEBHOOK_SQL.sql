@@ -1,3 +1,6 @@
+-- ARCHIVADO FASE 1 (2026-10-19): NO EJECUTAR. Requiere inventario remoto y migración revisada.
+-- El contenido histórico se conserva como comentario para trazabilidad.
+/*
 -- ═══════════════════════════════════════════════════════════════════════
 -- LovIA! — SQL PARA CREAR LA TABLA DE CORREOS Y LOS WEBHOOKS
 -- Ejecutar en Supabase SQL Editor
@@ -54,3 +57,5 @@ SELECT cron.schedule(
   );
   $$
 );
+
+*/

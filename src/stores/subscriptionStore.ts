@@ -1,5 +1,6 @@
 import { create } from 'zustand'
 import { supabase } from '../lib/supabase'
+import { isFreeAccessPeriod } from '../lib/campaignDates'
 
 export type Tier = 'free' | 'arquitecto' | 'ingeniero' | 'diamante'
 
@@ -85,6 +86,7 @@ export const useSubscriptionStore = create<SubscriptionState>((set, get) => ({
     setTier: (tier) => set({ currentTier: tier }),
 
     canAccess: (required) => {
+        if (isFreeAccessPeriod()) return true
         const current = tierOrder.indexOf(get().currentTier)
         const req = tierOrder.indexOf(required)
         return current >= req

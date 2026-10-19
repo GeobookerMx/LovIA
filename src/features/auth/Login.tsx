@@ -70,8 +70,8 @@ export default function Login() {
             console.log('[LovIA] Login completo → ', destination)
             navigate(destination)
 
-        } catch (err: any) {
-            console.error('[LovIA] Error inesperado en handleSubmit:', err)
+        } catch {
+            console.error('[LovIA] Error inesperado en inicio de sesión.')
             setError('Error al iniciar sesión. Por favor intenta de nuevo.')
         } finally {
             setSubmitting(false)
@@ -90,9 +90,9 @@ export default function Login() {
             }
             // En nativo: el flujo continúa vía appUrlOpen en main.tsx.
             // En web: la página redirige a /auth/callback automáticamente.
-        } catch (err: any) {
-            console.error('[LovIA] OAuth error:', provider, err)
-            setError(err.message || 'Error al iniciar sesión. Verifica tu conexión e intenta de nuevo.')
+        } catch {
+            console.error('[LovIA] Error de OAuth:', provider)
+            setError('Error al iniciar sesión. Verifica tu conexión e intenta de nuevo.')
         } finally {
             setOauthLoading(null)
         }
@@ -167,6 +167,7 @@ export default function Login() {
                             </>
                         )}
                     </button>
+                    <p className="auth-card__footer"><Link to="/recover">¿Olvidaste tu contraseña?</Link></p>
                 </form>
 
                 <div className="auth-divider">
