@@ -4,6 +4,7 @@ import { ArrowLeft, Send, Shield, AlertTriangle, Loader2 } from 'lucide-react'
 import { supabase } from '../../lib/supabase'
 import { useAuthStore } from '../../stores/authStore'
 import { type Message } from '../../lib/database.types'
+import { chooseReportReason, reportAndBlock } from '../../lib/reporting'
 
 const SUGGESTED_PROMPTS = [
     "¿Qué fue lo que más te sorprendió de tus resultados en el Mapa de Vida?",
@@ -156,6 +157,19 @@ export default function ChatRoom() {
         }
     }
 
+    const handleReport = async () => {
+        if (!user || !otherUser?.id || !matchId) return
+        const reason = chooseReportReason()
+        if (!reason) return
+        const result = await reportAndBlock(user.id, otherUser.id, matchId, reason)
+        if (result.blocked) {
+            alert(result.reported ? 'Reporte enviado y conexión bloqueada.' : 'Bloqueo registrado. El reporte necesita revisión de soporte.')
+            navigate('/matches')
+        } else {
+            alert('No pudimos confirmar el bloqueo. Inténtalo de nuevo o contacta a soporte.')
+        }
+    }
+
     if (loading) {
         return <div className="flex-center" style={{ minHeight: '100vh' }}><Loader2 className="animate-spin" /></div>
     }
@@ -194,11 +208,11 @@ export default function ChatRoom() {
                     <div>
                         <h2 style={{ fontSize: 'var(--fs-md)', margin: 0 }}>{otherUser?.alias || 'Match'}</h2>
                         <span style={{ fontSize: 'var(--fs-xs)', color: 'var(--success)', display: 'flex', alignItems: 'center', gap: 4 }}>
-                            <Shield size={10} color="var(--success)"/> Entorno Seguro
+                            <Shield size={10} color="var(--success)"/> Reportar y bloquear disponible
                         </span>
                     </div>
                 </div>
-                <button className="icon-btn" style={{ color: 'var(--text-tertiary)' }} title="Reportar">
+                <button className="icon-btn" style={{ color: 'var(--text-tertiary)' }} title="Reportar y bloquear" aria-label="Reportar y bloquear" onClick={handleReport}>
                     <AlertTriangle size={18} />
                 </button>
             </header>
@@ -209,10 +223,10 @@ export default function ChatRoom() {
                 <div style={{ textAlign: 'center', marginBottom: 'var(--space-6)', marginTop: 'var(--space-4)' }}>
                     <p style={{ fontSize: 'var(--fs-xs)', color: 'var(--text-tertiary)' }}>
                         Han desbloqueado el Nivel {currentLevel}.<br/>
-                        Recuerda mantener el respeto. Este chat está protegido y monitoreado.
+                        Recuerda mantener el respeto. Puedes reportar y bloquear desde esta pantalla.
                         {currentLevel < 3 && (
                             <span style={{ display: 'block', marginTop: 4, color: 'var(--warning)', fontWeight: 500 }}>
-                                🔒 Datos de contacto bloqueados hasta el Nivel 3.
+                                Evita compartir datos de contacto antes de conocer a la persona.
                             </span>
                         )}
                     </p>

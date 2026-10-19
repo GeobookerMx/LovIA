@@ -7,6 +7,7 @@ import {
 import { supabase } from '../../lib/supabase'
 import { useAuthStore } from '../../stores/authStore'
 import { useEvaluationStore } from '../../stores/evaluationStore'
+import { chooseReportReason, reportAndBlock } from '../../lib/reporting'
 import MatchProgress from '../../components/matching/MatchProgress'
 import '../../components/matching/Matching.css'
 
@@ -125,27 +126,17 @@ export default function MatchDetail() {
     }
 
     const handleReport = async () => {
-        const reason = window.prompt('¿Por qué deseas reportar a este usuario?\n(fake_profile / abusive / spam / fraud / other)')
+        const reason = chooseReportReason()
         if (!reason || !user) return
-
-        const { error } = await supabase.from('reports').insert({
-            reporter_id: user.id,
-            reported_id: otherUser.id,
-            reason: reason.trim() || 'other',
-        })
-
-        // Bloquear automáticamente al usuario reportado
-        await supabase.from('blocks').insert({
-            blocker_id: user.id,
-            blocked_id: otherUser.id,
-        })
-
-        if (!error) {
-            await supabase.from('matches').update({ status: 'declined' }).eq('id', match.id)
-            alert('Reporte enviado. Por tu seguridad, esta persona ya no puede contactarte.')
+        const result = await reportAndBlock(user.id, otherUser.id, match.id, reason)
+        if (result.blocked && result.reported && result.hidden) {
+            alert('Reporte enviado y conexión bloqueada.')
+            navigate('/matches')
+        } else if (result.blocked) {
+            alert('Se registró el bloqueo, pero no pudimos confirmar todas las acciones. Contacta a soporte.')
             navigate('/matches')
         } else {
-            alert('Error al enviar el reporte. Por favor intenta de nuevo.')
+            alert('No pudimos confirmar el bloqueo. Inténtalo de nuevo o contacta a soporte.')
         }
     }
 

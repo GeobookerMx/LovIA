@@ -13,6 +13,7 @@
 | Halloween | Banner con SVG, cierre y activación por fecha México; off por configuración | Prueba límite 01/11/2026; sin animación o sonido | Prueba visual y de contraste en dispositivo |
 | Radar | Ruta de mapa de precisión oculta por defecto; el código anterior se conserva | La ruta segura no solicita GPS | Nueva ubicación aproximada desde servidor, RLS y prueba de revocación; después activar mapa |
 | Recuperación | Ruta `/recover` y enlace en login | TypeScript y build | Redirect allowlist de Supabase, email de prueba, nativo y vencimiento de enlace |
+| Reporte y bloqueo | Chat y ficha de conexión comparten acción; distinguen reporte, bloqueo y ocultación confirmados | TypeScript; no se promete éxito si falla el bloqueo | Prueba A/B y RLS real para impedir mensajes y reaparición después de bloquear |
 | Libro editorial | Tres tarjetas con ID, párrafo y estado `draft`; no visibles al usuario | `src/content/bookCardDrafts.ts` | Confirmación editorial y de derechos antes de publicar |
 | PWA y nativo | Build web genera manifest y SW; no se cachean respuestas Supabase en reglas locales | Inspección de artefacto | Navegador/dispositivo: instalación, actualización, logout, offline; Android/iOS con staging real |
 
