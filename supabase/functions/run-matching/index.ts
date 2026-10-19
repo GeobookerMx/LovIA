@@ -19,6 +19,11 @@ function getDistanceInKm(lat1: number, lon1: number, lat2: number, lon2: number)
 
 let runInProgress = false
 
+// El contrato actual no valida edad, consentimiento, visibilidad, bloqueos,
+// sanciones ni ubicación aproximada en servidor. Requiere revisión y pruebas
+// de permisos en staging antes de permitir cualquier escritura de matches.
+const MATCHING_CONTRACT_READY = false
+
 async function sameSecret(received: string, expected: string): Promise<boolean> {
     const encode = (value: string) => new TextEncoder().encode(value)
     const [a, b] = await Promise.all([
@@ -35,6 +40,7 @@ async function sameSecret(received: string, expected: string): Promise<boolean> 
 // ── LovIA Matching Engine V2 (Readiness & Saftey First) ──
 Deno.serve(async (req) => {
     if (req.method !== 'POST') return new Response('Method not allowed', { status: 405 })
+    if (!MATCHING_CONTRACT_READY) return new Response('Matching job unavailable', { status: 503 })
     const jobSecret = Deno.env.get('LOVIA_MATCHING_JOB_SECRET')
     const supabaseUrl = Deno.env.get('SUPABASE_URL')
     const supabaseKey = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')
