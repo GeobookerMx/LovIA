@@ -75,6 +75,7 @@ interface SubscriptionState {
     setTier: (tier: Tier) => void
     canAccess: (required: Tier) => boolean
     loadFromServer: () => Promise<void>
+    reset: () => void
 }
 
 const tierOrder: Tier[] = ['free', 'arquitecto', 'ingeniero', 'diamante']
@@ -82,6 +83,7 @@ const tierOrder: Tier[] = ['free', 'arquitecto', 'ingeniero', 'diamante']
 export const useSubscriptionStore = create<SubscriptionState>((set, get) => ({
     currentTier: 'free',
     loading: false,
+    reset: () => set({ currentTier: 'free', loading: false }),
 
     setTier: (tier) => set({ currentTier: tier }),
 
@@ -111,7 +113,8 @@ export const useSubscriptionStore = create<SubscriptionState>((set, get) => ({
                 .eq('user_id', user.id)
                 .single()
 
-            if (!error && data) {
+            const { data: { user: currentUser } } = await supabase.auth.getUser()
+            if (!error && data && currentUser?.id === user.id) {
                 set({ currentTier: data.tier as Tier })
             }
         } catch (err) {

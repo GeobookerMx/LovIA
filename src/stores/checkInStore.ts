@@ -18,12 +18,14 @@ interface CheckInState {
     getLastEntry: () => CheckInEntry | null
     getTrend: () => 'improving' | 'stable' | 'declining' | null
     loadFromServer: () => Promise<void>
+    reset: () => void
 }
 
 export const useCheckInStore = create<CheckInState>((set, get) => ({
     history: [],
     showCheckIn: false,
     currentContext: 'weekly',
+    reset: () => set({ history: [], showCheckIn: false, currentContext: 'weekly' }),
 
     addEntry: async (entry) => {
         const timestamp = new Date().toISOString()
@@ -82,7 +84,8 @@ export const useCheckInStore = create<CheckInState>((set, get) => ({
                 .eq('user_id', user.id)
                 .order('created_at', { ascending: true })
 
-            if (!error && data) {
+            const { data: { user: currentUser } } = await supabase.auth.getUser()
+            if (!error && data && currentUser?.id === user.id) {
                 const historyStr = data.map(row => ({
                     mood: row.mood,
                     score: row.score,

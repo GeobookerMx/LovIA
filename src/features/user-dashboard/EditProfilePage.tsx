@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react'
 import { useNavigate } from 'react-router-dom'
-import { ArrowLeft, Save, User, MapPin, AlignLeft } from 'lucide-react'
+import { ArrowLeft, Save, User, MapPin } from 'lucide-react'
 import { useAuthStore } from '../../stores/authStore'
 import { trackEvent } from '../../lib/analytics'
 import './ProfilePages.css'
@@ -13,12 +13,10 @@ export default function EditProfilePage() {
         alias: string
         city: string
         full_name?: string
-        bio?: string
     }>({
         alias: '',
         city: '',
-        full_name: '',
-        bio: ''
+        full_name: ''
     })
     const [isSaving, setIsSaving] = useState(false)
     const [successMsg, setSuccessMsg] = useState('')
@@ -29,7 +27,6 @@ export default function EditProfilePage() {
                 alias: (profile as any).alias || '',
                 city: (profile as any).city || '',
                 full_name: (profile as any).full_name || '',
-                bio: (profile as any).bio || '',
             })
         }
     }, [profile])
@@ -40,13 +37,13 @@ export default function EditProfilePage() {
         setSuccessMsg('')
 
         // Guardar todos los campos editables del perfil
-        const updates: Record<string, string> = {}
-        if (formData.alias)     updates.alias     = formData.alias
-        if (formData.city)      updates.city      = formData.city
-        if (formData.full_name) updates.full_name = formData.full_name
-        if (formData.bio !== undefined) updates.bio = formData.bio ?? ''
+        const updates = {
+            alias: formData.alias.trim(),
+            city: formData.city.trim(),
+            full_name: (formData.full_name ?? '').trim(),
+        }
 
-        const { error } = await updateProfile(updates as any)
+        const { error } = await updateProfile(updates)
 
         setIsSaving(false)
         if (!error) {
@@ -114,20 +111,6 @@ export default function EditProfilePage() {
                         />
                     </div>
 
-                    <div className="settings-item glass-strong" style={{ flexDirection: 'column', alignItems: 'flex-start', padding: '16px', marginTop: '16px' }}>
-                        <label style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '8px', color: 'var(--text-secondary)' }}>
-                            <AlignLeft size={16} /> Biografía
-                        </label>
-                        <textarea 
-                            className="settings-select"
-                            style={{ width: '100%', padding: '12px', borderRadius: '8px', background: 'var(--bg-deep)', minHeight: '100px', resize: 'vertical' }}
-                            value={formData.bio}
-                            onChange={e => setFormData({...formData, bio: e.target.value})}
-                            placeholder="Cuenta un poco sobre ti y lo que buscas construir..."
-                            maxLength={300}
-                        />
-                        <span style={{ fontSize: '12px', color: 'var(--text-muted)', marginTop: '8px', alignSelf: 'flex-end' }}>{(formData.bio ?? '').length}/300</span>
-                    </div>
                 </div>
 
                 {successMsg && (

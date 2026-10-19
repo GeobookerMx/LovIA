@@ -3,6 +3,7 @@ import { supabase } from '../lib/supabase'
 import { useEvaluationStore } from './evaluationStore'
 import { useSubscriptionStore } from './subscriptionStore'
 import { useCheckInStore } from './checkInStore'
+import { useSettingsStore } from './settingsStore'
 import type { User, Session } from '@supabase/supabase-js'
 import type { PublicProfile } from '../lib/database.types'
 
@@ -29,6 +30,25 @@ async function loadServerData() {
         useSubscriptionStore.getState().loadFromServer(),
         useCheckInStore.getState().loadFromServer(),
     ])
+}
+
+function clearPrivateState() {
+    useEvaluationStore.getState().resetAll()
+    useSubscriptionStore.getState().reset()
+    useCheckInStore.getState().reset()
+    useSettingsStore.getState().reset()
+}
+
+const privateOwnerKey = 'lovia-private-state-owner'
+function bindPrivateState(ownerId: string | null) {
+    try {
+        const previousOwner = localStorage.getItem(privateOwnerKey)
+        if (!ownerId || previousOwner !== ownerId) clearPrivateState()
+        if (ownerId) localStorage.setItem(privateOwnerKey, ownerId)
+        else localStorage.removeItem(privateOwnerKey)
+    } catch {
+        clearPrivateState()
+    }
 }
 
 let globalAuthSubscription: { unsubscribe: () => void } | null = null
@@ -61,6 +81,7 @@ export const useAuthStore = create<AuthState>((set, get) => ({
                 console.warn('[LovIA] AuthStore getSession error:', error.message)
             }
 
+            bindPrivateState(session?.user?.id ?? null)
             set({
                 session,
                 user: session?.user ?? null,
@@ -69,7 +90,7 @@ export const useAuthStore = create<AuthState>((set, get) => ({
                 legalAccepted: !!session?.user,
             })
             clearTimeout(safetyTimer)
-            console.log('[LovIA] AuthStore: inicializado. User:', session?.user?.id ?? 'null')
+            console.log('[LovIA] AuthStore: inicializado.')
 
             if (session?.user) {
                 get().loadProfile()
@@ -78,7 +99,11 @@ export const useAuthStore = create<AuthState>((set, get) => ({
 
             if (!globalAuthSubscription) {
                 const { data: { subscription } } = supabase.auth.onAuthStateChange(async (event, session) => {
-                    console.log('[LovIA] onAuthStateChange:', event, session?.user?.id ?? 'null')
+                    console.log('[LovIA] onAuthStateChange:', event)
+                    if (get().user?.id !== session?.user?.id) {
+                        bindPrivateState(session?.user?.id ?? null)
+                        set({ profile: null })
+                    }
                     set({
                         session,
                         user: session?.user ?? null,
@@ -132,9 +157,10 @@ export const useAuthStore = create<AuthState>((set, get) => ({
     },
 
     signOut: async () => {
-        await supabase.auth.signOut()
+        const { error } = await supabase.auth.signOut()
+        if (error) throw error
+        bindPrivateState(null)
         set({ user: null, session: null, profile: null, legalAccepted: false })
-        useEvaluationStore.getState().resetAll()
     },
 
     acceptLegal: () => {
@@ -156,34 +182,9 @@ export const useAuthStore = create<AuthState>((set, get) => ({
                 console.warn('[AuthStore] Error fetching profile:', error.message)
             }
 
-            // Si el perfil no existe, creamos una fila por defecto (upsert robusto)
-            if (!error && !data) {
-                console.log('[AuthStore] Perfil no encontrado, creando perfil por defecto...')
-                const defaultProfile = {
-                    id: user.id,
-                    email: user.email,
-                    alias: user.user_metadata?.alias || user.user_metadata?.full_name || 'Usuario LovIA',
-                    full_name: user.user_metadata?.full_name || '',
-                    onboarding_completed: false,
-                    readiness_score: 0,
-                    assessments_done: [],
-                    last_seen_at: new Date().toISOString()
-                }
-                
-                const { data: inserted, error: insertError } = await supabase
-                    .from('profiles')
-                    .upsert(defaultProfile)
-                    .select()
-                    .single()
+            if (!error && !data) console.warn('[AuthStore] Falta el perfil creado por el servidor.')
 
-                if (insertError) {
-                    console.error('[AuthStore] Error insertando perfil por defecto:', insertError.message)
-                } else {
-                    data = inserted
-                }
-            }
-
-            if (data) {
+            if (data && get().user?.id === user.id) {
                 (set as any)({ profile: data as PublicProfile })
                 
                 // Actualizar la última fecha de actividad (last_seen_at) en segundo plano
@@ -193,7 +194,6 @@ export const useAuthStore = create<AuthState>((set, get) => ({
                             .from('profiles')
                             .update({ last_seen_at: new Date().toISOString() })
                             .eq('id', user.id)
-                        console.log('[AuthStore] last_seen_at actualizado ✅')
                     } catch (err) {
                         console.warn('[AuthStore] Error actualizando last_seen_at:', err)
                     }
@@ -212,15 +212,16 @@ export const useAuthStore = create<AuthState>((set, get) => ({
             // Cambiamos a upsert para evitar fallos si la fila no existe en la BD
             const { data, error } = await supabase
                 .from('profiles')
-                .upsert({
-                    id: user.id,
+                .update({
                     ...updates,
                     updated_at: new Date().toISOString()
                 })
+                .eq('id', user.id)
                 .select()
                 .single()
 
             if (error) return { error: error.message }
+            if (!data || get().user?.id !== user.id) return { error: 'La sesión cambió antes de confirmar el guardado.' }
 
             set({ profile: data as PublicProfile })
 

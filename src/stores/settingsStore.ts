@@ -29,6 +29,7 @@ interface SettingsState {
     toggle: (key: ToggleKey) => void
     setTheme: (theme: 'dark' | 'light' | 'system') => void
     setLanguage: (language: 'es' | 'en') => void
+    reset: () => void
 }
 
 export const useSettingsStore = create<SettingsState>()(
@@ -47,6 +48,11 @@ export const useSettingsStore = create<SettingsState>()(
             toggle: (key) => set((state) => ({ [key]: !state[key] })),
             setTheme: (theme) => set({ theme }),
             setLanguage: (language) => set({ language }),
+            reset: () => set({
+                pushEnabled: false, weeklyEmail: false, sparkReminder: false,
+                profileVisible: true, anonymousData: false,
+                theme: 'dark', language: 'es',
+            }),
         }),
         {
             name: 'lovia-settings',

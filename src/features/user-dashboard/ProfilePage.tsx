@@ -6,7 +6,25 @@ import { supabase } from '../../lib/supabase'
 import { isIOS } from '../../lib/platform'
 
 const MAX_FILE_BYTES = 5 * 1024 * 1024 // 5 MB
-const ALLOWED_TYPES = ['image/jpeg', 'image/png', 'image/webp', 'image/heic', 'image/heif']
+const ALLOWED_TYPES = ['image/jpeg', 'image/png', 'image/webp']
+
+async function normalizeAvatar(file: File): Promise<Blob> {
+    const bitmap = await createImageBitmap(file)
+    try {
+        const scale = Math.min(1, 1024 / Math.max(bitmap.width, bitmap.height))
+        const canvas = document.createElement('canvas')
+        canvas.width = Math.max(1, Math.round(bitmap.width * scale))
+        canvas.height = Math.max(1, Math.round(bitmap.height * scale))
+        const context = canvas.getContext('2d')
+        if (!context) throw new Error('No se pudo procesar la imagen')
+        context.drawImage(bitmap, 0, 0, canvas.width, canvas.height)
+        const normalized = await new Promise<Blob | null>(resolve => canvas.toBlob(resolve, 'image/jpeg', 0.85))
+        if (!normalized) throw new Error('No se pudo convertir la imagen')
+        return normalized
+    } finally {
+        bitmap.close()
+    }
+}
 import './ProfilePage.css'
 
 export default function ProfilePage() {
@@ -24,9 +42,13 @@ export default function ProfilePage() {
         setTimeout(() => setToast(null), 3500)
     }
 
-    const handleLogout = () => {
-        signOut()
-        navigate('/')
+    const handleLogout = async () => {
+        try {
+            await signOut()
+            navigate('/')
+        } catch {
+            showToast('error', 'No se pudo cerrar sesión. Inténtalo de nuevo.')
+        }
     }
 
     const handleAvatarUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -36,7 +58,7 @@ export default function ProfilePage() {
 
             // ── Validaciones de cliente ──────────────────────────────────────
             if (!ALLOWED_TYPES.includes(file.type)) {
-                showToast('error', 'Formato no permitido. Usa JPG, PNG, WEBP o HEIC.')
+                showToast('error', 'Formato no permitido. Usa JPG, PNG o WEBP.')
                 return
             }
             if (file.size > MAX_FILE_BYTES) {
@@ -45,14 +67,14 @@ export default function ProfilePage() {
             }
 
             setUploading(true)
-            const fileExt = file.name.split('.').pop()?.toLowerCase() || 'jpg'
-            const fileName = `avatar-${Date.now()}.${fileExt}`
+            const normalized = await normalizeAvatar(file)
+            const fileName = `avatar-${crypto.randomUUID()}.jpg`
             const filePath = `${user.id}/${fileName}`
 
             // Subir imagen
             const { error: uploadError } = await supabase.storage
                 .from('avatars')
-                .upload(filePath, file, { upsert: true })
+                .upload(filePath, normalized, { contentType: 'image/jpeg', upsert: false })
 
             if (uploadError) throw uploadError
 
@@ -61,19 +83,25 @@ export default function ProfilePage() {
                 .from('avatars')
                 .getPublicUrl(filePath)
 
-            await updateProfile({ avatar_url: publicUrl })
+            const { error: profileError } = await updateProfile({ avatar_url: publicUrl })
+            if (profileError) {
+                await supabase.storage.from('avatars').remove([filePath])
+                throw new Error(profileError)
+            }
             showToast('success', '¡Foto de perfil actualizada! 🎉')
 
         } catch (error: any) {
-            console.error('Error uploading avatar:', error)
-            showToast('error', 'Error al subir la imagen. Verifica que el Bucket "avatars" existe en Supabase.')
+            console.error('Error updating avatar:', error)
+            showToast('error', 'No se pudo guardar la foto. La anterior sigue visible.')
         } finally {
             setUploading(false)
+            e.target.value = ''
         }
     }
 
     const handleChangeVisibility = async (mode: 'classic' | 'gradual' | 'essence') => {
-        await updateProfile({ visibility_mode: mode })
+        const { error } = await updateProfile({ visibility_mode: mode })
+        if (error) showToast('error', 'No se pudo guardar la visibilidad.')
     }
 
     return (
@@ -89,7 +117,7 @@ export default function ProfilePage() {
                         type="file" 
                         ref={fileInputRef} 
                         style={{ display: 'none' }} 
-                        accept="image/jpeg,image/png,image/webp,image/heic,image/heif"
+                        accept="image/jpeg,image/png,image/webp"
                         onChange={handleAvatarUpload}
                     />
                     <img 
@@ -188,7 +216,7 @@ export default function ProfilePage() {
                 <MenuItem icon={<TrendingUp size={18} />} label="Plan de Mejora" color="var(--success)" onClick={() => navigate('/profile/improvement')} />
 
                 <h3 className="profile-page__menu-title">Cuenta</h3>
-                <MenuItem icon={<Shield size={18} />} label="Verificación (Selfie)" color="var(--love-warm)" onClick={() => navigate('/selfie-verification')} />
+                <MenuItem icon={<Shield size={18} />} label="Verificación (en preparación)" color="var(--love-warm)" onClick={() => navigate('/selfie-verification')} />
                 <MenuItem icon={<ShieldAlert size={18} />} label="Contactos de Emergencia" color="var(--warning)" onClick={() => navigate('/profile/emergency-contacts')} />
 
                 <h3 className="profile-page__menu-title">🧠 Conócete Más</h3>
