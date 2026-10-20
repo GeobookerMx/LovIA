@@ -8,6 +8,7 @@ DO $guard$
 DECLARE
   v_name text;
   v_table text;
+  v_privilege text;
 BEGIN
   FOREACH v_name IN ARRAY ARRAY['assessment_modules', 'assessment_questions'] LOOP
     v_table := format('public.%I', v_name);
@@ -20,9 +21,24 @@ BEGIN
     ) THEN
       RAISE EXCEPTION 'Existing policies on %; inspect before applying', v_table;
     END IF;
+    IF (
+      SELECT c.relrowsecurity FROM pg_class c
+      WHERE c.oid = to_regclass(v_table)
+    ) THEN
+      RAISE EXCEPTION 'RLS state changed on %; inspect before applying', v_table;
+    END IF;
     IF NOT has_table_privilege('authenticated', v_table, 'SELECT') THEN
       RAISE EXCEPTION 'Authenticated SELECT changed on %; inspect before applying', v_table;
     END IF;
+    FOREACH v_privilege IN ARRAY ARRAY[
+      'INSERT', 'UPDATE', 'DELETE', 'TRUNCATE', 'REFERENCES', 'TRIGGER', 'MAINTAIN'
+    ] LOOP
+      IF has_table_privilege('anon', v_table, v_privilege) OR
+         has_table_privilege('authenticated', v_table, v_privilege) THEN
+        RAISE EXCEPTION 'Client % grant changed on %; inspect before applying',
+          v_privilege, v_table;
+      END IF;
+    END LOOP;
   END LOOP;
 END;
 $guard$;
