@@ -194,18 +194,6 @@ export const useAuthStore = create<AuthState>((set, get) => ({
 
             if (data && get().user?.id === user.id) {
                 set({ profile: data as PublicProfile })
-                
-                // Actualizar la última fecha de actividad (last_seen_at) en segundo plano
-                void (async () => {
-                    try {
-                        await supabase
-                            .from('profiles')
-                            .update({ last_seen_at: new Date().toISOString() })
-                            .eq('id', user.id)
-                    } catch (err) {
-                        console.warn('[AuthStore] Error actualizando last_seen_at:', err)
-                    }
-                })()
             }
         } catch (err) {
             console.warn('[AuthStore] loadProfile failed:', err)

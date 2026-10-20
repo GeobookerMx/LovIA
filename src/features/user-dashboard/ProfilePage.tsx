@@ -9,20 +9,27 @@ const MAX_FILE_BYTES = 5 * 1024 * 1024 // 5 MB
 const ALLOWED_TYPES = ['image/jpeg', 'image/png', 'image/webp']
 
 async function normalizeAvatar(file: File): Promise<Blob> {
-    const bitmap = await createImageBitmap(file)
+    const objectUrl = URL.createObjectURL(file)
     try {
-        const scale = Math.min(1, 1024 / Math.max(bitmap.width, bitmap.height))
+        const image = new Image()
+        await new Promise<void>((resolve, reject) => {
+            image.onload = () => resolve()
+            image.onerror = () => reject(new Error('No se pudo abrir la imagen'))
+            image.src = objectUrl
+        })
+        if (!image.naturalWidth || !image.naturalHeight) throw new Error('Imagen vacía')
+        const scale = Math.min(1, 1024 / Math.max(image.naturalWidth, image.naturalHeight))
         const canvas = document.createElement('canvas')
-        canvas.width = Math.max(1, Math.round(bitmap.width * scale))
-        canvas.height = Math.max(1, Math.round(bitmap.height * scale))
+        canvas.width = Math.max(1, Math.round(image.naturalWidth * scale))
+        canvas.height = Math.max(1, Math.round(image.naturalHeight * scale))
         const context = canvas.getContext('2d')
         if (!context) throw new Error('No se pudo procesar la imagen')
-        context.drawImage(bitmap, 0, 0, canvas.width, canvas.height)
+        context.drawImage(image, 0, 0, canvas.width, canvas.height)
         const normalized = await new Promise<Blob | null>(resolve => canvas.toBlob(resolve, 'image/jpeg', 0.85))
         if (!normalized) throw new Error('No se pudo convertir la imagen')
         return normalized
     } finally {
-        bitmap.close()
+        URL.revokeObjectURL(objectUrl)
     }
 }
 import './ProfilePage.css'
@@ -107,21 +114,25 @@ export default function ProfilePage() {
     return (
         <div className="profile-page">
             <div className="profile-page__header animate-fade-in">
-                <div
+                <input
+                    type="file"
+                    ref={fileInputRef}
+                    style={{ display: 'none' }}
+                    accept="image/jpeg,image/png,image/webp"
+                    onChange={handleAvatarUpload}
+                    aria-label="Seleccionar foto de perfil"
+                />
+                <button
+                    type="button"
                     className="profile-page__avatar"
                     onClick={() => fileInputRef.current?.click()}
-                    style={{ cursor: 'pointer', position: 'relative', overflow: 'hidden' }}
+                    disabled={uploading}
+                    aria-label="Cambiar foto de perfil"
+                    style={{ cursor: 'pointer', position: 'relative', overflow: 'hidden', border: 0, padding: 0 }}
                     title="Cambiar foto de perfil"
                 >
-                    <input 
-                        type="file" 
-                        ref={fileInputRef} 
-                        style={{ display: 'none' }} 
-                        accept="image/jpeg,image/png,image/webp"
-                        onChange={handleAvatarUpload}
-                    />
                     <img 
-                        src={profile?.avatar_url || 'https://via.placeholder.com/150'} 
+                        src={profile?.avatar_url || '/icons/icon-192.png'} 
                         alt="Avatar" 
                         style={{width: 80, height: 80, borderRadius: '50%', objectFit: 'cover', opacity: uploading ? 0.5 : 1}} 
                     />
@@ -130,7 +141,7 @@ export default function ProfilePage() {
                             Subiendo...
                         </div>
                     )}
-                </div>
+                </button>
                 <h1>{profile?.alias || 'Usuario'}</h1>
                 <div className="profile-page__badges">
                     <span className="profile-page__badge glass">{profile?.tier === 'free' ? 'Buscador' : profile?.tier}</span>
