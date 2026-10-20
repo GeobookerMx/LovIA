@@ -397,7 +397,7 @@ s3_secret_key = "env(S3_SECRET_KEY)"
 
 [functions.run-matching]
 enabled = true
-verify_jwt = false # Only the server-held LOVIA_MATCHING_JOB_SECRET authorizes this job.
+verify_jwt = true # Keep the matching endpoint closed while its server contract is disabled.
 import_map = "./functions/run-matching/deno.json"
 # Uncomment to specify a custom file path to the entrypoint.
 # Supported file extensions are: .ts, .js, .mjs, .jsx, .tsx
