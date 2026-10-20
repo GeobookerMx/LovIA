@@ -34,3 +34,12 @@ Fecha: 19 de octubre de 2026. Publicación solicitada expresamente sin pruebas. 
 - Publicación directa autorizada mediante Netlify CLI, usando el paquete local `dist`, `--no-build` y `--site a5ff2b62-8531-46f7-b7b7-1c9bdb136af8`. Commit fuente `f946df56bf493b6cf284b57a9842304b25149c79`, presente en `GeobookerMx/LovIA/main`. Deploy ID `6ad6ebddaeb9797e3bb7dc37`, estado API `ready`, URL `https://lovia.com.mx`; asset público `/assets/index-tdCflfvn.js` (HTTP 200). Sin pruebas funcionales por instrucción del propietario.
 - Hasta corregir la fuente Git, una nueva publicación automática desde el repositorio enlazado puede reemplazar esta versión con código antiguo. Repetir Trigger deploy sobre `622adbb` consume minutos y revierte el avance.
 - El deploy `6ad6ebddaeb9797e3bb7dc37` se bloqueó temporalmente con `lockDeploy` (respuesta API `locked=true`) para impedir que el repositorio equivocado vuelva a publicarse automáticamente. Tras conectar `GeobookerMx/LovIA` y verificar un build del commit correcto, desbloquear la publicación automática desde Deploys.
+
+## Actualización visual de Halloween y enlace Android
+
+- Código publicado: `a73be836158c367161acd25cf9101a998e96cc47` en `GeobookerMx/LovIA/main`. El commit modifica el banner temporal y añade en la portada el enlace a la ficha pública de Google Play de `mx.lovia.app`.
+- La ficha de Google Play confirma que la aplicación Android existe; esta publicación web no cambia el paquete Android instalado ni su versión en la tienda.
+- Build de producción completado con `VITE_APP_ENV=production`, `VITE_SUPABASE_EXPECTED_REF=nbpidjpkanwynlhdxowx`, radar y checkout desactivados. No se ejecutaron pruebas funcionales por instrucción del propietario.
+- Despliegue anterior recuperable: `6ad6ebddaeb9797e3bb7dc37`. El nuevo paquete se subió como deploy `6ad6ef7e7960070d8af0981b` y se publicó manualmente mediante `restoreSiteDeploy` sin desbloquear el sitio. La API confirma `state=ready`, `published_at` presente y `locked=true`.
+- `https://lovia.com.mx` respondió HTTP 200 con `/assets/index-um6kDN3a.js`. El sitio conserva el dominio y la protección contra publicaciones automáticas desde el repositorio enlazado incorrectamente.
+- Raven sigue fuera del producto: los prompts maestros lo condicionan a finalidad, licencia para la modalidad digital y revisión profesional. No se anuncia ni se presenta como prueba de estrés o afinidad.
