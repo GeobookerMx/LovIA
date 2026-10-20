@@ -16,7 +16,7 @@ interface AuthState {
     legalAccepted: boolean
 
     initialize: () => Promise<void>
-    signUp: (email: string, password: string, name: string) => Promise<{ error: string | null }>
+    signUp: (email: string, password: string, name: string) => Promise<{ error: string | null; needsEmailConfirmation: boolean }>
     signIn: (email: string, password: string) => Promise<{ error: string | null }>
     signOut: () => Promise<void>
     acceptLegal: () => void
@@ -128,7 +128,7 @@ export const useAuthStore = create<AuthState>((set, get) => ({
 
     signUp: async (email, password, name) => {
         set({ loading: true })
-        const { error } = await supabase.auth.signUp({
+        const { data, error } = await supabase.auth.signUp({
             email,
             password,
             options: {
@@ -136,8 +136,8 @@ export const useAuthStore = create<AuthState>((set, get) => ({
             },
         })
         set({ loading: false })
-        if (error) return { error: error.message }
-        return { error: null }
+        if (error) return { error: error.message, needsEmailConfirmation: false }
+        return { error: null, needsEmailConfirmation: !data.session }
     },
 
     signIn: async (email, password) => {

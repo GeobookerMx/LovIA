@@ -13,19 +13,20 @@ interface MatchData {
     city: string;
     avatar_url: string;
     visibility_mode: 'classic' | 'gradual' | 'essence';
-    compatibility_score: number;
     current_level: number;
 }
 
 export default function MatchesList() {
     const navigate = useNavigate()
-    const { user, profile } = useAuthStore()
+    const { user } = useAuthStore()
     const [matches, setMatches] = useState<MatchData[]>([])
     const [loading, setLoading] = useState(true)
+    const [loadError, setLoadError] = useState(false)
 
     useEffect(() => {
         async function fetchMatches() {
             if (!user) return
+            setLoadError(false)
             
             // Buscar matches donde el usuario es user_a o user_b
             const { data, error } = await supabase
@@ -33,7 +34,6 @@ export default function MatchesList() {
                 .select(`
                     id, 
                     current_level,
-                    compatibility_score,
                     user_a:profiles!matches_user_a_id_fkey(id, alias, age, city, avatar_url, visibility_mode),
                     user_b:profiles!matches_user_b_id_fkey(id, alias, age, city, avatar_url, visibility_mode)
                 `)
@@ -42,6 +42,7 @@ export default function MatchesList() {
 
             if (error) {
                 console.error(error)
+                setLoadError(true)
                 setLoading(false)
                 return
             }
@@ -59,13 +60,10 @@ export default function MatchesList() {
                     city: other.city || 'Ubicación oculta',
                     avatar_url: other.avatar_url || 'https://via.placeholder.com/150',
                     visibility_mode: other.visibility_mode || 'gradual',
-                    compatibility_score: m.compatibility_score,
                     current_level: m.current_level
                 }
             })
 
-            // Sort by compatibility descending
-            formatted.sort((a,b) => b.compatibility_score - a.compatibility_score)
             setMatches(formatted)
             setLoading(false)
         }
@@ -96,84 +94,13 @@ export default function MatchesList() {
         )
     }
 
-    // ✅ Apple 4.3(b): Gate de readiness — diferenciador clave de LovIA
-    // Si no completó el onboarding o su readiness_score es < 40, mostrar pantalla explicativa en lugar de lista de matches
-    const readiness = profile?.readiness_score ?? 0
-    const isUnlocked = readiness >= 40
-
-    if (!profile?.onboarding_completed || !isUnlocked) {
+    if (loadError) {
         return (
             <div className="matches-page">
-                <header className="matches-page__header">
-                    <div>
-                        <h1>Descubrimiento</h1>
-                        <p className="matches-page__subtitle">Basado en tu momento de vida</p>
-                    </div>
-                </header>
-                <div className="matches-page__empty glass animate-scale-in" style={{ padding: '2rem 1.5rem' }}>
-                    <div className="matches-page__empty-icon animate-float" style={{ fontSize: 48, marginBottom: 16 }}>
-                        🔓
-                    </div>
-                    <h2 style={{ marginBottom: 8 }}>Desbloquea el Descubrimiento</h2>
-                    <p style={{ color: 'var(--text-secondary)', marginBottom: 24, lineHeight: 1.6 }}>
-                        LovIA te conecta con personas según tu <strong>momento de vida y preparación (Readiness) relacional</strong>.
-                        Antes de ver matches, necesitas completar los siguientes avances mínimos:
-                    </p>
-
-                    {/* Pasos requeridos */}
-                    <div style={{ display: 'flex', flexDirection: 'column', gap: 12, marginBottom: 28, textAlign: 'left' }}>
-                        {[
-                            { 
-                                icon: '📋', 
-                                title: 'Mapa de Momento de Vida', 
-                                desc: 'Completa el onboarding inicial (5-7 min)', 
-                                done: !!profile?.onboarding_completed, 
-                                action: '/onboarding' 
-                            },
-                            { 
-                                icon: '🧠', 
-                                title: 'Puntaje de Preparación (Readiness)', 
-                                desc: `Completa evaluaciones psicológicas y cognitivas (Necesitas 40+ pts. Tienes: ${readiness}/100)`, 
-                                done: isUnlocked, 
-                                action: '/modules' 
-                            },
-                            { 
-                                icon: '🤳', 
-                                title: 'Foto de perfil', 
-                                desc: 'Agrega tu selfie para generar confianza', 
-                                done: !!profile?.avatar_url, 
-                                action: '/profile' 
-                            },
-                        ].map((step, i) => (
-                            <div key={i}
-                                onClick={() => navigate(step.action)}
-                                style={{
-                                    display: 'flex', alignItems: 'center', gap: 14, padding: '14px 16px',
-                                    borderRadius: 14, cursor: 'pointer',
-                                    background: step.done ? 'rgba(0,200,100,0.08)' : 'rgba(255,255,255,0.04)',
-                                    border: `1px solid ${step.done ? 'rgba(0,200,100,0.3)' : 'rgba(255,255,255,0.1)'}`,
-                                    transition: 'all 0.2s'
-                                }}>
-                                <span style={{ fontSize: 28, flexShrink: 0 }}>{step.done ? '✅' : step.icon}</span>
-                                <div style={{ flex: 1 }}>
-                                    <div style={{ fontWeight: 600, fontSize: '0.95rem', color: step.done ? 'var(--success)' : 'var(--text-primary)' }}>
-                                        {step.title}
-                                    </div>
-                                    <div style={{ fontSize: '0.8rem', color: 'var(--text-secondary)', marginTop: 2 }}>
-                                        {step.done ? '¡Completado!' : step.desc}
-                                    </div>
-                                </div>
-                                <span style={{ color: 'var(--text-tertiary)', fontSize: '1.1rem' }}>{step.done ? '' : '›'}</span>
-                            </div>
-                        ))}
-                    </div>
-
-                    <button className="matches-page__cta" onClick={() => navigate('/onboarding')}>
-                        Comenzar mi Perfil Relacional ✨
-                    </button>
-                    <p style={{ fontSize: '0.75rem', color: 'var(--text-tertiary)', marginTop: 16 }}>
-                        LovIA garantiza conexiones reales basadas en compatibilidad genuina,<br />no en swipe aleatorio.
-                    </p>
+                <div className="matches-page__empty glass" role="alert">
+                    <h1>No pudimos cargar tus conversaciones</h1>
+                    <p>Revisa tu conexión e inténtalo de nuevo. Tus conversaciones no se han borrado.</p>
+                    <button className="matches-page__cta" onClick={() => window.location.reload()}>Reintentar</button>
                 </div>
             </div>
         )
@@ -183,8 +110,8 @@ export default function MatchesList() {
         <div className="matches-page">
             <header className="matches-page__header">
                 <div>
-                    <h1>Descubrimiento</h1>
-                    <p className="matches-page__subtitle">Basado en tu momento de vida</p>
+                    <h1>Mensajes y conexiones</h1>
+                    <p className="matches-page__subtitle">Conversaciones disponibles con tus conexiones activas</p>
                 </div>
             </header>
 
@@ -193,22 +120,16 @@ export default function MatchesList() {
                     <div className="matches-page__empty-icon animate-float">
                         <Heart size={32} color="var(--text-secondary)" />
                     </div>
-                    <h2>No hay perfiles disponibles</h2>
-                    <p>
-                        {!profile?.onboarding_completed 
-                            ? 'Debes completar tu Mapa de Momento de Vida para ver otros perfiles.' 
-                            : 'No encontramos perfiles en tu misma frecuencia o distancia actual.'}
-                    </p>
-                    {!profile?.onboarding_completed && (
-                        <button className="matches-page__cta" onClick={() => navigate('/onboard')} style={{ marginTop: 20 }}>
-                            Hacer Introspección
-                        </button>
-                    )}
+                    <h2>Aún no hay conexiones activas</h2>
+                    <p>Cuando una conexión esté disponible, la encontrarás aquí. Puedes seguir usando la Guía y Mi Diario mientras tanto.</p>
+                    <button className="matches-page__cta" onClick={() => navigate('/modules')} style={{ marginTop: 20 }}>Abrir la Guía</button>
                 </div>
             ) : (
                 <div className="matches-grid">
                     {matches.map(m => (
-                        <div key={m.match_id} className="match-card animate-fade-in-up" onClick={() => navigate(`/matches/${m.match_id}`)}>
+                        <div key={m.match_id} className="match-card animate-fade-in-up" role="button" tabIndex={0}
+                            onClick={() => navigate(`/matches/${m.match_id}`)}
+                            onKeyDown={(event) => { if (event.key === 'Enter' || event.key === ' ') { event.preventDefault(); navigate(`/matches/${m.match_id}`) } }}>
                             
                             {m.visibility_mode === 'essence' && m.current_level < 3 && (
                                 <div className="match-card__essence-bg">
@@ -223,9 +144,7 @@ export default function MatchesList() {
                                 className={getPhotoClass(m.visibility_mode, m.current_level)}
                             />
 
-                            <div className="match-card__score">
-                                {m.compatibility_score}%
-                            </div>
+                            <div className="match-card__score">Conexión activa</div>
                             
                             <div className="match-card__info">
                                 <div className="match-card__name">{m.alias}, {m.age || '?'}</div>

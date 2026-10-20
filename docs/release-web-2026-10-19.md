@@ -25,6 +25,10 @@ Fecha: 19 de octubre de 2026. Publicación solicitada expresamente sin pruebas. 
 - `run-matching` queda bloqueado por código local con respuesta 503; la versión remota desplegada puede ser distinta hasta que se verifique y despliegue la función.
 - No declarar estables builds móviles ni flujos de verificación, sanción, pago o borrado de cuenta con esta publicación web.
 
-## Resultado de publicación
+## Estado de publicación comprobado después del envío
 
-Pendiente de completar tras el envío a `main` y confirmación en el dominio. Registrar aquí commit publicado, nuevo asset y estado observable.
+- `origin/main` (`GeobookerMx/LovIA`) llegó a `e7d9eb2`; el sitio siguió entregando `/assets/index-D9lG1oNY.js`.
+- El panel Netlify mostró un nuevo despliegue *Published* de `main@622adbb` a las 21:58 y el mensaje «All files already uploaded by a previous deploy with the same commits».
+- Una consulta read-only posterior a ambos remotos confirmó `origin/main=e7d9eb2` y `netlify/main=622adbb`. El remoto local llamado `netlify` apunta a `GeobookerMx/elaborate-pavlova-7ebdc9.git`, distinto del repositorio autorizado `GeobookerMx/LovIA`.
+- Es necesario verificar en **Project configuration → Build & deploy → Continuous deployment** qué repositorio y rama utiliza el sitio. Si allí consta el repositorio `elaborate-pavlova-7ebdc9`, conectarlo al repositorio autorizado `GeobookerMx/LovIA`, rama `main`, conservando el site ID y el dominio. No enviar cambios al otro repositorio para resolverlo.
+- No se ha observado publicación de las mejoras en `lovia.com.mx`. El nuevo despliegue y su ID quedan pendientes de acceso autenticado al panel. Repetir Trigger deploy mientras la fuente siga en `622adbb` consume minutos sin actualizar el código.

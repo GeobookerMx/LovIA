@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
-import { TrendingUp, Zap, Target, ChevronRight, Brain, Star, Share2, Lock, Eye } from 'lucide-react'
+import { TrendingUp, Zap, ChevronRight, Brain, Star, Share2 } from 'lucide-react'
 import { useAuthStore } from '../../stores/authStore'
 import { useEvaluationStore } from '../../stores/evaluationStore'
 import { supabase } from '../../lib/supabase'
@@ -43,10 +43,9 @@ function calcReadiness(
 }
 
 function getReadinessBand(score: number) {
-    if (score >= 75) return { label: 'Listo para conectar',       color: 'var(--success)',          emoji: '🟢', discovery: 'open' }
-    if (score >= 60) return { label: 'Preparado',                 color: 'var(--freq-high)',         emoji: '🟢', discovery: 'open' }
-    if (score >= 40) return { label: 'Creciendo',                 color: 'var(--love-warm)',         emoji: '🟡', discovery: 'preview' }
-    return               { label: 'En proceso de autoconocimiento', color: 'var(--freq-low)',         emoji: '🟠', discovery: 'locked' }
+    if (score >= 75) return { label: 'Has explorado muchas actividades', color: 'var(--success)', emoji: '🟢' }
+    if (score >= 40) return { label: 'Sigues explorando a tu ritmo', color: 'var(--love-warm)', emoji: '🟡' }
+    return { label: 'Tu camino apenas comienza', color: 'var(--freq-low)', emoji: '🟠' }
 }
 
 function getNextAction(
@@ -55,13 +54,13 @@ function getNextAction(
     evalProgress: number,
     profilePct: number,
 ): { icon: string; title: string; desc: string; route: string } {
-    if (profilePct < 60) return { icon: '👤', title: 'Completa tu perfil', desc: 'Faltan datos clave para tu Frecuencia de Relación', route: '/profile/edit' }
-    if (!assessmentsDone.includes('attachment')) return { icon: '💚', title: 'Descubre tu Estilo de Apego', desc: 'Suma 10 puntos a tu Readiness · 3 min', route: '/assessment/attachment' }
-    if (!assessmentsDone.includes('bigfive'))    return { icon: '🧬', title: 'Evalúa tu Personalidad OCEAN', desc: 'Suma 10 puntos · BFI-10 validado · 4 min', route: '/assessment/bigfive' }
-    if (!assessmentsDone.includes('values'))     return { icon: '🌟', title: 'Define tus Valores Esenciales', desc: 'Suma 10 puntos a tu compatibilidad · 2 min', route: '/assessment/values' }
-    if (evalProgress < 100)                      return { icon: '🧠', title: 'Completa las evaluaciones', desc: 'Stroop, Memoria, Tolerancia... suma 20 puntos', route: '/modules' }
-    if (score < 60)                              return { icon: '⚡', title: 'Responde la Chispa de hoy', desc: 'Cada respuesta mejora tu perfil relacional', route: '/spark' }
-    return { icon: '🎯', title: 'Explora tu compatibilidad', desc: 'Tu Frecuencia de Relación está activa', route: '/radar' }
+    if (profilePct < 60) return { icon: '👤', title: 'Revisa tu perfil', desc: 'Decide qué información quieres compartir', route: '/profile/edit' }
+    if (!assessmentsDone.includes('attachment')) return { icon: '💚', title: 'Explora cómo te vinculas', desc: 'Actividad opcional de reflexión', route: '/assessment/attachment' }
+    if (!assessmentsDone.includes('bigfive'))    return { icon: '🧬', title: 'Conoce tus preferencias', desc: 'Una reflexión opcional; no mide tu valor personal', route: '/assessment/bigfive' }
+    if (!assessmentsDone.includes('values'))     return { icon: '🌟', title: 'Piensa en tus valores', desc: 'Elige qué importa para ti en una relación', route: '/assessment/values' }
+    if (evalProgress < 100)                      return { icon: '📚', title: 'Abre la Guía', desc: 'Encuentra ejercicios breves para hacer a tu ritmo', route: '/modules' }
+    if (score < 60)                              return { icon: '⚡', title: 'Responde la Chispa de hoy', desc: 'Una pregunta breve para reflexionar', route: '/spark' }
+    return { icon: '🎯', title: 'Explora LovIA', desc: 'Revisa tus opciones disponibles', route: '/radar' }
 }
 
 interface Spark { question: string; category: string; responded?: boolean }
@@ -127,12 +126,12 @@ export default function Home() {
             </header>
 
             {/* ══════════════════════════════════════════════
-                BLOQUE 1 — Frecuencia de Relación (banda, no número)
+                BLOQUE 1 — Progreso educativo privado
             ══════════════════════════════════════════════ */}
             <div className="home__block home__block--frequency glass animate-fade-in-up">
                 <div className="home__block-header">
                     <TrendingUp size={18} color={band.color} />
-                    <span>Tu Frecuencia de Relación</span>
+                    <span>Tu progreso en LovIA</span>
                     <button className="home__block-cta" onClick={() => navigate('/profile/graph')}>
                         Ver análisis <ChevronRight size={14} />
                     </button>
@@ -143,20 +142,13 @@ export default function Home() {
                     <span className="home__freq-label">{band.label}</span>
                 </div>
 
-                {/* Barra de progreso — readiness */}
+                {/* Progreso voluntario de actividades; no mide compatibilidad ni elegibilidad. */}
                 <div className="home__freq-bar-track">
                     <div className="home__freq-bar-fill" style={{ width: `${readiness}%`, background: band.color }} />
-                    {/* Marcas de umbral */}
-                    <div className="home__freq-threshold" style={{ left: '40%' }} title="preview" />
-                    <div className="home__freq-threshold" style={{ left: '60%' }} title="open" />
-                    <div className="home__freq-threshold" style={{ left: '75%' }} title="match" />
                 </div>
 
-                {/* Estado de descubrimiento */}
                 <div className="home__discovery-state">
-                    {band.discovery === 'locked' && <><Lock size={13} /> Solo introspección por ahora</>}
-                    {band.discovery === 'preview' && <><Eye size={13} /> Vista previa de compatibilidades desbloqueada</>}
-                    {band.discovery === 'open'    && <><Target size={13} /> Descubrimiento completo activo</>}
+                    Tus actividades son opcionales y no desbloquean personas ni mensajes.
                 </div>
             </div>
 

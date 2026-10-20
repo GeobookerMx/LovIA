@@ -21,9 +21,8 @@ import { isNative } from './platform'
 // ── URL Helpers ──────────────────────────────────────────────────────────────
 
 const getWebRedirectUrl = (path = '/auth/callback') => {
-  const host = window.location.hostname
-  // The production apex redirects to www. Staging must stay on its own origin.
-  if (host === 'lovia.com.mx' || host === 'www.lovia.com.mx') return `https://www.lovia.com.mx${path}`
+  // PKCE stores its verifier on the starting origin. Keep the callback on that origin.
+  // Both apex and www must be present in Supabase Auth's allowed redirect URLs.
   return `${window.location.origin}${path}`
 }
 

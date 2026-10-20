@@ -24,7 +24,12 @@ export default function Login() {
         let active = true
         void supabase.from('profiles').select('onboarding_completed').eq('id', user.id).maybeSingle()
             .then(({ data, error }) => {
-                if (active) navigate(!error && data?.onboarding_completed ? '/home' : '/onboarding', { replace: true })
+                if (!active) return
+                if (error) {
+                    setError('No pudimos cargar tu perfil. Inténtalo de nuevo.')
+                    return
+                }
+                navigate(data?.onboarding_completed ? '/home' : '/onboarding', { replace: true })
             })
         return () => { active = false }
     }, [user, initialized, navigate])
@@ -66,8 +71,8 @@ export default function Login() {
                 .maybeSingle()
 
             if (profileError) {
-                console.warn('[LovIA] Error leyendo perfil:', profileError.message, '— enviando a /onboarding')
-                navigate('/onboarding')
+                console.warn('[LovIA] Error leyendo perfil:', profileError.message)
+                setError('Entraste a tu cuenta, pero no pudimos cargar tu perfil. Revisa tu conexión e inténtalo de nuevo.')
                 return
             }
 

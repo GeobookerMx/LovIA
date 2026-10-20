@@ -3,8 +3,7 @@ import { Outlet } from 'react-router-dom'
 import { supabase } from '../../lib/supabase'
 import { Shield, LogIn, AlertTriangle, Loader } from 'lucide-react'
 
-// ── Correos autorizados como admin ───────────────────────────────────────────
-type State = 'loading' | 'allowed' | 'denied' | 'unauthenticated'
+type State = 'loading' | 'allowed' | 'denied' | 'unavailable' | 'unauthenticated'
 
 export default function AdminGuard() {
   const [state, setState] = useState<State>('loading')
@@ -23,7 +22,7 @@ export default function AdminGuard() {
 
       setUserEmail(user.email ?? null)
       const { data: allowed, error } = await supabase.rpc('is_admin')
-      if (active) setState(!error && allowed === true && user.app_metadata?.role === 'admin' ? 'allowed' : 'denied')
+      if (active) setState(error ? 'unavailable' : allowed === true && user.app_metadata?.role === 'admin' ? 'allowed' : 'denied')
     }
 
     void check()
@@ -54,13 +53,24 @@ export default function AdminGuard() {
           onClick={async () => {
             await supabase.auth.signInWithOAuth({
               provider: 'google',
-              options: { redirectTo: `${window.location.origin}/admin` }
+              options: { redirectTo: `${window.location.origin}/auth/callback?next=/admin` }
             })
           }}
         >
           <LogIn size={18} />
           Continuar con Google
         </button>
+      </div>
+    </div>
+  )
+
+  if (state === 'unavailable') return (
+    <div style={styles.screen} role="alert">
+      <div style={styles.card}>
+        <AlertTriangle size={48} color="#F59E0B" />
+        <h1 style={styles.title}>No pudimos verificar el acceso</h1>
+        <p style={styles.subtitle}>El panel sigue protegido. Revisa la conexión e inténtalo de nuevo.</p>
+        <button style={styles.btn} onClick={() => window.location.reload()}>Reintentar</button>
       </div>
     </div>
   )

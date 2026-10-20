@@ -2,17 +2,6 @@ import { Link } from 'react-router-dom'
 import { Heart, Shield, Brain, Sparkles, ArrowRight, Star, BookOpen, Mail, Instagram } from 'lucide-react'
 import './Landing.css'
 
-const scienceAuthors = [
-    { name: 'J. P. Peña', field: 'Evolución de las Relaciones de Pareja', year: '2023' },
-    { name: 'Sternberg', field: 'Teoría Triangular del Amor', year: '1986' },
-    { name: 'Gottman', field: '7 Principios del Matrimonio', year: '1999' },
-    { name: 'Chapman', field: '5 Lenguajes del Amor', year: '1992' },
-    { name: 'Johnson', field: 'Terapia Focalizada en Emociones', year: '2008' },
-    { name: 'Perel', field: 'Deseo y Relaciones Modernas', year: '2006' },
-    { name: 'Cohen', field: 'PSS-4 Estrés Percibido', year: '1983' },
-    { name: 'Gross & John', field: 'Regulación Emocional (ERQ)', year: '2003' },
-]
-
 export default function Landing() {
     return (
         <div className="landing">
@@ -34,16 +23,17 @@ export default function Landing() {
                         Conecta desde quien eres
                     </p>
                     <p className="landing__description">
-                        Descubre herramientas para conocerte mejor y conectar con personas
-                        según intereses y preferencias recíprocas.
+                        Conoce personas, reflexiona sobre tus vínculos y encuentra herramientas
+                        para cuidar tus relaciones a tu ritmo.
                     </p>
+                    <p className="landing__audience">Para personas adultas. Explorar personas y conversar requiere consentimiento y controles de seguridad.</p>
 
                     <div className="landing__free-banner">
                         🎉 <strong>Acceso completo gratis hasta el 31 de enero de 2027</strong> — Sin tarjeta requerida
                     </div>
 
                     <div className="landing__cta-group">
-                        <Link to="/home" className="landing__cta landing__cta--primary">
+                        <Link to="/register" className="landing__cta landing__cta--primary">
                             Comenzar gratis
                             <ArrowRight size={18} />
                         </Link>
@@ -71,7 +61,7 @@ export default function Landing() {
                     <div className="landing__feature-icon" style={{ background: 'rgba(168, 85, 247, 0.15)' }}>
                         <Brain size={24} color="var(--line-sex)" />
                     </div>
-                    <h3>27+ Factores</h3>
+                    <h3>Conócete mejor</h3>
                     <p>Reflexiona sobre comunicación, valores y bienestar con actividades opcionales.</p>
                 </div>
 
@@ -79,7 +69,7 @@ export default function Landing() {
                     <div className="landing__feature-icon" style={{ background: 'rgba(34, 211, 238, 0.15)' }}>
                         <Shield size={24} color="var(--line-realization)" />
                     </div>
-                    <h3>Seguridad Multi-Capa</h3>
+                    <h3>Herramientas de seguridad</h3>
                     <p>Herramientas de reporte y bloqueo para cuidar tu experiencia.</p>
                 </div>
 
@@ -92,53 +82,17 @@ export default function Landing() {
                 </div>
             </section>
 
-            {/* Science Section */}
+            {/* Orientación inicial sin afirmar validaciones no revisadas */}
             <section className="landing__science">
                 <div className="landing__science-header animate-fade-in-up">
                     <BookOpen size={28} color="var(--love-warm)" />
-                    <h2>Respaldado por <span className="text-gradient">Ciencia</span></h2>
-                    <p>Consulta las fuentes y los límites de cada herramienta antes de usarla.</p>
+                    <h2>Encuentra tu <span className="text-gradient">camino</span></h2>
+                    <p>Empieza por lo que te interesa hoy. Las actividades de reflexión son opcionales y tus notas del diario son privadas.</p>
                 </div>
-
-                <div className="landing__science-counter glass-strong animate-fade-in-up">
-                    <span className="landing__science-number">37+</span>
-                    <span className="landing__science-label">estudios publicados respaldan nuestro modelo</span>
-                </div>
-
-                <div className="landing__science-authors stagger-children">
-                    {scienceAuthors.map((author) => (
-                        <div key={author.name} className="landing__author-badge glass">
-                            <strong>{author.name}</strong>
-                            <span>{author.field}</span>
-                            <small>{author.year}</small>
-                        </div>
-                    ))}
-                </div>
-
-                <div className="landing__science-instruments animate-fade-in-up">
-                    <h3>Instrumentos Validados</h3>
-                    <div className="landing__instruments-grid">
-                        <div className="landing__instrument glass">
-                            <span className="landing__instrument-tag">PSS-4</span>
-                            <p>Estrés percibido — Cohen et al., 1983</p>
-                        </div>
-                        <div className="landing__instrument glass">
-                            <span className="landing__instrument-tag">ERQ</span>
-                            <p>Regulación emocional — Gross & John, 2003</p>
-                        </div>
-                        <div className="landing__instrument glass">
-                            <span className="landing__instrument-tag">ICI</span>
-                            <p>Tolerancia a frustración — Validado UNAM</p>
-                        </div>
-                        <div className="landing__instrument glass">
-                            <span className="landing__instrument-tag">Stroop</span>
-                            <p>Control cognitivo — Stroop, 1935</p>
-                        </div>
-                        <div className="landing__instrument glass">
-                            <span className="landing__instrument-tag">WAIS-IV</span>
-                            <p>Memoria de trabajo — Wechsler, 2008</p>
-                        </div>
-                    </div>
+                <div className="landing__paths">
+                    <div className="landing__path glass"><Heart size={24} /><h3>Quiero conocer personas</h3><p>Revisa tus conexiones y conversa sólo cuando exista autorización mutua.</p></div>
+                    <div className="landing__path glass"><Brain size={24} /><h3>Quiero comprenderme mejor</h3><p>Usa la Guía, ejercicios y Mi Diario de forma voluntaria.</p></div>
+                    <div className="landing__path glass"><Shield size={24} /><h3>Quiero cuidar mi relación</h3><p>Explora herramientas de comunicación sin aparecer por ello en descubrimiento.</p></div>
                 </div>
             </section>
 
@@ -177,8 +131,8 @@ export default function Landing() {
                     </a>
                 </div>
                 <div className="landing__footer-bottom">
-                    <p>© 2025 LovIA! — Todos los derechos reservados</p>
-                    <Link to="/home" className="landing__footer-link">Acerca del Autor</Link>
+                    <p>© 2026 LovIA! — Juan Pablo Peña García</p>
+                    <Link to="/login" className="landing__footer-link">Ya tengo una cuenta</Link>
                 </div>
             </footer>
         </div>

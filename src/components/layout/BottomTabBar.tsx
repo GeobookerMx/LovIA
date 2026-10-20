@@ -1,6 +1,5 @@
 import { Link } from 'react-router-dom'
-import { Home, Heart, MapPin, Users, User } from 'lucide-react'
-import { useAuthStore } from '../../stores/authStore'
+import { Home, Heart, MapPin, BookOpen, User } from 'lucide-react'
 import './BottomTabBar.css'
 
 interface Props {
@@ -9,31 +8,17 @@ interface Props {
 
 const tabs = [
     { path: '/home', icon: Home, label: 'Inicio' },
-    { path: '/radar', icon: MapPin, label: 'Radar' },
-    { path: '/matches', icon: Heart, label: 'Matches' },
-    { path: '/community', icon: Users, label: 'Comunidad' },
+    { path: '/radar', icon: MapPin, label: 'Explorar' },
+    { path: '/modules', icon: BookOpen, label: 'Guía' },
+    { path: '/matches', icon: Heart, label: 'Mensajes' },
     { path: '/profile', icon: User, label: 'Perfil' },
 ]
 
 export default function BottomTabBar({ currentPath }: Props) {
-    const profile = useAuthStore(s => s.profile)
-    
-    // Obtener readiness score del perfil del usuario
-    const readiness = profile?.readiness_score ?? 0
-    const isUnlocked = readiness >= 40
-
-    // Ocultar visualmente 'Radar' y 'Matches' si el score es inferior a 40 (Discovery locked/preview threshold)
-    const visibleTabs = tabs.filter(tab => {
-        if (tab.path === '/radar' || tab.path === '/matches') {
-            return isUnlocked
-        }
-        return true
-    })
-
     return (
         <nav className="tab-bar" role="navigation" aria-label="Navegación principal">
-            {visibleTabs.map(({ path, icon: Icon, label }) => {
-                const isActive = currentPath === path
+            {tabs.map(({ path, icon: Icon, label }) => {
+                const isActive = currentPath === path || currentPath.startsWith(`${path}/`)
                 return (
                     <Link
                         key={path}

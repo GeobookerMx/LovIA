@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react'
 import { Link, useNavigate } from 'react-router-dom'
 import { useAuthStore } from '../../stores/authStore'
+import { supabase } from '../../lib/supabase'
 import { signInWithGoogle, signInWithApple } from '../../lib/socialAuth'
 import { Mail, Lock, User, ArrowRight, Eye, EyeOff, AlertCircle, CheckCircle, Loader2 } from 'lucide-react'
 import { trackEvent } from '../../lib/analytics'
@@ -15,6 +16,7 @@ export default function Register() {
     const [showPassword, setShowPassword] = useState(false)
     const [error, setError] = useState<string | null>(null)
     const [success, setSuccess] = useState(false)
+    const [needsEmailConfirmation, setNeedsEmailConfirmation] = useState(false)
     const [showLegal, setShowLegal] = useState(false)
     const [legalAccepted, setLegalAccepted] = useState(false)
     const [submitting, setSubmitting] = useState(false)
@@ -28,9 +30,15 @@ export default function Register() {
 
     // Redirigir si ya está autenticado — cubre el caso OAuth nativo.
     useEffect(() => {
-        if (initialized && user) {
-            navigate('/onboarding', { replace: true })
-        }
+        if (!initialized || !user) return
+        let active = true
+        void supabase.from('profiles').select('onboarding_completed').eq('id', user.id).maybeSingle()
+            .then(({ data, error }) => {
+                if (!active) return
+                if (error) { setError('No pudimos cargar tu perfil. Inténtalo de nuevo.'); return }
+                navigate(data?.onboarding_completed ? '/home' : '/onboarding', { replace: true })
+            })
+        return () => { active = false }
     }, [user, initialized, navigate])
 
     const passwordChecks = {
@@ -78,9 +86,10 @@ export default function Register() {
                 return
             }
 
-            trackEvent('signup_completed')
+            if (!result.needsEmailConfirmation) trackEvent('signup_completed')
+            setNeedsEmailConfirmation(result.needsEmailConfirmation)
             setSuccess(true)
-            setTimeout(() => navigate('/onboarding'), 1500)
+            if (!result.needsEmailConfirmation) setTimeout(() => navigate('/onboarding'), 1500)
         } finally {
             setSubmitting(false)
         }
@@ -112,10 +121,13 @@ export default function Register() {
                     <div className="auth-card__success-icon animate-heartbeat">
                         <CheckCircle size={48} color="var(--success)" />
                     </div>
-                    <h2>¡Cuenta creada!</h2>
+                    <h2>{needsEmailConfirmation ? 'Revisa tu correo' : '¡Cuenta creada!'}</h2>
                     <p style={{ color: 'var(--text-secondary)', marginTop: 'var(--space-3)' }}>
-                        ¡Bienvenido/a a LovIA! Entrando a tu cuenta...
+                        {needsEmailConfirmation
+                            ? 'Si recibes un mensaje de LovIA, confirma tu correo para entrar. Después inicia sesión.'
+                            : '¡Bienvenido/a a LovIA! Entrando a tu cuenta...'}
                     </p>
+                    {needsEmailConfirmation && <Link to="/login" className="btn btn-primary">Ir a iniciar sesión</Link>}
                 </div>
             </div>
         )

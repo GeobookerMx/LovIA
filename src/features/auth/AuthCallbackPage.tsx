@@ -20,12 +20,21 @@ export default function AuthCallbackPage() {
         subscription.unsubscribe()
         console.log('[LovIA] AuthCallback: sesión recibida.')
 
-        const { data: profile } = await supabase
+        if (searchParams.get('next') === '/admin') {
+          navigate('/admin', { replace: true })
+          return
+        }
+
+        const { data: profile, error: profileError } = await supabase
           .from('profiles')
           .select('onboarding_completed')
           .eq('id', session.user.id)
           .maybeSingle()
 
+        if (profileError) {
+          setErrorMsg('Entraste a tu cuenta, pero no pudimos cargar tu perfil. Vuelve a intentarlo.')
+          return
+        }
         const destination = profile?.onboarding_completed ? '/home' : '/onboarding'
         navigate(destination, { replace: true })
       }
@@ -68,9 +77,8 @@ export default function AuthCallbackPage() {
         subscription.unsubscribe()
         console.log('[LovIA] AuthCallback: sesión verificada.')
 
-        const next = searchParams.get('next')
-        if (next === '/onboarding') {
-          navigate('/onboarding', { replace: true })
+        if (searchParams.get('next') === '/admin') {
+          navigate('/admin', { replace: true })
           return
         }
 
@@ -82,9 +90,8 @@ export default function AuthCallbackPage() {
           .maybeSingle()
 
         if (profileError) {
-          // Error de DB — onboarding es el camino más seguro
           console.warn('[LovIA] AuthCallback: error leyendo perfil:', profileError.message)
-          navigate('/onboarding', { replace: true })
+          setErrorMsg('Entraste a tu cuenta, pero no pudimos cargar tu perfil. Vuelve a intentarlo.')
           return
         }
 
