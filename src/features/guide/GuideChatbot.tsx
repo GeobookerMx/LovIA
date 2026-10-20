@@ -1,5 +1,5 @@
 /**
- * LovIA! — Dr. LovIA Guide Chatbot Widget
+ * LovIA! — automated Guide widget
  * Floating chatbot accessible from any screen.
  * Uses a rule-based knowledge base — no external AI API required.
  */
@@ -114,7 +114,7 @@ export default function GuideChatbot() {
     const [input, setInput] = useState('')
     const [typing, setTyping] = useState(false)
     const [specialists, setSpecialists] = useState<SpecialistPreview[]>([])
-    const [hasGreeted, setHasGreeted] = useState(false)
+    const greetedRef = useRef(false)
     const messagesEndRef = useRef<HTMLDivElement>(null)
     const inputRef = useRef<HTMLInputElement>(null)
     const navigate = useNavigate()
@@ -135,17 +135,6 @@ export default function GuideChatbot() {
         messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' })
     }, [messages, typing])
 
-    // Show welcome message when first opened
-    useEffect(() => {
-        if (open && !hasGreeted) {
-            setHasGreeted(true)
-            pushBotMessage(INTENTS.welcome, 350)
-        }
-        if (open) {
-            setTimeout(() => inputRef.current?.focus(), 400)
-        }
-    }, [open])
-
     const pushBotMessage = useCallback((msg: BotMessage, delay = 0) => {
         setTyping(true)
         setTimeout(() => {
@@ -160,6 +149,21 @@ export default function GuideChatbot() {
             }])
         }, delay + 600 + Math.random() * 400)
     }, [])
+
+    // Focus the question field when the guide opens.
+    useEffect(() => {
+        if (!open) return
+        const focusTimer = window.setTimeout(() => inputRef.current?.focus(), 400)
+        return () => window.clearTimeout(focusTimer)
+    }, [open])
+
+    const openGuide = () => {
+        setOpen(true)
+        if (!greetedRef.current) {
+            greetedRef.current = true
+            pushBotMessage(INTENTS.welcome, 350)
+        }
+    }
 
     const handleIntent = useCallback((intent: string) => {
         // Clear quick replies from all previous messages
@@ -217,9 +221,9 @@ export default function GuideChatbot() {
             {!open && (
                 <button
                     className="guide-fab"
-                    onClick={() => setOpen(true)}
+                    onClick={openGuide}
                     aria-label="Abrir Guía LovIA"
-                    title="Dr. LovIA — Tu guía"
+                    title="Guía automática de LovIA"
                 >
                     <MessageCircle size={22} color="white" />
                     <div className="guide-fab__badge" />
@@ -233,8 +237,8 @@ export default function GuideChatbot() {
                     <div className="guide-header">
                         <div className="guide-avatar">🧠</div>
                         <div className="guide-header__info">
-                            <div className="guide-header__name">Dr. LovIA</div>
-                            <div className="guide-header__status">En línea ahora</div>
+                            <div className="guide-header__name">Guía LovIA</div>
+                            <div className="guide-header__status">Respuestas automáticas</div>
                         </div>
                         <button className="guide-close" onClick={() => setOpen(false)}>
                             <X size={14} />

@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useCallback } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { Zap, ChevronLeft, ChevronRight, Flame, Loader2 } from 'lucide-react'
 import { supabase } from '../../lib/supabase'
@@ -30,12 +30,7 @@ export default function SparkPage() {
     const [topPattern, setTopPattern] = useState<UserPattern | null>(null)
     const [showSuccess, setShowSuccess] = useState(false)
 
-    useEffect(() => {
-        if (!user) return
-        loadTodayData()
-    }, [user])
-
-    const loadTodayData = async () => {
+    const loadTodayData = useCallback(async () => {
         try {
             setLoading(true)
             // ✅ FIX TIMEZONE: usar zona horaria de México, no UTC
@@ -99,8 +94,9 @@ export default function SparkPage() {
 
                 if (recentResponses && recentResponses.length > 0) {
                     const counts: Record<string, number> = {}
-                    recentResponses.forEach((r: any) => {
-                        const cat = r.sparks?.category
+                    recentResponses.forEach((responseRow) => {
+                        const relation = responseRow.sparks as { category?: string } | null
+                        const cat = relation?.category
                         if (cat) counts[cat] = (counts[cat] || 0) + 1
                     })
                     const top = Object.entries(counts).sort((a, b) => b[1] - a[1])[0]
@@ -112,7 +108,12 @@ export default function SparkPage() {
         } finally {
             setLoading(false)
         }
-    }
+    }, [user])
+
+    useEffect(() => {
+        if (!user) return
+        void loadTodayData()
+    }, [user, loadTodayData])
 
     const handleSelectOption = async (index: number) => {
         if (hasRespondedToday || !user || !spark) return
@@ -132,7 +133,11 @@ export default function SparkPage() {
         }
 
         // RPC de racha — silenciamos error para no bloquear el flujo
-        try { await supabase.rpc('update_user_streak', { p_user_id: user.id }) } catch (_) {}
+        try {
+            await supabase.rpc('update_user_streak', { p_user_id: user.id })
+        } catch (error) {
+            console.warn('[Spark] No se pudo actualizar la racha:', error)
+        }
 
         // Sincronizar spark_streak en profiles para que Home lo pueda leer
         try {
@@ -140,7 +145,9 @@ export default function SparkPage() {
             await supabase.from('profiles')
                 .update({ spark_streak: newStreak })
                 .eq('id', user.id)
-        } catch (_) {}
+        } catch (error) {
+            console.warn('[Spark] No se pudo sincronizar el progreso:', error)
+        }
 
         // Mostrar pantalla de éxito — el usuario cierra manualmente
         setShowSuccess(true)
@@ -167,8 +174,8 @@ export default function SparkPage() {
                         ¡Chispa del día completada!
                     </h2>
                     <p style={{ color: 'var(--text-secondary)', marginBottom: 4, lineHeight: 1.5 }}>
-                        Tu respuesta queda guardada y contribuye a tu<br/>
-                        <strong style={{ color: 'var(--love-rose)' }}>perfil de compatibilidad</strong>.
+                        Tu respuesta queda guardada como parte de tu<br/>
+                        <strong style={{ color: 'var(--love-rose)' }}>recorrido personal</strong>.
                     </p>
 
                     {/* Racha */}
@@ -205,8 +212,8 @@ export default function SparkPage() {
                         </p>
                         <p style={{ fontSize: '0.82rem', color: 'var(--text-secondary)', lineHeight: 1.5 }}>
                             Las preguntas de introspección se actualizan <strong>cada mañana a las 6:00 AM</strong>.
-                            El proceso de autoconocimiento funciona mejor con <strong>consistencia diaria</strong> —
-                            pequeñas reflexiones cada día construyen un perfil de compatibilidad más preciso.
+                            Puedes volver cuando te resulte útil. La racha es voluntaria y no cambia tu acceso,
+                            visibilidad ni tus conexiones.
                         </p>
                     </div>
 

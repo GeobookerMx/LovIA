@@ -8,7 +8,7 @@ interface ShareCardProps {
 
 const SHARE_URL = 'https://lovia.com.mx'
 const SHARE_TEXT = '❤️ Descubrí LovIA! Conecta desde quien eres. Acceso gratis hasta el 31 de enero de 2027, sin tarjeta.'
-const SHARE_HASHTAGS = '#LovIA #PsicologiaEvolutiva #RelacionesDeParejas'
+const SHARE_HASHTAGS = '#LovIA #Conexiones #RelacionesDePareja'
 
 const WA_TEXT = encodeURIComponent(`${SHARE_TEXT}\n\n${SHARE_URL}\n\n${SHARE_HASHTAGS}`)
 const WA_URL = `https://wa.me/?text=${WA_TEXT}`
@@ -36,7 +36,7 @@ export default function ShareCard({ onClose }: ShareCardProps) {
         }
         try {
             await navigator.share({
-                title: 'LovIA! — Relaciones basadas en ciencia',
+                title: 'LovIA! — Conecta desde quien eres',
                 text: SHARE_TEXT,
                 url: SHARE_URL,
             })
@@ -78,7 +78,7 @@ export default function ShareCard({ onClose }: ShareCardProps) {
 
                 {/* Mensaje */}
                 <h3 className="share-modal__title">¡Invita a alguien especial!</h3>
-                <p className="share-modal__subtitle">El amor basado en ciencia merece compartirse 🧠❤️</p>
+                <p className="share-modal__subtitle">Comparte un espacio para conversar y conocerse mejor ❤️</p>
 
                 {/* Botones */}
                 <div className="share-modal__actions">

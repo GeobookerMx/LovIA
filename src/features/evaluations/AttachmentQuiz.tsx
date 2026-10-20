@@ -130,8 +130,8 @@ export default function AttachmentQuiz() {
           </div>
 
           <div className="assessment-result__impact">
-            <h4>¿Cómo afecta tu compatibilidad?</h4>
-            <p>Tu estilo de apego ahora forma parte de tu <strong>Gráfica Relacional</strong> y mejora la precisión de tus matches en un <strong>25%</strong>.</p>
+            <h4>Cómo usar este resultado</h4>
+            <p>Tómalo como una invitación a observar patrones y conversar. No mide compatibilidad ni determina qué personas puedes conocer.</p>
           </div>
 
           <button className="btn btn-primary assessment-result__btn" onClick={handleSave} disabled={saving}>

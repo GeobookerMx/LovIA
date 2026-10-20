@@ -8,7 +8,7 @@ export default function Footer() {
             <div className="app-footer__logo">Lov<span className="text-gradient">IA!</span></div>
             
             <p className="app-footer__text">
-                Construyendo relaciones más fuertes y saludables a través de ciencia y tecnología.
+                Un espacio para conocer personas, conversar y reflexionar a tu ritmo.
             </p>
             
             <a href="mailto:clienteslovia@gmail.com" className="app-footer__contact">

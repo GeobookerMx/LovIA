@@ -11,6 +11,72 @@
     overflow-x: hidden;
 }
 
+.onboarding--welcome {
+    align-items: center;
+    justify-content: center;
+    gap: clamp(1.25rem, 3vw, 2rem);
+    padding: clamp(1.5rem, 4vw, 3rem) 1rem;
+}
+
+.onboarding__intro,
+.onboarding__goal-grid,
+.onboarding__first-step,
+.onboarding__finish {
+    width: min(100%, 720px);
+}
+
+.onboarding__intro { text-align: center; }
+.onboarding__kicker {
+    color: var(--love-warm);
+    font-size: var(--fs-sm);
+    font-weight: 700;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+}
+.onboarding__intro h1 { margin: 0.5rem 0; font-size: clamp(1.8rem, 5vw, 2.8rem); }
+.onboarding__intro p { color: var(--text-secondary); line-height: 1.6; }
+
+.onboarding__goal-grid { display: grid; gap: 0.75rem; }
+.onboarding__goal {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    width: 100%;
+    min-height: 5.5rem;
+    padding: 1rem 1.15rem;
+    border: 1px solid var(--border-default);
+    border-radius: var(--radius-lg);
+    color: var(--text-primary);
+    background: var(--bg-card);
+    text-align: left;
+}
+.onboarding__goal:hover,
+.onboarding__goal:focus-visible { border-color: var(--love-rose); background: var(--bg-glass-strong); }
+.onboarding__goal--selected { border: 2px solid var(--love-rose); background: rgba(255, 77, 109, 0.12); }
+.onboarding__goal-icon { font-size: 1.8rem; flex: none; }
+.onboarding__goal-text { display: flex; flex: 1; flex-direction: column; gap: 0.2rem; }
+.onboarding__goal-text strong { font-size: 1rem; }
+.onboarding__goal-text span { color: var(--text-secondary); font-size: 0.9rem; line-height: 1.4; }
+.onboarding__goal-indicator { color: var(--love-rose); font-size: 1.3rem; font-weight: 700; }
+
+.onboarding__first-step {
+    padding: 1rem 1.25rem;
+    border: 1px solid rgba(251, 191, 36, 0.35);
+    border-radius: var(--radius-lg);
+    background: rgba(251, 191, 36, 0.08);
+}
+.onboarding__first-step-label { color: var(--love-warm); font-size: var(--fs-sm); font-weight: 700; }
+.onboarding__first-step p { margin: 0.4rem 0; font-size: 1.05rem; }
+.onboarding__first-step small { color: var(--text-secondary); line-height: 1.4; }
+.onboarding__finish { display: flex; flex-direction: column; align-items: center; gap: 0.6rem; text-align: center; }
+.onboarding__finish .onboarding__cta { min-height: 3rem; }
+.onboarding__finish > p { max-width: 480px; color: var(--text-secondary); font-size: var(--fs-sm); line-height: 1.5; }
+.onboarding__error { color: #fecaca !important; }
+
+@media (prefers-reduced-motion: reduce) {
+    .onboarding__goal { transition: none; }
+}
+
 /* ── Top Bar (progress) ── */
 .onboarding__top-bar {
     display: flex;

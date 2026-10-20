@@ -160,7 +160,7 @@ export default function BookPage() {
                             </div>
                             <div className="book-stat">
                                 <Heart size={14} />
-                                <span>Psicología Evolutiva</span>
+                                <span>Relaciones de pareja</span>
                             </div>
                             <div className="book-stat">
                                 <Clock size={14} />
@@ -175,28 +175,27 @@ export default function BookPage() {
                     <h4>Sobre este libro</h4>
                     <p>
                         <strong style={{ color: 'var(--love-rose)' }}>"Evolución de las Relaciones de Pareja"</strong>{' '}
-                        es la obra que fundamenta científicamente todo el ecosistema de LovIA!
+                        es una obra de Juan Pablo Peña García que inspira parte del marco educativo de LovIA.
                     </p>
                     <p>
-                        En sus páginas encontrarás la Teoría de los <strong>Apegos Paralelos</strong>,
-                        la <strong>Frustración Periférica</strong> y las <strong>Dinámicas de Intercambio Energético</strong> —
-                        los tres pilares que explican por qué algunas relaciones prosperan y otras se desgastan,
-                        desde una perspectiva de la psicología evolutiva moderna.
+                        El texto propone conceptos y preguntas sobre los vínculos de pareja. Se presenta como
+                        material del autor para lectura y reflexión; sus ideas no sustituyen una evaluación
+                        profesional ni constituyen por sí mismas instrumentos psicológicos validados.
                     </p>
                     <p style={{ color: 'var(--text-tertiary)', fontSize: '0.82rem', marginTop: '8px' }}>
-                        #terapiadepareja · #psicologiaevolutiva · #relacionesdepareja
+                        #relacionesdepareja · #autoconocimiento · #conversaciones
                     </p>
                 </div>
 
                 {/* Temas del libro */}
                 <div className="book-topics">
                     {[
-                        { emoji: '🧠', label: 'Neurociencia del apego', desc: 'Cómo el cerebro construye vínculos duraderos' },
-                        { emoji: '💞', label: 'Compatibilidad profunda', desc: 'Más allá del atractivo superficial' },
-                        { emoji: '🔄', label: 'Ciclos relacionales', desc: 'Patrones que se repiten y cómo romperlos' },
-                        { emoji: '📈', label: 'Evolución de la pareja', desc: 'Etapas y puntos críticos de toda relación' },
-                        { emoji: '🛡️', label: 'Resiliencia emocional', desc: 'Herramientas concretas de terapia de pareja' },
-                        { emoji: '⚡', label: 'Frecuencia de relación', desc: 'El concepto detrás del algoritmo de LovIA!' },
+                        { emoji: '💞', label: 'Amor y vínculos', desc: 'Ideas del autor para pensar cómo nos relacionamos' },
+                        { emoji: '🗣️', label: 'Conversaciones', desc: 'Preguntas para hablar de expectativas y límites' },
+                        { emoji: '🔄', label: 'Ciclos relacionales', desc: 'Patrones que vale la pena observar con calma' },
+                        { emoji: '📈', label: 'Evolución de la pareja', desc: 'Cambios y etapas descritos por el autor' },
+                        { emoji: '🛡️', label: 'Cuidado personal', desc: 'Reflexiones para tomar decisiones con contexto' },
+                        { emoji: '⚡', label: 'Frecuencia de relación', desc: 'Un concepto propio presentado para reflexión' },
                     ].map(topic => (
                         <div key={topic.label} className="book-topic glass">
                             <span className="book-topic__emoji">{topic.emoji}</span>

@@ -11,8 +11,8 @@ export default function DateReadinessCheck() {
     const [hasTime, setHasTime] = useState<boolean | null>(null)
     const [agreesProtocol, setAgreesProtocol] = useState(false)
 
-    const isBlocked = emotionalState === 'stressed' || emotionalState === 'sad' || hasTime === false
-    const canProceed = emotionalState && hasTime !== null && agreesProtocol && !isBlocked
+    const shouldPause = emotionalState === 'stressed' || emotionalState === 'sad' || hasTime === false
+    const canProceed = agreesProtocol
 
     const handleContinue = () => {
         if (canProceed) {
@@ -27,17 +27,17 @@ export default function DateReadinessCheck() {
                 <button className="icon-btn" onClick={() => navigate(`/matches/${matchId}`)}>
                     <ArrowLeft size={20} />
                 </button>
-                <h2 style={{ marginLeft: 'var(--space-4)', fontSize: 'var(--fs-xl)' }}>Date Readiness Gate</h2>
+                <h2 style={{ marginLeft: 'var(--space-4)', fontSize: 'var(--fs-xl)' }}>Preparar encuentro</h2>
             </header>
 
             <div className="glass-strong animate-fade-in-up" style={{ padding: 'var(--space-6)', borderRadius: 'var(--radius-lg)', flex: 1 }}>
                 
                 <div style={{ textAlign: 'center', marginBottom: 'var(--space-6)' }}>
                     <ShieldAlert size={48} color="var(--line-realization)" style={{ margin: '0 auto var(--space-4)' }}/>
-                    <h3 style={{ fontSize: 'var(--fs-lg)', marginBottom: 'var(--space-2)' }}>Pausa de Bioseguridad</h3>
+                    <h3 style={{ fontSize: 'var(--fs-lg)', marginBottom: 'var(--space-2)' }}>Pausa de seguridad</h3>
                     <p style={{ color: 'var(--text-secondary)', fontSize: 'var(--fs-sm)' }}>
-                        Antes de llevar esto al mundo real, LovIA requiere validar tu estado actual. 
-                        Este paso es privado y protege tu experiencia de cita.
+                        Revisa cómo te sientes y acuerda medidas básicas antes de hacer un plan. Tus respuestas
+                        sirven para decidir con calma; LovIA no diagnostica ni decide por ti.
                     </p>
                 </div>
 
@@ -118,13 +118,13 @@ export default function DateReadinessCheck() {
                     </div>
 
                     {/* Bloqueo Mensaje */}
-                    {isBlocked && (
+                    {shouldPause && (
                         <div className="animate-fade-in" style={{ padding: 'var(--space-4)', background: 'rgba(239, 68, 68, 0.1)', borderLeft: '4px solid var(--warning)', borderRadius: '4px', marginBottom: 'var(--space-6)' }}>
                             <p style={{ color: 'var(--warning)', fontSize: 'var(--fs-sm)', fontWeight: 'bold' }}>
                                 LovIA sugiere aplazar el encuentro.
                             </p>
                             <p style={{ color: 'var(--text-secondary)', fontSize: 'var(--fs-sm)', marginTop: '4px' }}>
-                                Tus respuestas indican que hoy podrías no estar en el mejor momento logístico o emocional para iniciar una relación física. Te recomendamos descansar y volver a intentarlo otro día.
+                                Considera descansar, hablar con alguien de confianza o elegir otro momento. Puedes continuar si decides hacerlo y confirmas las medidas de seguridad.
                             </p>
                         </div>
                     )}
@@ -138,7 +138,7 @@ export default function DateReadinessCheck() {
                         style={{ width: '100%', display: 'flex', justifyContent: 'center', opacity: canProceed ? 1 : 0.5, cursor: canProceed ? 'pointer' : 'not-allowed' }}
                     >
                         <Lock size={18} />
-                        Desbloquear Plan de Encuentro
+                        Crear plan de encuentro
                     </button>
                 </div>
 

@@ -1,319 +1,143 @@
-/**
- * LovIA! — Knowledge Base del Chatbot Guía
- * Base de conocimiento para el asistente "Dr. LovIA"
- * Sistema rule-based con intenciones + respuestas ricas.
- */
-
+/** Answers shown by the rule-based LovIA guide. No clinical or matching claims. */
 export interface QuickReply {
-    label: string
-    intent: string
+  label: string
+  intent: string
 }
 
 export interface BotMessage {
-    text: string
-    richContent?: RichContent
-    quickReplies?: QuickReply[]
+  text: string
+  richContent?: RichContent
+  quickReplies?: QuickReply[]
 }
 
 export interface RichContent {
-    type: 'card' | 'list' | 'citation' | 'specialist' | 'steps'
-    title?: string
-    items?: string[]
-    steps?: { n: number; title: string; desc: string }[]
+  type: 'card' | 'list' | 'citation' | 'specialist' | 'steps'
+  title?: string
+  items?: string[]
+  steps?: { n: number; title: string; desc: string }[]
 }
 
-// ── Árbol de intenciones ──────────────────────────────────────────────────
 export const INTENTS: Record<string, BotMessage> = {
-
-    // ── Bienvenida ──
-    welcome: {
-        text: '¡Hola! 👋 Soy **Dr. LovIA**, tu guía dentro de la plataforma. Estoy aquí para explicarte cómo funciona la app, presentarte a nuestros especialistas, contarte la ciencia detrás y ayudarte a sacar el máximo provecho de tu experiencia.',
-        quickReplies: [
-            { label: '¿Cómo funciona LovIA?', intent: 'how_it_works' },
-            { label: '🔬 Base científica', intent: 'science' },
-            { label: '👩‍⚕️ Especialistas', intent: 'specialists' },
-            { label: '📊 ¿Cómo obtengo matches?', intent: 'how_matches' },
-            { label: '📋 Guía paso a paso', intent: 'step_guide' },
-        ],
+  welcome: {
+    text: '¡Hola! Soy la **Guía automática de LovIA**. Puedo orientarte por la app y sugerirte actividades de reflexión. Mis respuestas son información general, no una evaluación profesional.',
+    quickReplies: [
+      { label: '¿Cómo empiezo?', intent: 'step_guide' },
+      { label: 'Conocer personas', intent: 'how_matches' },
+      { label: 'Privacidad y seguridad', intent: 'safety' },
+      { label: 'Especialistas', intent: 'specialists' },
+    ],
+  },
+  how_it_works: {
+    text: 'LovIA ofrece tres caminos que puedes cambiar cuando quieras: **conocer personas**, **comprenderte mejor** y **cuidar una relación**. Puedes usar la Guía, una Chispa breve o Mi Diario sin convertir esas actividades en una calificación sobre ti.',
+    quickReplies: [
+      { label: 'Pasos para empezar', intent: 'step_guide' },
+      { label: '¿Cómo se usan los resultados?', intent: 'scoring' },
+    ],
+  },
+  step_guide: {
+    text: 'Un recorrido sencillo para empezar a tu ritmo:',
+    richContent: {
+      type: 'steps',
+      steps: [
+        { n: 1, title: 'Elige tu objetivo', desc: 'Selecciona lo que te interesa hoy. Puedes cambiarlo en Inicio.' },
+        { n: 2, title: 'Prueba una reflexión', desc: 'Responde una Chispa o escribe en Mi Diario si te resulta útil.' },
+        { n: 3, title: 'Prepara tu perfil', desc: 'Decide qué información deseas compartir. Tu objetivo personal no activa tu visibilidad.' },
+        { n: 4, title: 'Consulta tus conexiones', desc: 'Revisa Mensajes para ver conexiones existentes. Las sugerencias nuevas dependen de controles de seguridad del servidor.' },
+      ],
     },
-
-    // ── Cómo funciona ──
-    how_it_works: {
-        text: 'LovIA **no es una app de swipe**. Es una plataforma de **preparación relacional y compatibilidad gradual**. Antes de conectarte con alguien, la app te pregunta quién eres hoy, qué puedes ofrecer, qué buscas y qué tan listo estás para conocer a alguien.\n\nEstos datos alimentan tres motores internos:',
-        richContent: {
-            type: 'list',
-            items: [
-                '🟢 **Readiness** — ¿Estás listo emocionalmente para conocer a alguien?',
-                '💜 **Compatibility** — ¿Con quién hace sentido un vínculo real?',
-                '🔒 **Safety** — ¿Existen señales que ameriten pausar o redirigir tu experiencia?',
-            ],
-        },
-        quickReplies: [
-            { label: '📋 Ver guía paso a paso', intent: 'step_guide' },
-            { label: '🔬 ¿En qué ciencia se basa?', intent: 'science' },
-            { label: '🔓 ¿Qué se desbloquea cuándo?', intent: 'unlocks' },
-        ],
+    quickReplies: [
+      { label: 'Conocer personas', intent: 'how_matches' },
+      { label: 'Actividades voluntarias', intent: 'unlocks' },
+    ],
+  },
+  unlocks: {
+    text: 'El acceso a LovIA es **gratuito hasta el 31 de enero de 2027 inclusive**. No se inicia un cobro automático al terminar ese periodo. Las actividades de reflexión son voluntarias y no desbloquean personas ni mensajes.',
+    richContent: {
+      type: 'list',
+      items: [
+        '🪞 **Mi Diario y Chispas**: para pensar a tu ritmo; sus respuestas son personales.',
+        '📚 **Guía**: ideas y ejercicios; no es una prueba clínica.',
+        '💬 **Mensajes**: consulta tus conexiones existentes.',
+        '🛡️ **Seguridad**: reportar y bloquear nunca debe depender de completar ejercicios.',
+      ],
     },
-
-    // ── Guía paso a paso ──
-    step_guide: {
-        text: 'Aquí tienes el recorrido completo dentro de LovIA, de principio a fin:',
-        richContent: {
-            type: 'steps',
-            steps: [
-                { n: 1, title: 'Registro y consentimiento', desc: 'Creas tu cuenta (email, Google o Apple), confirmas tu mayoría de edad y aceptas los términos de privacidad. Todo queda trazado.' },
-                { n: 2, title: 'Mapa de tu momento de vida', desc: 'Test de 5-7 min. Intenciones, disponibilidad, cargas familiares, horarios, distancia y apertura. No hay respuestas buenas o malas.' },
-                { n: 3, title: 'Cómo te vinculas', desc: 'Test de 4-6 min. Estilo de apego, tolerancia al conflicto, ritmo de apertura emocional y confianza.' },
-                { n: 4, title: 'Tu Readiness Score', desc: 'El sistema calcula internamente si estás listo para el siguiente paso. Tú ves una narrativa explicativa, no un número.' },
-                { n: 5, title: 'Descubrimiento gradual', desc: 'Empiezas a ver perfiles. Según tu plan, las fotos pueden ser visibles, difuminadas o bloqueadas hasta el Date Readiness.' },
-                { n: 6, title: 'Chat y prompts guiados', desc: 'Una vez hay match mutuo, abres el chat. La IA sugiere preguntas de calidad para romper el hielo sin rodeos.' },
-                { n: 7, title: 'Voz y videollamada', desc: 'Disponible en los planes Arquitecto o superior. Todo dentro de la app, sin compartir número de teléfono.' },
-                { n: 8, title: 'Date Readiness Gate', desc: 'Cuando ambos están listos, el sistema propone 3 lugares públicos seguros para la primera cita.' },
-                { n: 9, title: 'Plan de cita segura', desc: 'Activas el Modo Cita Segura, registras hasta 2 contactos de confianza y haces check-in al llegar y check-out al salir.' },
-                { n: 10, title: 'Insight post-cita', desc: 'La app te acompaña después: ¿cómo te sentiste? ¿Quieres ver al plan de nuevo? ¿Quieres apoyo de un especialista?' },
-            ],
-        },
-        quickReplies: [
-            { label: '👩‍⚕️ Red de especialistas', intent: 'specialists' },
-            { label: '🔒 ¿Cómo funcionan los desbloqueos?', intent: 'unlocks' },
-            { label: '📍 Ecosistema Geobooker', intent: 'geobooker' },
-        ],
-    },
-
-    // ── Desbloqueos ──
-    unlocks: {
-        text: 'LovIA libera funciones de forma progresiva. **Las funciones de seguridad y los tests completos son siempre gratuitos:**',
-        richContent: {
-            type: 'list',
-            items: [
-                '🆓 **Gratis para todos**: registro, tests completos, matching, chat, modo cita segura, directorio de especialistas',
-                '📸 **Foto completa**: eligiendo el modo Clásico en tu perfil (requiere verificación de selfie)',
-                '📍 **Cita segura completa**: disponible en todos los planes con contactos de confianza',
-                '📣 **Matches**: disponibles una vez que completes tu perfil relacional y onboarding',
-                '🚫 **Contacto externo (número/email)**: solo después de la primera cita con check-out confirmado',
-            ],
-        },
-        quickReplies: [
-            { label: '📊 ¿Cómo obtengo matches?', intent: 'how_matches' },
-            { label: '📋 Guía paso a paso', intent: 'step_guide' },
-        ],
-    },
-
-    // ── Ciencia detrás ──
-    science: {
-        text: 'LovIA está fundamentada en investigación clínica y teoría de las relaciones de pareja. Estos son los marcos teóricos que sustentan el sistema de evaluación:',
-        richContent: {
-            type: 'citation',
-            items: [
-                '📖 **Juan Pablo Peña García** — *Evolución de las Relaciones de Pareja* (2023). Marco conceptual de los 4 ejes de análisis relacional: Amor/Vinculación, Sexualidad/Intimidad, Realización/Momento de vida y Seguridad/Autorregulación.',
-                '🔬 **John Bowlby & Mary Ainsworth** — Teoría del Apego. Base del análisis de estilo vincular del Test 2 (Cómo te vinculas).',
-                '💡 **John Gottman** — *The Seven Principles for Making Marriage Work* (1999). El concepto de "4 Jinetes del Apocalipsis" informa el análisis de conflicto.',
-                '🧠 **Susan Johnson** — Terapia Focalizada en las Emociones (EFT). Marco del análisis de regulación emocional bajo estrés.',
-                '📊 **Robert Sternberg** — Teoría Triangular del Amor (Pasión, Intimidad, Compromiso). Informa la estructura del matching de compatibilidad.',
-                '🌡️ **Daniel J. Siegel** — Ventana de Tolerancia y Neurobiología del Apego. Base científica del PSS-4 y las escalas de autorregulación.',
-                '📐 **J. W. Pennebaker & R. E. Booth** — PSS-4 (Perceived Stress Scale). Versión abreviada del test de estrés percibido.',
-            ],
-        },
-        quickReplies: [
-            { label: '🧪 ¿Cómo funciona el scoring?', intent: 'scoring' },
-            { label: '📋 Ver flujo completo', intent: 'step_guide' },
-            { label: '👩‍⚕️ Conocer especialistas', intent: 'specialists' },
-        ],
-    },
-
-    // ── Scoring ──
-    scoring: {
-        text: 'LovIA tiene **tres tipos de calificación interna**, y ninguna se muestra como un número público a otros usuarios:',
-        richContent: {
-            type: 'list',
-            items: [
-                '📊 **Readiness Score** (Interno + tuyo): Determina a qué ritmo se abre tu experiencia. Tú lo ves como una narrativa personal: *"Estás en una etapa reflexiva con varias responsabilidades..."*',
-                '💞 **Compatibility Score** (Solo el sistema): Calcula el ajuste entre dos perfiles. Tú lo ves como el orden y la calidad de tus matches sugeridos.',
-                '🔒 **Safety Score** (Solo moderación): Detecta señales de riesgo o fraude. No es visible para nadie; solo activa límites o pausas protectoras.',
-            ],
-        },
-        quickReplies: [
-            { label: '🔬 Base científica completa', intent: 'science' },
-            { label: '🔓 ¿Qué se desbloquea?', intent: 'unlocks' },
-        ],
-    },
-
-    // ── Especialistas ──
-    specialists: {
-        text: 'En LovIA tenemos un directorio de **especialistas verificados** en terapia de pareja, psicología individual, sexología y más. Todos pasan por un proceso de verificación de cédula profesional antes de aparecer en la plataforma.',
-        richContent: {
-            type: 'specialist',
-            items: ['__DYNAMIC__'],  // populated at runtime from Supabase
-        },
-        quickReplies: [
-            { label: '📋 Ver directorio completo', intent: 'go_directory' },
-            { label: '¿Cuándo se sugiere apoyo?', intent: 'support_trigger' },
-        ],
-    },
-
-    // ── Trigger de apoyo ──
-    support_trigger: {
-        text: 'Un especialista puede ser sugerido por la app de manera contextual en estos momentos, **siempre de forma opcional, nunca forzada**:',
-        richContent: {
-            type: 'list',
-            items: [
-                '📊 Si tu Readiness Score inicial es bajo (estás en un momento complejo de vida)',
-                '😔 Después de vivir una experiencia difícil: ghosting fuerte, cita que no salió bien, o reportar a alguien',
-                '⏸️ Si activas el modo pausa o expresas que no estás seguro de continuar',
-                '💬 Si el chat detecta lenguaje asociado a crisis emocional o desesperación',
-                '🤲 Si tú mismo buscas apoyo desde el menú de Comunidad → Directorio',
-            ],
-        },
-        quickReplies: [
-            { label: '👩‍⚕️ Ver especialistas ahora', intent: 'go_directory' },
-            { label: '📋 Guía paso a paso', intent: 'step_guide' },
-        ],
-    },
-
-    // ── Seguridad ──
-    safety: {
-        text: 'La seguridad en LovIA es un **flujo real, no un adorno**. Estos son los mecanismos de protección:',
-        richContent: {
-            type: 'list',
-            items: [
-                '🚫 **Bloqueo de contacto externo en chat**: El chat detecta números de teléfono, emails e Instagram e impide compartirlos fuera del proceso de cita segura',
-                '📍 **Ubicación temporal**: Solo se comparte durante la cita, con expiración automática al hacer check-out',
-                '👥 **Contactos de confianza**: Hasta 2 personas que reciben notificación al inicio y fin de la cita',
-                '🔘 **Check-in / Check-out**: Si no hay check-out, el sistema envía un recordatorio y puede alertar al contacto de confianza',
-                '🛡️ **Moderación activa**: Reportes revisados por el equipo de LovIA en 24-48 horas',
-                '🔒 **Datos separados**: Tu perfil público y tus datos sensibles (tests, ubicación, hijos) están en tablas separadas con acceso estricto',
-            ],
-        },
-        quickReplies: [
-            { label: '📋 Modo cita segura', intent: 'step_guide' },
-            { label: '🔬 Base científica', intent: 'science' },
-        ],
-    },
-
-    // ── Bloqueo de Seguridad ──
-    security_block: {
-        text: 'Soy **Dr. LovIA**, tu guía de bienestar relacional. No estoy diseñado para responder preguntas técnicas, de privacidad interna ni relacionadas con datos de usuarios. Si tienes una duda de seguridad o privacidad real, escríbenos a **evosocial@hotmail.com**.',
-        quickReplies: [
-            { label: '📋 ¿Cómo funciona LovIA?', intent: 'how_it_works' },
-            { label: '🔬 Base científica', intent: 'science' },
-            { label: '🔒 Seguridad de la plataforma', intent: 'safety' },
-        ],
-    },
-
-    // ── Bloqueo de datos de usuario ──
-    privacy_block: {
-        text: 'Por protección de la privacidad de nuestros usuarios, no puedo acceder, mostrar ni comentar datos personales de ninguna cuenta. Si necesitas ayuda con tu cuenta, escríbenos a **evosocial@hotmail.com**.',
-        quickReplies: [
-            { label: '📋 ¿Cómo funciona LovIA?', intent: 'how_it_works' },
-            { label: '🔒 Seguridad', intent: 'safety' },
-        ],
-    },
-
-    // ── Navegación ──
-    go_directory: { text: '📍 Navega a **Comunidad → Directorio** para ver todos los especialistas verificados, filtrar por ciudad o especialidad y contactar directamente.' },
-
-    // ✔ Matches: cómo obtenerlos
-    how_matches: {
-        text: 'Para comenzar a ver matches en LovIA, el sistema necesita conocerte primero. Sigue estos pasos:',
-        richContent: {
-            type: 'steps',
-            steps: [
-                { n: 1, title: 'Completa tu Onboarding', desc: 'Responde el Mapa de Momento de Vida (5-7 min). Esto es la base de todo el sistema de compatibilidad.' },
-                { n: 2, title: 'Realiza al menos 1 evaluación', desc: 'Entra a Evaluaciones y completa el test de Regulación Emocional, Tolerancia o Stroop. Cada una mejora tu Readiness Score.' },
-                { n: 3, title: 'Completa tu perfil', desc: 'Agrega foto (selfie verificada recomendada), alias y elige tu modo de visibilidad en tu perfil.' },
-                { n: 4, title: 'El algoritmo te busca pareja', desc: 'Una vez listo, el sistema ejecuta el motor de compatibilidad y asigna matches. Verifica tu sección de Descubrimiento.' },
-            ],
-        },
-        quickReplies: [
-            { label: '📋 Ver guía completa', intent: 'step_guide' },
-            { label: '🔬 ¿En qué ciencia se basa?', intent: 'science' },
-        ],
-    },
-
-    // ✔ Lugares para primera cita
-    geobooker: {
-        text: 'LovIA te sugiere **lugares seguros y verificados** para tu primera cita, basados en reseñas reales de la comunidad:',
-        richContent: {
-            type: 'list',
-            items: [
-                '📍 **Lugares públicos cercanos**: cafés, restaurantes y espacios recomendados cerca de ti',
-                '⭐ **Calificados por la comunidad**: cada lugar tiene reseñas reales de otros usuarios',
-                '🔒 **Cita segura**: el sistema propone 3 opciones seguras cuando ambos están listos',
-                '📞 **Negocios verificados**: información de contacto, horario y ubicación exacta disponible',
-            ],
-        },
-        quickReplies: [
-            { label: '📋 Plan de cita segura', intent: 'step_guide' },
-            { label: '👩‍⚕️ Especialistas disponibles', intent: 'specialists' },
-        ],
-    },
+    quickReplies: [{ label: '¿Cómo empiezo?', intent: 'step_guide' }],
+  },
+  science: {
+    text: 'El libro *Evolución de las Relaciones de Pareja* de Juan Pablo Peña García inspira parte del lenguaje educativo de LovIA. Amor, Sexualidad y Realización son temas del marco del autor. En la teoría de Sternberg se distinguen intimidad, pasión y compromiso; no son equivalencias exactas. Una bibliografía no valida por sí sola una puntuación o una predicción de pareja.',
+    quickReplies: [
+      { label: '¿Qué significan las puntuaciones?', intent: 'scoring' },
+      { label: 'Actividades voluntarias', intent: 'unlocks' },
+    ],
+  },
+  scoring: {
+    text: 'El progreso que aparece en LovIA indica actividades realizadas. **No es una medida de tu valor, preparación emocional ni probabilidad de éxito con otra persona.** Una respuesta de estrés o un juego de atención tampoco determina a quién puedes conocer. Las evaluaciones pendientes de revisión deben interpretarse con cautela.',
+    quickReplies: [
+      { label: 'Base y límites', intent: 'science' },
+      { label: 'Conocer personas', intent: 'how_matches' },
+    ],
+  },
+  specialists: {
+    text: 'Puedes consultar el Directorio desde Comunidad. Confirma directamente la cédula, especialidad, disponibilidad y condiciones de atención de cada profesional antes de contratar un servicio.',
+    richContent: { type: 'specialist', items: ['__DYNAMIC__'] },
+    quickReplies: [{ label: 'Abrir directorio', intent: 'go_directory' }],
+  },
+  support_trigger: {
+    text: 'Puedes buscar apoyo humano cuando lo necesites desde el Directorio. LovIA no usa un resultado de estrés para diagnosticarte ni para decidir si mereces ayuda.',
+    quickReplies: [{ label: 'Abrir directorio', intent: 'go_directory' }],
+  },
+  safety: {
+    text: 'Decide con cuidado qué compartes en tu perfil y en las conversaciones. Puedes revisar las opciones de bloqueo y reporte desde las pantallas donde estén disponibles. Si una herramienta de seguridad falla o necesitas ayuda con tu cuenta, escribe a **evosocial@hotmail.com**. La ubicación precisa no debe considerarse pública.',
+    quickReplies: [
+      { label: 'Privacidad', intent: 'privacy_block' },
+      { label: 'Buscar apoyo', intent: 'support_trigger' },
+    ],
+  },
+  security_block: {
+    text: 'Esta Guía no puede proporcionar contraseñas, claves ni acceso administrativo. Para una duda sobre la seguridad de tu cuenta, escribe a **evosocial@hotmail.com**.',
+  },
+  privacy_block: {
+    text: 'Esta Guía no muestra datos de otras cuentas. Tus respuestas personales no deben compartirse con otros usuarios sin una acción y permiso claros. Para consultar el aviso completo, abre Privacidad desde tu perfil.',
+  },
+  go_directory: { text: 'Abre **Comunidad → Directorio** para consultar profesionales y sus datos disponibles.' },
+  how_matches: {
+    text: 'En **Mensajes** puedes consultar conexiones que ya existan. Las nuevas sugerencias necesitan comprobar edad, consentimiento, visibilidad, bloqueos y preferencias recíprocas en el servidor. Completar pruebas o acumular puntos no debe ser un requisito para conocer personas.',
+    quickReplies: [
+      { label: 'Preparar mi perfil', intent: 'step_guide' },
+      { label: 'Seguridad', intent: 'safety' },
+    ],
+  },
 }
 
-// ── Detección de intents por palabras clave ──────────────────────────────
 const KEYWORD_MAP: [string[], string][] = [
-    // 🔴 BLOQUEOS DE SEGURIDAD — Primero siempre (mayor prioridad)
-    [[
-        // Ataques técnicos y de inyección
-        'hack', 'hacker', 'vulnerabilidad', 'exploit', 'inyeccion', 'inyección',
-        'sql', 'xss', 'csrf', 'injection', 'bypass', 'jailbreak', 'override',
-        // Ingeniería de prompts
-        'ignora', 'ignore', 'olvida', 'forget', 'instrucciones anteriores',
-        'previous instructions', 'system prompt', 'actua como', 'actúa como',
-        'pretend', 'simulate', 'dan mode', 'modo sin filtros',
-        // Infraestructura interna
-        'supabase', 'postgresql', 'base de datos', 'database', 'backend',
-        'servidor', 'server', 'api key', 'apikey', 'secret', 'token jwt',
-        'jwt', 'env', '.env', 'variable de entorno', 'arquitectura',
-        'código fuente', 'codigo fuente', 'source code', 'github', 'repositorio',
-        'tabla', 'schema', 'rls', 'bucket', 'storage', 'webhook',
-        // Administración
-        'admin panel', 'panel admin', 'dashboard admin', 'como entrar al admin',
-        'credencial', 'contraseña admin', 'password admin',
-    ], 'security_block'],
-
-    // 🔴 BLOQUEOS DE PRIVACIDAD — Datos de usuarios
-    [[
-        'datos de usuario', 'datos personales', 'perfil de otro', 'ver perfil de',
-        'información de otro', 'correo de', 'email de', 'teléfono de',
-        'quién es', 'quien es el usuario', 'dame los datos',
-        'contraseña', 'password', 'clave de acceso', 'cambiar contraseña de otro',
-        'datos privados', 'historial de otro', 'ver matches de otro',
-    ], 'privacy_block'],
-
-    // ✅ Intenciones normales
-    [['hola', 'buenos', 'inicio', 'empezar', 'saludo', 'hi', 'oye', 'buenas'], 'welcome'],
-    [['cómo funciona', 'como funciona', 'qué es', 'que es', 'para qué', 'para que', 'explain', 'cuéntame', 'cuentame'], 'how_it_works'],
-    [['paso a paso', 'guía', 'guia', 'pasos', 'flujo', 'proceso', 'recorrido', 'tutorial'], 'step_guide'],
-    [['ciencia', 'científica', 'libro', 'autor', 'fuente', 'investigación', 'evidencia', 'teoría', 'base', 'bibliografía', 'estudios'], 'science'],
-    [['scoring', 'puntuación', 'score', 'calificación', 'número', 'cómo califica', 'readiness', 'como me evalua'], 'scoring'],
-    [['especialista', 'psicólogo', 'psicologo', 'terapeuta', 'médico', 'doctor', 'apoyo', 'ayuda profesional', 'directorio', 'terapia'], 'specialists'],
-    [['cuándo sugiere', 'cuando sugiere', 'trigger', 'cuándo aparece apoyo', 'cuando me ayuda', 'necesito ayuda'], 'support_trigger'],
-    [['precio', 'costo', 'plan', 'cobrar', 'mensualidad', 'cuánto vale', 'cuanto cuesta', 'tarifa', 'pesos', 'mxn', 'pagar', 'suscripcion'], 'unlocks'],
-    [['gratis', 'free', 'explorador', 'sin pagar', 'sin costo', 'qué incluye el gratis', 'gratuito'], 'unlocks'],
-    [['desbloqueo', 'desbloquear', 'cuándo puedo', 'cuando puedo', 'foto', 'video', 'videollamada', 'voz', 'nota de voz'], 'unlocks'],
-    [['seguridad', 'protección', 'proteccion', 'seguro', 'bloquear', 'reportar', 'cita segura', 'check-in', 'ubicación', 'ubicacion'], 'safety'],
-    [['match', 'matches', 'conectar', 'descubrimiento', 'cómo veo', 'como veo', 'ver perfiles', 'conocer personas', 'compatibilidad'], 'how_matches'],
-    [['geobooker', 'lugares', 'restaurante', 'café', 'cafe', 'primera cita', 'dónde', 'donde', 'ecosistema', 'negocios'], 'geobooker'],
+  [['contraseña admin', 'clave secreta', 'service role', 'api key', 'credencial de administrador'], 'security_block'],
+  [['datos de otro', 'perfil de otro', 'contraseña de otro', 'correo de otro', 'email de otro'], 'privacy_block'],
+  [['hola', 'buenas', 'saludo'], 'welcome'],
+  [['cómo funciona', 'como funciona', 'qué es', 'que es', 'para qué', 'para que'], 'how_it_works'],
+  [['precio', 'costo', 'pagar', 'plan', 'gratis', 'desbloquear', 'suscripción', 'suscripcion'], 'unlocks'],
+  [['ciencia', 'científica', 'libro', 'autor', 'fuente', 'teoría', 'bibliografía'], 'science'],
+  [['puntuación', 'score', 'readiness', 'calificación', 'compatibilidad'], 'scoring'],
+  [['especialista', 'psicólogo', 'psicologo', 'terapeuta', 'directorio'], 'specialists'],
+  [['ayuda profesional', 'apoyo humano', 'necesito apoyo'], 'support_trigger'],
+  [['seguridad', 'bloquear', 'reportar', 'ubicación', 'ubicacion', 'privacidad'], 'safety'],
+  [['match', 'matches', 'conectar', 'perfiles', 'conocer personas', 'mensajes'], 'how_matches'],
+  [['guía', 'guia', 'pasos', 'recorrido', 'empezar'], 'step_guide'],
 ]
 
 export function detectIntent(input: string): string {
-    const lower = input.toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g, '')
-    for (const [keywords, intent] of KEYWORD_MAP) {
-        if (keywords.some(kw => lower.includes(kw.normalize('NFD').replace(/[\u0300-\u036f]/g, '')))) {
-            return intent
-        }
-    }
-    return 'fallback'
+  const lower = input.toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g, '')
+  for (const [keywords, intent] of KEYWORD_MAP) {
+    if (keywords.some((keyword) => lower.includes(keyword.normalize('NFD').replace(/[\u0300-\u036f]/g, '')))) return intent
+  }
+  return 'fallback'
 }
 
 export const FALLBACK: BotMessage = {
-    text: 'Hmm, no estoy seguro de entender tu pregunta. Puedo ayudarte con estos temas:',
-    quickReplies: [
-        { label: '📊 ¿Cómo obtengo matches?', intent: 'how_matches' },
-        { label: '📋 Guía paso a paso', intent: 'step_guide' },
-        { label: '🔬 Base científica', intent: 'science' },
-        { label: '👩‍⚕️ Especialistas', intent: 'specialists' },
-        { label: '🔒 Seguridad', intent: 'safety' },
-        { label: '📍 Ecosistema Geobooker', intent: 'geobooker' },
-    ],
+  text: 'No encontré una respuesta precisa para eso. Puedo orientarte con estos temas o puedes escribir a **evosocial@hotmail.com** si necesitas ayuda con tu cuenta.',
+  quickReplies: [
+    { label: '¿Cómo empiezo?', intent: 'step_guide' },
+    { label: 'Conocer personas', intent: 'how_matches' },
+    { label: 'Privacidad y seguridad', intent: 'safety' },
+    { label: 'Especialistas', intent: 'specialists' },
+  ],
 }

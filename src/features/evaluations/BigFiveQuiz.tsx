@@ -143,13 +143,13 @@ export default function BigFiveQuiz() {
             <ChevronRight size={14} color="var(--line-sex)" />
             <span>
               Tu dimensión dominante es <strong>{DIM_INFO[Object.entries(result).sort((a,b) => b[1]-a[1])[0][0]].name}</strong>.
-              Esto afecta cómo te relacionas en pareja.
+              Puede servirte como punto de partida para reflexionar; no define por sí sola cómo te relacionas.
             </span>
           </div>
 
           <div className="assessment-result__impact">
-            <h4>Impacto en tu compatibilidad</h4>
-            <p>Tu perfil OCEAN se integra a la <strong>Gráfica Relacional</strong> para encontrar matches con personalidades complementarias.</p>
+            <h4>Cómo usar este resultado</h4>
+            <p>Compara estas tendencias con tu experiencia y contexto. El resultado no predice compatibilidad ni desbloquea personas.</p>
           </div>
 
           <button className="btn btn-primary assessment-result__btn" onClick={handleSave} disabled={saving}>

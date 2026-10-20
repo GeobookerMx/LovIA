@@ -1,6 +1,6 @@
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useCallback } from 'react'
 import { useNavigate, useParams } from 'react-router-dom'
-import { ArrowLeft, CheckCircle, Lock, PlayCircle, BookOpen, Clock, Award, ChevronDown, ChevronUp, X, Loader2 } from 'lucide-react'
+import { ArrowLeft, CheckCircle, PlayCircle, BookOpen, Clock, Award, ChevronDown, ChevronUp, X, Loader2 } from 'lucide-react'
 import { supabase } from '../../lib/supabase'
 import { useAuthStore } from '../../stores/authStore'
 import { trackEvent } from '../../lib/analytics'
@@ -17,7 +17,6 @@ interface Lesson {
     description: string
     rich_content?: string
     completed?: boolean
-    locked?: boolean
 }
 
 interface ModuleData {
@@ -59,7 +58,7 @@ export default function ModuleDetail() {
     const [reflectionInput, setReflectionInput] = useState('')
     const [savedReflection, setSavedReflection] = useState<string | null>(null)
 
-    const fetchModuleDetails = async () => {
+    const fetchModuleDetails = useCallback(async () => {
         if (!user || !moduleId) return
         setLoading(true)
         try {
@@ -71,7 +70,7 @@ export default function ModuleDetail() {
                 .maybeSingle()
                 
             if (modErr) throw modErr
-            if (dbMod) setModule(dbMod as any)
+            if (dbMod) setModule(dbMod as ModuleData)
 
             // 2. Cargar lecciones
             const { data: dbLessons, error: lessonsErr } = await supabase
@@ -92,19 +91,12 @@ export default function ModuleDetail() {
 
             const completedIds = new Set(dbProgress?.map(p => p.lesson_id) || [])
             
-            // 4. Mapear lecciones y verificar bloqueos secuenciales
-            // Bloqueamos la lección si la lección anterior no está completada
-            const mappedLessons = (dbLessons || []).map((les, idx) => {
+            // Las lecciones se pueden explorar en cualquier orden.
+            const mappedLessons = (dbLessons || []).map((les) => {
                 const completed = completedIds.has(les.id)
-                let locked = false
-                if (idx > 0) {
-                    const prevLesson = dbLessons[idx - 1]
-                    locked = !completedIds.has(prevLesson.id)
-                }
                 return {
                     ...les,
-                    completed,
-                    locked
+                    completed
                 }
             })
             
@@ -114,11 +106,11 @@ export default function ModuleDetail() {
         } finally {
             setLoading(false)
         }
-    }
+    }, [user, moduleId])
 
     useEffect(() => {
-        fetchModuleDetails()
-    }, [user, moduleId])
+        void fetchModuleDetails()
+    }, [fetchModuleDetails])
 
     // Cargar respuesta de reflexión previa si la lección ya está completada
     useEffect(() => {
@@ -160,7 +152,7 @@ export default function ModuleDetail() {
             // Registrar evento de analítica
             trackEvent('module_completed', { moduleId: activeLesson.module_id, lessonId: activeLesson.id })
 
-            // Forzar recálculo y carga de perfil para actualizar Readiness Score en la cabecera / bottom bar
+            // Actualizar el progreso personal después de guardar la lección.
             await loadProfile()
             
             // Recargar detalles de lecciones en la vista
@@ -231,14 +223,10 @@ export default function ModuleDetail() {
                 </div>
             </div>
 
-            {/* Science Basis */}
+            {/* Editorial context pending source review */}
             <div className="module-detail__science glass animate-fade-in-up" style={{ animationDelay: '0.1s' }}>
-                <h3>📚 Base Científica</h3>
-                <p className="module-detail__author" style={{ color: module.color }}>{module.author}</p>
-                <p>{module.science_basis}</p>
-                <div className="module-detail__key-research">
-                    <strong>💡 Dato clave:</strong> {module.key_research}
-                </div>
+                <h3>Sobre este módulo</h3>
+                <p>Explora las lecciones que te resulten útiles. Completarlas es opcional y el porcentaje solo indica tu avance aquí.</p>
             </div>
 
             {/* Lessons */}
@@ -250,17 +238,16 @@ export default function ModuleDetail() {
                     return (
                         <div
                             key={lesson.id}
-                            className={`module-detail__lesson glass ${lesson.completed ? 'module-detail__lesson--completed' : ''} ${lesson.locked ? 'module-detail__lesson--locked' : ''}`}
+                            className={`module-detail__lesson glass ${lesson.completed ? 'module-detail__lesson--completed' : ''}`}
                             style={{ animationDelay: `${0.05 * i}s` }}
                         >
                             <button
                                 className="module-detail__lesson-header"
-                                onClick={() => !lesson.locked && setExpandedLesson(isExpanded ? null : lesson.id)}
-                                disabled={lesson.locked}
+                                onClick={() => setExpandedLesson(isExpanded ? null : lesson.id)}
                             >
                                 <div className="module-detail__lesson-left">
-                                    <div className="module-detail__lesson-status" style={{ color: lesson.completed ? 'var(--success)' : lesson.locked ? 'var(--text-tertiary)' : module.color }}>
-                                        {lesson.completed ? <CheckCircle size={18} /> : lesson.locked ? <Lock size={18} /> : (typeIcons[lesson.type] || <BookOpen size={18} />)}
+                                    <div className="module-detail__lesson-status" style={{ color: lesson.completed ? 'var(--success)' : module.color }}>
+                                        {lesson.completed ? <CheckCircle size={18} /> : (typeIcons[lesson.type] || <BookOpen size={18} />)}
                                     </div>
                                     <div>
                                         <span className="module-detail__lesson-title">{lesson.title}</span>
@@ -269,9 +256,7 @@ export default function ModuleDetail() {
                                         </span>
                                     </div>
                                 </div>
-                                {!lesson.locked && (
-                                    isExpanded ? <ChevronUp size={16} /> : <ChevronDown size={16} />
-                                )}
+                                {isExpanded ? <ChevronUp size={16} /> : <ChevronDown size={16} />}
                             </button>
 
                             {isExpanded && (
@@ -320,7 +305,7 @@ export default function ModuleDetail() {
                             ) : (
                                 <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
                                     <BookOpen size={24} color="var(--love-warm)" />
-                                    <span style={{ color: 'white', fontSize: '0.85rem', fontWeight: 600 }}>Lección Científica</span>
+                                    <span style={{ color: 'white', fontSize: '0.85rem', fontWeight: 600 }}>Contenido educativo</span>
                                 </div>
                             )}
                             <button 

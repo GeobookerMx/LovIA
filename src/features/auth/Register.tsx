@@ -19,6 +19,7 @@ export default function Register() {
     const [needsEmailConfirmation, setNeedsEmailConfirmation] = useState(false)
     const [showLegal, setShowLegal] = useState(false)
     const [legalAccepted, setLegalAccepted] = useState(false)
+    const [sensitiveDataAccepted, setSensitiveDataAccepted] = useState(false)
     const [submitting, setSubmitting] = useState(false)
     const [oauthLoading, setOauthLoading] = useState<'google' | 'apple' | null>(null)
     const { signUp, user, initialized } = useAuthStore()
@@ -70,7 +71,11 @@ export default function Register() {
 
         setSubmitting(true)
         try {
-            const result = await signUp(email, password, name)
+            const result = await signUp(email, password, name, {
+                version: '2026-10-20',
+                acceptedAt: new Date().toISOString(),
+                sensitiveDataAccepted,
+            })
 
             if (result.error) {
                 trackEvent('error_profile_save', { error: result.error, context: 'signup' })
@@ -97,6 +102,11 @@ export default function Register() {
 
     const handleOAuthLogin = async (provider: 'google' | 'apple') => {
         setError(null)
+        if (!legalAccepted) {
+            setError('Lee y acepta el aviso, confirma que tienes al menos 18 años y decide sobre los datos sensibles antes de continuar.')
+            setShowLegal(true)
+            return
+        }
         setOauthLoading(provider)
         try {
             if (provider === 'google') {
@@ -106,8 +116,8 @@ export default function Register() {
             }
             // En nativo: appUrlOpen en main.tsx completa el flujo.
             // En web: redirige a /auth/callback?next=/onboarding.
-        } catch (err: any) {
-            setError(err.message || 'Error al iniciar sesión.')
+        } catch (err: unknown) {
+            setError(err instanceof Error ? err.message : 'Error al iniciar sesión.')
         } finally {
             setOauthLoading(null)
         }
@@ -248,6 +258,7 @@ export default function Register() {
                                         setShowLegal(true)
                                     } else {
                                         setLegalAccepted(false)
+                                        setSensitiveDataAccepted(false)
                                     }
                                 }}
                             />
@@ -282,6 +293,9 @@ export default function Register() {
                 </div>
 
                 <div className="auth-card__socials">
+                    <p style={{ color: 'var(--text-tertiary)', fontSize: 'var(--fs-xs)', lineHeight: 1.5 }}>
+                        La confirmación de mayoría de edad y el aviso también aplican al acceso con Google o Apple.
+                    </p>
                     <button
                         type="button"
                         className="btn btn-secondary auth-card__social-btn"
@@ -316,8 +330,9 @@ export default function Register() {
             {showLegal && (
                 <LegalModal
                     onClose={() => setShowLegal(false)}
-                    onAccept={() => {
+                    onAccept={(acceptedSensitiveData) => {
                         setLegalAccepted(true)
+                        setSensitiveDataAccepted(acceptedSensitiveData)
                         setShowLegal(false)
                     }}
                 />

@@ -90,7 +90,7 @@ export default function ProfilePage() {
             }
             showToast('success', '¡Foto de perfil actualizada! 🎉')
 
-        } catch (error: any) {
+        } catch (error: unknown) {
             console.error('Error updating avatar:', error)
             showToast('error', 'No se pudo guardar la foto. La anterior sigue visible.')
         } finally {
@@ -186,34 +186,33 @@ export default function ProfilePage() {
                 </p>
             </div>
 
-            {/* Quick Stats */}
+            {/* Accesos rápidos personales */}
             <div className="profile-page__stats stagger-children">
-                <div className="profile-page__stat glass" onClick={() => navigate('/onboard')} style={{ cursor: 'pointer' }}>
+                <button type="button" className="profile-page__stat glass" onClick={() => navigate('/profile/edit')} style={{ cursor: 'pointer', color: 'var(--text-primary)' }}>
                     <Activity size={18} color="var(--freq-mid)" />
-                    <span className="profile-page__stat-value">{profile?.onboarding_completed ? 'Listo' : 'No'}</span>
-                    <span className="profile-page__stat-label">Readiness</span>
-                </div>
-                <div className="profile-page__stat glass" onClick={() => navigate('/verification')} style={{ cursor: 'pointer' }}>
-                    <Shield size={18} color="var(--line-sex)" />
-                    <span className="profile-page__stat-value">{profile?.trust_level || 'bronze'}</span>
-                    <span className="profile-page__stat-label">Confianza</span>
-                </div>
-                {/* ✅ Apple 3.1.1: stat Nivel no navega a /pricing en iOS */}
-                <div className="profile-page__stat glass" onClick={() => !isIOS() && navigate('/pricing')} style={{ cursor: isIOS() ? 'default' : 'pointer' }}>
-                    <TrendingUp size={18} color="var(--line-realization)" />
-                    <span className="profile-page__stat-value">{profile?.tier}</span>
-                    <span className="profile-page__stat-label">Nivel</span>
-                </div>
+                    <span className="profile-page__stat-value">Editar</span>
+                    <span className="profile-page__stat-label">Mi perfil</span>
+                </button>
+                <button type="button" className="profile-page__stat glass" onClick={() => navigate('/profile/journal')} style={{ cursor: 'pointer', color: 'var(--text-primary)' }}>
+                    <BookHeart size={18} color="var(--line-sex)" />
+                    <span className="profile-page__stat-value">Privado</span>
+                    <span className="profile-page__stat-label">Mi Diario</span>
+                </button>
+                <button type="button" className="profile-page__stat glass" onClick={() => navigate('/modules')} style={{ cursor: 'pointer', color: 'var(--text-primary)' }}>
+                    <BookOpen size={18} color="var(--line-realization)" />
+                    <span className="profile-page__stat-value">Explorar</span>
+                    <span className="profile-page__stat-label">Guía</span>
+                </button>
             </div>
 
             {/* Menu */}
             <nav className="profile-page__menu">
                 <h3 className="profile-page__menu-title">Mi Perfil</h3>
-                <MenuItem icon={<BarChart3 size={18} />} label="Gráfica de Relación" color="var(--line-love)" onClick={() => navigate('/profile/graph')} />
-                <MenuItem icon={<Activity size={18} />} label="Radar de Frecuencia" color="var(--line-sex)" onClick={() => navigate('/profile/frequency')} />
-                <MenuItem icon={<BookHeart size={18} />} label="Mi Diario Emocional" color="var(--love-rose)" onClick={() => navigate('/profile/journal')} />
-                <MenuItem icon={<Layers size={18} />} label="Mis Factores" color="var(--line-realization)" onClick={() => navigate('/profile/factors')} />
-                <MenuItem icon={<TrendingUp size={18} />} label="Plan de Mejora" color="var(--success)" onClick={() => navigate('/profile/improvement')} />
+                <MenuItem icon={<BarChart3 size={18} />} label="Mi recorrido" color="var(--line-love)" onClick={() => navigate('/profile/graph')} />
+                <MenuItem icon={<Activity size={18} />} label="Frecuencia de Relación: el modelo" color="var(--line-sex)" onClick={() => navigate('/profile/frequency')} />
+                <MenuItem icon={<BookHeart size={18} />} label="Mi Diario" color="var(--love-rose)" onClick={() => navigate('/profile/journal')} />
+                <MenuItem icon={<Layers size={18} />} label="Preguntas sobre afinidad" color="var(--line-realization)" onClick={() => navigate('/profile/factors')} />
+                <MenuItem icon={<TrendingUp size={18} />} label="Ideas para seguir" color="var(--success)" onClick={() => navigate('/profile/improvement')} />
 
                 <h3 className="profile-page__menu-title">Cuenta</h3>
                 <MenuItem icon={<Shield size={18} />} label="Verificación (en preparación)" color="var(--love-warm)" onClick={() => navigate('/selfie-verification')} />
@@ -254,7 +253,7 @@ export default function ProfilePage() {
                 )}
                 <MenuItem icon={<Settings size={18} />} label="Configuración" color="var(--text-secondary)" onClick={() => navigate('/profile/settings')} />
                 <MenuItem icon={<FileText size={18} />} label="Legal y Privacidad" color="var(--text-secondary)" onClick={() => navigate('/profile/legal')} />
-                <MenuItem icon={<BookOpen size={18} />} label="La Ciencia Detrás" color="var(--line-sex)" onClick={() => navigate('/profile/science')} />
+                <MenuItem icon={<BookOpen size={18} />} label="Bases y límites de LovIA" color="var(--line-sex)" onClick={() => navigate('/profile/science')} />
                 <MenuItem icon={<BookOpen size={18} />} label="El Libro — Descarga Gratis 📖" color="var(--warning)" onClick={() => navigate('/book')} />
                 <MenuItem icon={<Shield size={18} />} label="Acerca del Autor" color="var(--love-rose)" onClick={() => navigate('/profile/creator')} />
 

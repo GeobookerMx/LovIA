@@ -121,14 +121,14 @@ export default function AxisModulePage() {
                     <h2>¡Módulo Completado!</h2>
                     <p className="assessment-done__desc">
                         Has completado el módulo de <strong>{meta.name}</strong>.<br />
-                        Tus respuestas enriquecen tu Frecuencia de Relación.
+                        Tus respuestas quedan como parte de tu recorrido personal.
                     </p>
                     <div className="assessment-done__badge">
                         <CheckCircle size={18} color="var(--success)" />
-                        <span>+10 puntos a tu Readiness Score</span>
+                        <span>Actividad guardada</span>
                     </div>
                     <p className="assessment-disclaimer">
-                        Este no es un diagnóstico clínico. Es una heurística de orientación relacional.
+                        Esta actividad es educativa y voluntaria. No produce un diagnóstico ni determina tu acceso.
                     </p>
                     <button className="assessment-submit-btn" onClick={() => navigate('/home')}>
                         Volver al inicio <ChevronRight size={18} />

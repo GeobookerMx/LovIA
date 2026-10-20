@@ -3,7 +3,7 @@ import { useState } from 'react'
 import './LegalModal.css'
 
 interface Props {
-    onAccept: () => void
+    onAccept: (sensitiveDataAccepted: boolean) => void
     onClose: () => void
 }
 
@@ -12,6 +12,7 @@ export default function LegalModal({ onAccept, onClose }: Props) {
     const [scrolledTerms, setScrolledTerms] = useState(false)
     const [activeTab, setActiveTab] = useState<'privacy' | 'terms'>('privacy')
     const [consentSensitive, setConsentSensitive] = useState(false)
+    const [ageConfirmed, setAgeConfirmed] = useState(false)
 
     const handleScroll = (e: React.UIEvent<HTMLDivElement>) => {
         const el = e.currentTarget
@@ -22,7 +23,7 @@ export default function LegalModal({ onAccept, onClose }: Props) {
         }
     }
 
-    const canAccept = scrolledPrivacy && scrolledTerms && consentSensitive
+    const canAccept = scrolledPrivacy && scrolledTerms && ageConfirmed
 
     return (
         <div className="legal-overlay animate-fade-in" onClick={onClose}>
@@ -60,62 +61,62 @@ export default function LegalModal({ onAccept, onClose }: Props) {
                     {activeTab === 'privacy' ? (
                         <div className="legal-modal__text">
                             <h3>Aviso de Privacidad — LovIA!</h3>
-                            <p><strong>Responsable:</strong> LovIA! Tecnología Relacional, S.A. de C.V.</p>
-                            <p><strong>Fundamento legal:</strong> Ley Federal de Protección de Datos Personales en Posesión de los Particulares (LFPDPPP) 2025.</p>
+                            <p><strong>Contacto de privacidad:</strong> clienteslovia@gmail.com</p>
+                            <p><strong>Marco aplicable:</strong> Ley Federal de Protección de Datos Personales en Posesión de los Particulares vigente.</p>
 
                             <h4>1. Datos que recopilamos</h4>
                             <p>Recopilamos los siguientes datos personales:</p>
                             <ul>
-                                <li><strong>Identificación:</strong> Nombre, email, fecha de nacimiento, género, orientación sexual</li>
-                                <li><strong>Psicológicos (datos sensibles):</strong> Respuestas a cuestionarios de compatibilidad, evaluaciones de estado emocional, historial de frecuencia de relación</li>
-                                <li><strong>Verificación:</strong> Fotografías de perfil, selfie de verificación (opcional), INE (solo para encuentros presenciales)</li>
-                                <li><strong>Uso:</strong> Interacciones en la app, historial de matches, registros de videollamadas (metadatos, no contenido)</li>
+                                <li><strong>Cuenta:</strong> alias, email y datos necesarios para iniciar sesión.</li>
+                                <li><strong>Perfil:</strong> foto y la información que decidas completar, como ciudad, intereses o preferencias.</li>
+                                <li><strong>Actividad:</strong> conexiones, mensajes, reportes y progreso en herramientas voluntarias.</li>
+                                <li><strong>Datos sensibles opcionales:</strong> respuestas personales, orientación o información emocional cuando decidas proporcionarlas.</li>
+                                <li><strong>Ubicación:</strong> únicamente cuando autorices el permiso correspondiente para una función que la necesite.</li>
                             </ul>
 
                             <h4>2. Finalidad del tratamiento</h4>
                             <ul>
                                 <li>Crear y mantener tu perfil de usuario</li>
-                                <li>Calcular tu Frecuencia de Relación y Gráfica Relacional</li>
-                                <li>Generar matches basados en compatibilidad algorítmica</li>
-                                <li>Proporcionar recomendaciones de autoconocimiento</li>
-                                <li>Verificar tu identidad para encuentros presenciales seguros</li>
-                                <li>Mejorar nuestros algoritmos de manera anónima y agregada</li>
+                                <li>Mostrar las herramientas y el contenido que solicites</li>
+                                <li>Gestionar conexiones, conversaciones, bloqueos y reportes</li>
+                                <li>Guardar tu progreso y preferencias dentro de la app</li>
+                                <li>Proteger la cuenta, prevenir abuso y atender solicitudes de soporte</li>
                             </ul>
 
                             <h4>3. Datos sensibles (LFPDPPP Art. 3-VI)</h4>
-                            <p>Ciertos datos que recopilamos se consideran <strong>datos sensibles</strong> bajo la LFPDPPP, incluyendo: orientación sexual, estado emocional, perfil psicológico, y respuestas a evaluaciones de salud mental. Para su tratamiento requerimos tu <strong>consentimiento expreso y por escrito</strong>, el cual se otorga mediante la casilla de consentimiento al final de este aviso.</p>
+                            <p>La orientación, las respuestas emocionales y otras reflexiones pueden revelar datos sensibles. Su tratamiento requiere consentimiento expreso. Puedes evitar las actividades opcionales y solicitar la revocación del consentimiento mediante el contacto de privacidad.</p>
 
                             <h4>4. Derechos ARCO</h4>
                             <p>Tienes derecho a <strong>Acceder, Rectificar, Cancelar u Oponerte</strong> al tratamiento de tus datos en cualquier momento. Para ejercer tus derechos ARCO, contacta a: <strong>clienteslovia@gmail.com</strong></p>
 
                             <h4>5. Seguridad</h4>
-                            <p>Implementamos cifrado TLS 1.3 en tránsito, AES-256 en reposo, Row Level Security (RLS) en base de datos, y auditorías periódicas de seguridad.</p>
+                            <p>LovIA aplica controles técnicos y de acceso para proteger la información. Ningún sistema es infalible; reporta cualquier incidente o acceso que no reconozcas al contacto de privacidad.</p>
 
                             <h4>6. Transferencias</h4>
-                            <p>No compartimos tus datos personales con terceros, excepto cuando sea requerido por autoridad competente o para la prestación de servicios esenciales (Supabase como procesador de datos, bajo contrato de confidencialidad).</p>
+                            <p>LovIA utiliza proveedores tecnológicos para autenticación, almacenamiento, alojamiento y funcionamiento de la app. También puede comunicar información cuando exista una obligación legal. El aviso integral deberá mantener identificados los proveedores y finalidades vigentes.</p>
 
                             <h4>7. Cambios al aviso</h4>
                             <p>Te notificaremos de cualquier cambio material a este aviso mediante la app y por email.</p>
 
-                            <p><em>Última actualización: Abril 2026</em></p>
+                            <p><em>Última actualización del texto mostrado: 20 de octubre de 2026.</em></p>
                         </div>
                     ) : (
                         <div className="legal-modal__text">
                             <h3>Términos y Condiciones — LovIA!</h3>
 
                             <h4>1. Definición del servicio</h4>
-                            <p>LovIA! es una herramienta de autoconocimiento y compatibilidad basada en investigación científica. <strong>LovIA! NO es:</strong></p>
+                            <p>LovIA es una plataforma para conocer personas y usar herramientas educativas de reflexión. Sus actividades no predicen el éxito de una relación. LovIA no es:</p>
                             <ul>
-                                <li>Un servicio de seguridad personal</li>
-                                <li>Un sustituto de terapia profesional</li>
-                                <li>Una garantía de compatibilidad (el matching es probabilístico)</li>
-                                <li>Un servicio de investigación de antecedentes penales</li>
+                                <li>Un servicio de emergencia o seguridad personal</li>
+                                <li>Un diagnóstico ni un sustituto de atención profesional</li>
+                                <li>Una garantía de afinidad, identidad o conducta de otra persona</li>
+                                <li>Un servicio de investigación de antecedentes</li>
                             </ul>
 
                             <h4>2. Uso responsable</h4>
                             <p>Al usar LovIA!, te comprometes a:</p>
                             <ul>
-                                <li>Proporcionar información veraz en tu perfil y cuestionarios</li>
+                                <li>Tener al menos 18 años y proporcionar información veraz</li>
                                 <li>Tratar a otros usuarios con respeto</li>
                                 <li>No compartir información personal de otros usuarios fuera de la app</li>
                                 <li>Reportar cualquier comportamiento inapropiado o peligroso</li>
@@ -123,21 +124,21 @@ export default function LegalModal({ onAccept, onClose }: Props) {
                             </ul>
 
                             <h4>3. Seguridad en encuentros</h4>
-                            <p>LovIA! proporciona herramientas de seguridad (geolocalización, contactos de emergencia, verificación de identidad), pero <strong>no garantiza la seguridad física</strong> de los usuarios. Cada usuario es responsable de tomar precauciones al reunirse con otra persona.</p>
+                            <p>Las opciones de bloqueo, reporte o contacto de emergencia ayudan a responder ante situaciones concretas, pero no garantizan la seguridad física. Si decides reunirte con alguien, toma precauciones y utiliza servicios de emergencia locales cuando sea necesario.</p>
 
                             <h4>4. Contenido algorítmico</h4>
-                            <p>Los resultados de compatibilidad, la Frecuencia de Relación y las recomendaciones son generados por algoritmos basados en investigación publicada. Son herramientas de reflexión, no diagnósticos clínicos.</p>
+                            <p>El progreso, las Chispas y las preguntas educativas sirven para reflexionar. No son diagnósticos ni puntuaciones psicológicas validadas, y no determinan el valor de una persona o el acceso a funciones básicas.</p>
 
                             <h4>5. Suscripciones y pagos</h4>
-                            <p>LovIA! ofrece un modelo freemium. Las funciones premium están sujetas a suscripción mensual. Puedes cancelar en cualquier momento desde tu perfil.</p>
+                            <p>El acceso está documentado como gratuito hasta el 31 de enero de 2027 inclusive. Terminar ese periodo no inicia un cobro automático. Cualquier oferta futura deberá mostrar precio, vigencia y consentimiento antes de contratar.</p>
 
                             <h4>6. Propiedad intelectual</h4>
-                            <p>El contenido, algoritmos, diseño y marca de LovIA! son propiedad exclusiva de LovIA! Tecnología Relacional. Tu contenido (respuestas, fotos de perfil) te pertenece, pero nos otorgas licencia para procesarlo según este acuerdo.</p>
+                            <p>La marca, el diseño y el contenido propio de LovIA conservan sus derechos correspondientes. Conservas los derechos sobre el contenido que aportas y autorizas su tratamiento únicamente para prestar las funciones que solicites conforme al aviso de privacidad.</p>
 
                             <h4>7. Jurisdicción</h4>
                             <p>Estos términos se rigen por las leyes de los Estados Unidos Mexicanos. Cualquier controversia será resuelta en los tribunales de la Ciudad de México.</p>
 
-                            <p><em>Última actualización: Febrero 2025</em></p>
+                            <p><em>Última actualización del texto mostrado: 20 de octubre de 2026.</em></p>
                         </div>
                     )}
 
@@ -154,11 +155,19 @@ export default function LegalModal({ onAccept, onClose }: Props) {
                     <label className="legal-modal__checkbox">
                         <input
                             type="checkbox"
+                            checked={ageConfirmed}
+                            onChange={(e) => setAgeConfirmed(e.target.checked)}
+                        />
+                        <span><strong>Mayoría de edad:</strong> Confirmo que tengo al menos 18 años.</span>
+                    </label>
+                    <label className="legal-modal__checkbox">
+                        <input
+                            type="checkbox"
                             checked={consentSensitive}
                             onChange={(e) => setConsentSensitive(e.target.checked)}
                         />
                         <span>
-                            <strong>Consentimiento datos sensibles (LFPDPPP Art. 9):</strong> Autorizo expresamente el tratamiento de mis datos sensibles (orientación sexual, estado emocional, perfil psicológico) para las finalidades descritas en el Aviso de Privacidad.
+                            <strong>Consentimiento opcional para datos sensibles:</strong> Autorizo expresamente el tratamiento de los datos sensibles que decida proporcionar para las finalidades descritas. Si no marco esta casilla, podré crear mi cuenta y evitar esas actividades.
                         </span>
                     </label>
                 </div>
@@ -169,10 +178,10 @@ export default function LegalModal({ onAccept, onClose }: Props) {
                     </button>
                     <button
                         className="legal-modal__btn legal-modal__btn--primary"
-                        onClick={onAccept}
+                        onClick={() => onAccept(consentSensitive)}
                         disabled={!canAccept}
                     >
-                        Acepto todo
+                        Aceptar y continuar
                     </button>
                 </div>
             </div>

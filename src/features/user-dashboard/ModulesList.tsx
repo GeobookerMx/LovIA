@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
-import { ArrowLeft, Lock, CheckCircle, Clock, BookOpen, Brain, Heart, MessageCircle, Shield, Flame, Loader2 } from 'lucide-react'
+import { ArrowLeft, CheckCircle, Clock, BookOpen, Brain, Heart, MessageCircle, Shield, Flame, Loader2 } from 'lucide-react'
 import { supabase } from '../../lib/supabase'
 import { useAuthStore } from '../../stores/authStore'
 import './ModulesPages.css'
@@ -23,7 +23,6 @@ interface ModuleWithProgress extends DBModule {
     lessonsCount: number
     completed: boolean
     progress: number
-    locked: boolean
 }
 
 const ICON_MAP: Record<string, React.ReactNode> = {
@@ -36,15 +35,17 @@ const ICON_MAP: Record<string, React.ReactNode> = {
 
 export default function ModulesList() {
     const navigate = useNavigate()
-    const { user, profile } = useAuthStore()
+    const user = useAuthStore((state) => state.user)
     const [modules, setModules] = useState<ModuleWithProgress[]>([])
     const [loading, setLoading] = useState(true)
+    const [loadError, setLoadError] = useState(false)
 
     useEffect(() => {
         if (!user) return
 
         async function fetchModulesAndProgress() {
             setLoading(true)
+            setLoadError(false)
             try {
                 // 1. Obtener módulos de la BD
                 const { data: dbMods, error: modsError } = await supabase
@@ -79,32 +80,25 @@ export default function ModulesList() {
                     const completedLessons = lessons.filter(l => completedLessonIds.has(l.id)).length
                     const progress = totalLessons > 0 ? Math.round((completedLessons / totalLessons) * 100) : 0
                     
-                    // Lógica de bloqueo según Readiness Score
-                    // ie, cnv y regulation son libres, attachment pide 40+, sexuality pide 60+
-                    const readiness = profile?.readiness_score ?? 0
-                    let locked = false
-                    if (mod.id === 'attachment' && readiness < 40) locked = true
-                    if (mod.id === 'sexuality' && readiness < 60) locked = true
-
                     return {
                         ...mod,
                         lessonsCount: totalLessons,
                         completed: progress === 100 && totalLessons > 0,
-                        progress,
-                        locked
+                        progress
                     }
                 })
 
                 setModules(mapped)
             } catch (err) {
                 console.error('[ModulesList] Error al cargar datos:', err)
+                setLoadError(true)
             } finally {
                 setLoading(false)
             }
         }
 
         fetchModulesAndProgress()
-    }, [user, profile])
+    }, [user])
 
     const completedCount = modules.filter((m) => m.completed).length
     const inProgressCount = modules.filter((m) => m.progress > 0 && !m.completed).length
@@ -147,32 +141,28 @@ export default function ModulesList() {
             <div className="modules-page__intro glass-strong animate-fade-in-up">
                 <BookOpen size={20} color="var(--love-warm)" />
                 <p>
-                    Cada módulo está respaldado por investigación científica publicada.
-                    Trabaja en las áreas que más impactan tu <strong>Frecuencia de Relación</strong>.
+                    Explora los módulos a tu ritmo. Su progreso es personal y no determina si puedes conocer a alguien.
                 </p>
             </div>
+
+            {loadError && <p role="alert">No pudimos cargar los módulos. Revisa tu conexión y vuelve a abrir esta página.</p>}
+            {!loadError && modules.length === 0 && <p>Aún no hay módulos disponibles. Puedes empezar con una Chispa o Mi Diario.</p>}
 
             {/* Module Cards */}
             <div className="modules-page__list stagger-children">
                 {modules.map((mod) => (
                     <button
                         key={mod.id}
-                        className={`modules-page__card glass ${mod.locked ? 'modules-page__card--locked' : ''} ${mod.completed ? 'modules-page__card--completed' : ''}`}
-                        onClick={() => !mod.locked && navigate(`/modules/${mod.id}`)}
-                        disabled={mod.locked}
+                        className={`modules-page__card glass ${mod.completed ? 'modules-page__card--completed' : ''}`}
+                        onClick={() => navigate(`/modules/${mod.id}`)}
                     >
                         <div className="modules-page__card-icon" style={{ color: mod.color, background: `${mod.color}15` }}>
-                            {mod.locked ? <Lock size={24} /> : mod.completed ? <CheckCircle size={24} /> : (ICON_MAP[mod.icon_name] || <BookOpen size={24} />)}
+                            {mod.completed ? <CheckCircle size={24} /> : (ICON_MAP[mod.icon_name] || <BookOpen size={24} />)}
                         </div>
 
                         <div className="modules-page__card-content">
                             <div className="modules-page__card-top">
                                 <h3>{mod.title}</h3>
-                                {mod.locked && (
-                                    <span className="modules-page__tier-badge" style={{ background: 'var(--love-rose)', color: 'white' }}>
-                                        Bloqueado
-                                    </span>
-                                )}
                             </div>
                             <p className="modules-page__card-subtitle">{mod.subtitle}</p>
 

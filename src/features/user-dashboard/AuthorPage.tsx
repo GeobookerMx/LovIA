@@ -58,20 +58,19 @@ export default function AuthorPage() {
                 {/* Institución */}
                 <div className="glass author__institution">
                     <span className="author__inst-badge">🏛️ Instituto Mexicano de Psicooncología</span>
-                    <p>Escritor independiente especializado en Psicología Evolutiva y dinámica de parejas.</p>
+                    <p>Escritor independiente y autor de una propuesta sobre relaciones de pareja.</p>
                 </div>
 
                 {/* Cita / Bio */}
                 <div className="glass-strong author__bio">
                     <Quote size={24} color="var(--love-rose)" style={{ opacity: 0.5, marginBottom: '12px' }} />
                     <p>
-                        He dedicado mi carrera a decodificar la complejidad de las relaciones humanas fusionando
-                        el <strong style={{ color: 'var(--love-rose)' }}>Análisis Psicológico Clínico</strong> empírico
-                        con la ciencia del comportamiento evolutivo.
+                        He desarrollado una propuesta para pensar la complejidad de las relaciones humanas y
+                        convertir sus preguntas centrales en herramientas accesibles de reflexión.
                     </p>
                     <p style={{ marginTop: '12px' }}>
                         LovIA nace de una convicción: las conexiones auténticas requieren conocerse desde adentro
-                        hacia afuera. Esta herramienta es la materialización digital de años de investigación publicada.
+                        hacia afuera. Esta herramienta traslada ideas del libro a un recorrido digital que debe usarse con contexto.
                     </p>
                 </div>
 
@@ -86,13 +85,12 @@ export default function AuthorPage() {
                     </div>
                     <h3 className="author__book-title">"Evolución de las Relaciones de Pareja"</h3>
                     <p className="author__book-desc">
-                        Todo el motor neurobiológico y psicológico detrás del algoritmo de LovIA —
-                        Teoría de los apegos paralelos, Frustración Periférica y Dinámicas de Intercambio Energético —
-                        detallado en esta obra. La vanguardia del amor moderno, documentada y publicada.
+                        La obra presenta conceptos propios y preguntas sobre amor, sexualidad, realización y
+                        cambio en la pareja. Se ofrece como material del autor para lectura y reflexión.
                     </p>
                     <div className="author__book-tags">
-                        <span>#terapiadepareja</span>
-                        <span>#psicologiaevolutiva</span>
+                        <span>#autoconocimiento</span>
+                        <span>#conversaciones</span>
                         <span>#relacionesdepareja</span>
                     </div>
                     {/* CTA Descarga */}
@@ -142,7 +140,7 @@ export default function AuthorPage() {
                     onClick={() => {
                         if (navigator.share) {
                             navigator.share({
-                                title: 'LovIA! — Relaciones basadas en ciencia',
+                                title: 'LovIA! — Conecta desde quien eres',
                                 text: 'Descubrí LovIA: acceso gratis hasta el 31 de enero de 2027, sin tarjeta.',
                                 url: 'https://lovia.com.mx'
                             })

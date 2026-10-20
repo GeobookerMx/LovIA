@@ -1,229 +1,87 @@
-import { useState, useCallback } from 'react'
+import { useState } from 'react'
 import { useNavigate } from 'react-router-dom'
-import { ArrowLeft, ArrowRight, Sparkles } from 'lucide-react'
-import { momentoDeVidaQuestions, vinculoQuestions, pss4Questions, pss4Options } from './questionData'
-import { calculateReadiness, calculateFrequency, type OnboardingResults } from './scoring'
-import QuestionCard from './QuestionCard'
-import PSS4Card from './PSS4Card'
-import FrequencyResult from './FrequencyResult'
+import { ArrowRight, Loader2 } from 'lucide-react'
+import { supabase } from '../../lib/supabase'
+import { LOVIA_GOALS, readLoviaGoal, type LoviaGoal } from '../../lib/loviaGoals'
+import { useAuthStore } from '../../stores/authStore'
 import './Onboarding.css'
 
-import { useAuthStore } from '../../stores/authStore'
-import { supabase } from '../../lib/supabase'
-
-type Phase = 'welcome' | 'questions' | 'pss4' | 'calculating' | 'result'
-
-// Combinar ambos tests para el flujo de preguntas principales
-const allQuestions = [...momentoDeVidaQuestions, ...vinculoQuestions]
-const TOTAL_STEPS = allQuestions.length + pss4Questions.length
-
 export default function OnboardingFlow() {
-    const navigate = useNavigate()
-    const { user, updateProfile } = useAuthStore()
-    const [phase, setPhase] = useState<Phase>('welcome')
-    const [qIndex, setQIndex] = useState(0)
-    const [pssIndex, setPssIndex] = useState(0)
-    const [answers, setAnswers] = useState<Record<string, string | number>>({})
-    const [pssAnswers, setPssAnswers] = useState<Record<string, number>>({})
-    const [needsSupport, setNeedsSupport] = useState(false)
-    const [freqResult, setFreqResult] = useState<OnboardingResults | null>(null)
+  const navigate = useNavigate()
+  const user = useAuthStore((state) => state.user)
+  const updateProfile = useAuthStore((state) => state.updateProfile)
+  const [selectedGoal, setSelectedGoal] = useState<LoviaGoal | null>(() => readLoviaGoal(user?.user_metadata))
+  const [saving, setSaving] = useState(false)
+  const [error, setError] = useState<string | null>(null)
+  const selected = LOVIA_GOALS.find((option) => option.id === selectedGoal)
 
-    // Progreso continuo a través de ambas fases
-    const currentStep =
-        phase === 'questions' ? qIndex + 1 :
-        phase === 'pss4'      ? allQuestions.length + pssIndex + 1 : 0
-    const progress = TOTAL_STEPS > 0 ? (currentStep / TOTAL_STEPS) * 100 : 0
-
-    // ── Handlers: preguntas principales ──
-    const handleAnswer = useCallback((questionId: string, value: string | number) => {
-        setAnswers((prev) => ({ ...prev, [questionId]: value }))
-    }, [])
-
-    const handlePssAnswer = useCallback((value: number) => {
-        const qId = pss4Questions[pssIndex].id
-        setPssAnswers((prev) => ({ ...prev, [qId]: value }))
-    }, [pssIndex])
-
-    const goNext = useCallback(() => {
-        const q = allQuestions[qIndex]
-        if (answers[q.id] === undefined) return
-
-        if (qIndex < allQuestions.length - 1) {
-            setQIndex((i) => i + 1)
-        } else {
-            // Fin de preguntas principales → pasar a PSS-4
-            setPhase('pss4')
-        }
-    }, [qIndex, answers])
-
-    const goNextPss = useCallback(() => {
-        const qId = pss4Questions[pssIndex].id
-        if (pssAnswers[qId] === undefined) return
-
-        if (pssIndex < pss4Questions.length - 1) {
-            setPssIndex((i) => i + 1)
-        } else {
-            // Fin de PSS-4 → calcular
-            setPhase('calculating')
-            setTimeout(async () => {
-                const readiness = calculateReadiness(answers)
-                const freq      = calculateFrequency(answers, pssAnswers)
-
-                if (user) {
-                    await supabase.from('assessments_raw').insert({
-                        user_id:   user.id,
-                        test_type: 'momento_vida_pss4',
-                        answers:   { ...answers, ...pssAnswers },
-                    })
-
-                    await supabase.from('assessment_scores').update({
-                        readiness_score:   readiness.readinessScore,
-                        needs_support:     readiness.needsSupport,
-                        frequency_score:   freq.frequency,
-                        stress_level:      freq.stressLevel,
-                        last_calculated_at: new Date().toISOString(),
-                    }).eq('id', user.id)
-                }
-
-                await updateProfile({ onboarding_completed: true })
-
-                setNeedsSupport(readiness.needsSupport)
-                setFreqResult(freq)
-                setPhase('result')
-            }, 2500)
-        }
-    }, [pssIndex, pssAnswers, answers, updateProfile, user])
-
-    const goBack = useCallback(() => {
-        if (phase === 'questions' && qIndex > 0) setQIndex((i) => i - 1)
-        if (phase === 'pss4' && pssIndex > 0)   setPssIndex((i) => i - 1)
-        if (phase === 'pss4' && pssIndex === 0)  setPhase('questions')
-    }, [phase, qIndex, pssIndex])
-
-    // ── Welcome ──
-    if (phase === 'welcome') {
-        return (
-            <div className="onboarding">
-                <div className="onboarding__welcome animate-fade-in">
-                    <div className="onboarding__welcome-icon animate-heartbeat">
-                        <Sparkles size={48} color="var(--love-rose)" />
-                    </div>
-                    <h1>Tu Mapa de <span className="text-gradient">Momento de Vida</span></h1>
-                    <p>
-                        No buscamos enamorarte a la fuerza. Primero queremos entender
-                        <strong> desde qué parte de ti te quieres vincular</strong>.
-                    </p>
-                    <ul className="onboarding__welcome-list">
-                        <li>⏱️ ~3 minutos de honestidad pura</li>
-                        <li>🔒 100% privado (no lo verán otros perfiles)</li>
-                        <li>📚 Basado en el libro <strong>Evolución de las Relaciones de Pareja</strong> por J. P. Peña García</li>
-                        <li>🪞 Respuestas reales logísticas y emocionales</li>
-                    </ul>
-                    <button className="onboarding__cta" onClick={() => setPhase('questions')}>
-                        Comenzar Introspección <ArrowRight size={18} />
-                    </button>
-                </div>
-            </div>
-        )
+  const continueToApp = async () => {
+    if (!selectedGoal || saving) return
+    if (!user) {
+      setError('Tu sesión terminó. Inicia sesión para continuar.')
+      return
     }
 
-    // ── Calculating ──
-    if (phase === 'calculating') {
-        return (
-            <div className="onboarding">
-                <div className="onboarding__calculating">
-                    <div className="onboarding__calc-orbs">
-                        <div className="onboarding__orb onboarding__orb--love" />
-                        <div className="onboarding__orb onboarding__orb--sex" />
-                        <div className="onboarding__orb onboarding__orb--real" />
-                    </div>
-                    <h2 className="animate-pulse-soft">Calculando tu Frecuencia de Relación...</h2>
-                    <p>Procesando las 3 líneas + PSS-4</p>
-                </div>
-            </div>
-        )
+    setSaving(true)
+    setError(null)
+    try {
+      // This is a personal UI preference, never an authorization or discovery consent flag.
+      const { error: goalError } = await supabase.auth.updateUser({ data: { lovia_goal: selectedGoal } })
+      if (goalError) throw goalError
+
+      const { error: profileError } = await updateProfile({ onboarding_completed: true })
+      if (profileError) throw new Error(profileError)
+
+      navigate('/home', { replace: true })
+    } catch {
+      setError('No pudimos guardar tu elección. Comprueba tu conexión e inténtalo de nuevo.')
+    } finally {
+      setSaving(false)
     }
+  }
 
-    // ── Result — FrequencyResult con lógica de soporte preservada ──
-    if (phase === 'result' && freqResult) {
-        const onContinue = needsSupport
-            ? () => navigate('/community')
-            : () => navigate('/home')
+  return (
+    <main className="onboarding onboarding--welcome">
+      <div className="onboarding__intro">
+        <span className="onboarding__kicker">Tu camino en LovIA</span>
+        <h1>¿Qué te gustaría hacer hoy?</h1>
+        <p>Elige un punto de partida. Puedes cambiarlo después y explorar las demás herramientas cuando quieras.</p>
+      </div>
 
-        return (
-            <>
-                <FrequencyResult result={freqResult} onContinue={onContinue} />
-                {needsSupport && (
-                    <div style={{ padding: '0 1.5rem 2rem', display: 'flex', flexDirection: 'column', gap: '0.75rem' }}>
-                        <button className="onboarding__cta onboarding__cta--outline" onClick={() => navigate('/home')}>
-                            Continuar a la app de todos modos
-                        </button>
-                    </div>
-                )}
-            </>
-        )
-    }
+      <div className="onboarding__goal-grid" role="group" aria-label="Elige tu objetivo inicial">
+        {LOVIA_GOALS.map((option) => (
+          <button
+            key={option.id}
+            type="button"
+            className={`onboarding__goal ${selectedGoal === option.id ? 'onboarding__goal--selected' : ''}`}
+            aria-pressed={selectedGoal === option.id}
+            onClick={() => { setSelectedGoal(option.id); setError(null) }}
+          >
+            <span className="onboarding__goal-icon" aria-hidden="true">{option.icon}</span>
+            <span className="onboarding__goal-text">
+              <strong>{option.title}</strong>
+              <span>{option.description}</span>
+            </span>
+            <span className="onboarding__goal-indicator" aria-hidden="true">{selectedGoal === option.id ? '✓' : '→'}</span>
+          </button>
+        ))}
+      </div>
 
-    // ── Questions + PSS-4 (comparten la barra de progreso) ──
-    return (
-        <div className="onboarding">
-            {/* Barra de progreso continua */}
-            <div className="onboarding__top-bar">
-                <button
-                    className="onboarding__back"
-                    onClick={goBack}
-                    disabled={phase === 'questions' && qIndex === 0}
-                >
-                    <ArrowLeft size={20} />
-                </button>
-                <div className="onboarding__progress">
-                    <div className="onboarding__progress-bar" style={{ width: `${progress}%` }} />
-                </div>
-                <span className="onboarding__step-count">{currentStep}/{TOTAL_STEPS}</span>
-            </div>
-
-            {/* Card area */}
-            <div className="onboarding__card-area">
-                {phase === 'questions' && (
-                    <>
-                        <QuestionCard
-                            key={allQuestions[qIndex].id}
-                            question={allQuestions[qIndex]}
-                            answer={answers[allQuestions[qIndex].id]}
-                            onAnswer={(val: string | number) => handleAnswer(allQuestions[qIndex].id, val)}
-                        />
-                        <button
-                            className="onboarding__next"
-                            onClick={goNext}
-                            disabled={answers[allQuestions[qIndex].id] === undefined}
-                        >
-                            {qIndex === allQuestions.length - 1 ? 'Continuar a Bienestar' : 'Siguiente'}
-                            <ArrowRight size={18} />
-                        </button>
-                    </>
-                )}
-
-                {phase === 'pss4' && (
-                    <>
-                        <PSS4Card
-                            key={pss4Questions[pssIndex].id}
-                            question={pss4Questions[pssIndex] as any}
-                            options={pss4Options}
-                            selected={pssAnswers[pss4Questions[pssIndex].id]}
-                            onSelect={handlePssAnswer}
-                            index={pssIndex}
-                        />
-                        <button
-                            className="onboarding__next"
-                            onClick={goNextPss}
-                            disabled={pssAnswers[pss4Questions[pssIndex].id] === undefined}
-                        >
-                            {pssIndex === pss4Questions.length - 1 ? 'Ver mi Frecuencia' : 'Siguiente'}
-                            <ArrowRight size={18} />
-                        </button>
-                    </>
-                )}
-            </div>
+      {selected && (
+        <div className="onboarding__first-step" role="status">
+          <span className="onboarding__first-step-label">Una pregunta para comenzar</span>
+          <p>{selected.reflection}</p>
+          <small>Puedes guardarla en Mi Diario más tarde. No es una prueba ni una calificación.</small>
         </div>
-    )
+      )}
+
+      <div className="onboarding__finish">
+        {error && <p className="onboarding__error" role="alert">{error}</p>}
+        <button type="button" className="onboarding__cta" onClick={continueToApp} disabled={!selectedGoal || saving}>
+          {saving ? <><Loader2 className="animate-spin" size={18} /> Guardando…</> : <>Entrar a LovIA <ArrowRight size={18} /></>}
+        </button>
+        <p>Tu elección es privada y no activa tu visibilidad para otras personas. Las actividades son voluntarias.</p>
+      </div>
+    </main>
+  )
 }

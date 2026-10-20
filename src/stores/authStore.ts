@@ -16,7 +16,7 @@ interface AuthState {
     legalAccepted: boolean
 
     initialize: () => Promise<void>
-    signUp: (email: string, password: string, name: string) => Promise<{ error: string | null; needsEmailConfirmation: boolean }>
+    signUp: (email: string, password: string, name: string, consent: { version: string; acceptedAt: string; sensitiveDataAccepted: boolean }) => Promise<{ error: string | null; needsEmailConfirmation: boolean }>
     signIn: (email: string, password: string) => Promise<{ error: string | null }>
     signOut: () => Promise<void>
     acceptLegal: () => void
@@ -126,13 +126,21 @@ export const useAuthStore = create<AuthState>((set, get) => ({
         }
     },
 
-    signUp: async (email, password, name) => {
+    signUp: async (email, password, name, consent) => {
         set({ loading: true })
         const { data, error } = await supabase.auth.signUp({
             email,
             password,
             options: {
-                data: { alias: name, full_name: name, avatar_url: '' },
+                data: {
+                    alias: name,
+                    full_name: name,
+                    avatar_url: '',
+                    age_confirmed_18: true,
+                    legal_consent_version: consent.version,
+                    legal_consent_accepted_at: consent.acceptedAt,
+                    sensitive_data_consent: consent.sensitiveDataAccepted,
+                },
             },
         })
         set({ loading: false })
@@ -172,7 +180,7 @@ export const useAuthStore = create<AuthState>((set, get) => ({
             const { data: { user } } = await supabase.auth.getUser()
             if (!user) return
 
-            let { data, error } = await supabase
+            const { data, error } = await supabase
                 .from('profiles')
                 .select('*')
                 .eq('id', user.id)
@@ -185,10 +193,10 @@ export const useAuthStore = create<AuthState>((set, get) => ({
             if (!error && !data) console.warn('[AuthStore] Falta el perfil creado por el servidor.')
 
             if (data && get().user?.id === user.id) {
-                (set as any)({ profile: data as PublicProfile })
+                set({ profile: data as PublicProfile })
                 
                 // Actualizar la última fecha de actividad (last_seen_at) en segundo plano
-                (async () => {
+                void (async () => {
                     try {
                         await supabase
                             .from('profiles')
