@@ -5,7 +5,7 @@ Fecha: 19 de octubre de 2026. Publicación solicitada expresamente sin pruebas. 
 ## Destino y recuperación
 
 - Repositorio: `GeobookerMx/LovIA`, rama `main`.
-- Sitio Netlify declarado por el propietario: `elaborate-pavlova-7ebdc9`, site ID `68efa1d5-8ec7-46d9-8706-0f8e78d3d735`; el mismo ID figura en `.netlify/state.json`.
+- Sitio Netlify verificado mediante API: `elaborate-pavlova-7ebdc9`, site ID real `a5ff2b62-8531-46f7-b7b7-1c9bdb136af8`. El ID inicialmente comunicado (`68efa1d5-8ec7-46d9-8706-0f8e78d3d735`) pertenece al sitio `shimmering-zabaione-1d3b44` sin dominio LovIA. `.netlify/state.json` local se corrigió al ID real y sigue excluido de Git.
 - Dominio: `https://lovia.com.mx`.
 - Supabase producción: `nbpidjpkanwynlhdxowx`. La configuración local `.env.production` apunta a ese proyecto; la clave pública quedó excluida de Git.
 - Código previo: `622adbb218835b1392f2698b136c9be9549ac836`, conservado en la etiqueta `lovia/web-before-2026-10-19`.
@@ -30,5 +30,6 @@ Fecha: 19 de octubre de 2026. Publicación solicitada expresamente sin pruebas. 
 - `origin/main` (`GeobookerMx/LovIA`) llegó a `e7d9eb2`; el sitio siguió entregando `/assets/index-D9lG1oNY.js`.
 - El panel Netlify mostró un nuevo despliegue *Published* de `main@622adbb` a las 21:58 y el mensaje «All files already uploaded by a previous deploy with the same commits».
 - Una consulta read-only posterior a ambos remotos confirmó `origin/main=e7d9eb2` y `netlify/main=622adbb`. El remoto local llamado `netlify` apunta a `GeobookerMx/elaborate-pavlova-7ebdc9.git`, distinto del repositorio autorizado `GeobookerMx/LovIA`.
-- Es necesario verificar en **Project configuration → Build & deploy → Continuous deployment** qué repositorio y rama utiliza el sitio. Si allí consta el repositorio `elaborate-pavlova-7ebdc9`, conectarlo al repositorio autorizado `GeobookerMx/LovIA`, rama `main`, conservando el site ID y el dominio. No enviar cambios al otro repositorio para resolverlo.
-- No se ha observado publicación de las mejoras en `lovia.com.mx`. El nuevo despliegue y su ID quedan pendientes de acceso autenticado al panel. Repetir Trigger deploy mientras la fuente siga en `622adbb` consume minutos sin actualizar el código.
+- La API confirmó que la fuente Git del sitio es `GeobookerMx/elaborate-pavlova-7ebdc9`, rama `main`, y que su deploy previo era `6ad6e6d77ba019e473ca61bf` desde `622adbb`. Es necesario cambiarla en **Project configuration → Build & deploy → Continuous deployment → Repository → Manage repository → Link to a different repository** a `GeobookerMx/LovIA`, rama `main`, conservando el mismo sitio y dominio. No enviar cambios al otro repositorio para resolverlo.
+- Publicación directa autorizada mediante Netlify CLI, usando el paquete local `dist`, `--no-build` y `--site a5ff2b62-8531-46f7-b7b7-1c9bdb136af8`. Commit fuente `f946df56bf493b6cf284b57a9842304b25149c79`, presente en `GeobookerMx/LovIA/main`. Deploy ID `6ad6ebddaeb9797e3bb7dc37`, estado API `ready`, URL `https://lovia.com.mx`; asset público `/assets/index-tdCflfvn.js` (HTTP 200). Sin pruebas funcionales por instrucción del propietario.
+- Hasta corregir la fuente Git, una nueva publicación automática desde el repositorio enlazado puede reemplazar esta versión con código antiguo. Repetir Trigger deploy sobre `622adbb` consume minutos y revierte el avance.
