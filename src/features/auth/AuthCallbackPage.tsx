@@ -18,7 +18,7 @@ export default function AuthCallbackPage() {
       if ((event === 'SIGNED_IN' || event === 'TOKEN_REFRESHED') && session?.user) {
         navigated = true
         subscription.unsubscribe()
-        console.log('[LovIA] AuthCallback onAuthStateChange SIGNED_IN:', session.user.id)
+        console.log('[LovIA] AuthCallback: sesión recibida.')
 
         const { data: profile } = await supabase
           .from('profiles')
@@ -66,7 +66,7 @@ export default function AuthCallbackPage() {
 
         navigated = true
         subscription.unsubscribe()
-        console.log('[LovIA] AuthCallback: sesión verificada para user:', session.user.id)
+        console.log('[LovIA] AuthCallback: sesión verificada.')
 
         const next = searchParams.get('next')
         if (next === '/onboarding') {

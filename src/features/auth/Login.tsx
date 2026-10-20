@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useRef } from 'react'
 import { Link, useNavigate } from 'react-router-dom'
 import { useAuthStore } from '../../stores/authStore'
 import { supabase } from '../../lib/supabase'
@@ -15,19 +15,25 @@ export default function Login() {
     const [oauthLoading, setOauthLoading] = useState<'google' | 'apple' | null>(null)
     const { signIn, user, initialized } = useAuthStore()
     const navigate = useNavigate()
+    const manualSignIn = useRef(false)
 
     // Redirigir si el usuario ya está autenticado — cubre el caso OAuth nativo donde
     // appUrlOpen llama setSession y onAuthStateChange actualiza el store sin navegar.
     useEffect(() => {
-        if (initialized && user) {
-            navigate('/home', { replace: true })
-        }
+        if (!initialized || !user || manualSignIn.current) return
+        let active = true
+        void supabase.from('profiles').select('onboarding_completed').eq('id', user.id).maybeSingle()
+            .then(({ data, error }) => {
+                if (active) navigate(!error && data?.onboarding_completed ? '/home' : '/onboarding', { replace: true })
+            })
+        return () => { active = false }
     }, [user, initialized, navigate])
 
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault()
         setError(null)
         setSubmitting(true)
+        manualSignIn.current = true
 
         try {
             console.log('[LovIA] Login: intentando con email/password...')
@@ -49,8 +55,7 @@ export default function Login() {
             const authUser = authData?.user
 
             if (!authUser) {
-                console.warn('[LovIA] getUser devolvió null post-signIn — navegando a /home de todas formas')
-                navigate('/home')
+                setError('No se pudo confirmar la sesión. Inténtalo de nuevo.')
                 return
             }
 
@@ -75,6 +80,7 @@ export default function Login() {
             setError('Error al iniciar sesión. Por favor intenta de nuevo.')
         } finally {
             setSubmitting(false)
+            manualSignIn.current = false
         }
     }
 
