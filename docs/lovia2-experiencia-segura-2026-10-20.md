@@ -29,7 +29,7 @@ Alcance: cliente web/PWA. Sin SQL, migraciones, despliegue de funciones ni cambi
 
 ## Límites antes de declarar LovIA 2.0 lista
 
-1. Recuperar y conciliar el SQL exacto de `20261019155934_lovia_contencion_a_permisos` con un historial local único.
+1. El informe aportado `LovIA — Contención aplicada y continuación de producto` contiene el SQL exacto de `20261019155934_lovia_contencion_a_permisos`. Falta contrastar su versión y contenido con el historial remoto y crear el archivo local correspondiente; no volver a ejecutarlo.
 2. Verificar en Supabase remoto RLS, autorización administrativa, edad, consentimiento, visibilidad, bloqueos y preferencias recíprocas.
 3. Probar login por correo, Google y Apple, recuperación, cambio de cuenta y limpieza de datos privados.
 4. Probar diario, fotos, bloqueo, reporte, chat y administración con usuarios A/B, anónimo y administrador.
@@ -37,3 +37,13 @@ Alcance: cliente web/PWA. Sin SQL, migraciones, despliegue de funciones ni cambi
 6. Mantener Raven y otros instrumentos sin licencia o revisión suficiente fuera de publicación.
 
 Este bloque no modifica migraciones ni servicios remotos y no acredita por sí solo la seguridad del backend.
+
+## Evidencia posterior: catálogo de evaluaciones
+
+El 20 de octubre, el propietario compartió el estado del panel de producción `nbpidjpkanwynlhdxowx`: `public.assessment_modules` y `public.assessment_questions` muestran RLS desactivado; `assessment_modules` muestra cero políticas. El asesor marca `assessment_modules` como crítico. La contención del 19 de octubre había revocado los privilegios de escritura de `anon` y `authenticated`, conservando `SELECT`, pero no había activado RLS. Por tanto, el aviso es coherente con esa contención y queda pendiente una migración nueva para ambas tablas. El acceso real mediante Data API todavía necesita comprobación: el panel muestra “API Disabled” y permisos personalizados.
+
+`AxisModulePage.tsx` lee ambos catálogos desde una ruta protegida por login. La corrección propuesta requiere comprobar primero las políticas y permisos actuales de ambas tablas y luego añadir una política de lectura para `authenticated` junto con RLS, sin otorgar escritura. Debe verificarse que un usuario autenticado lee los módulos y preguntas y que `anon` no puede escribir ni leer contenido reservado. Activar RLS aislado dejaría la ruta sin resultados.
+
+La captura también muestra dos filas de `assessment_modules` por cada eje (`amor`, `intimidad`, `realizacion`, `seguridad`). La versión anterior de `AxisModulePage.tsx` elegía el primer módulo del eje con `limit(1)` sin un orden estable; podía seleccionar conjuntos de preguntas distintos. Antes de consolidar módulos hay que contar preguntas y respuestas asociadas a cada ID, elegir el registro canónico y migrar referencias preservando las respuestas existentes. No eliminar duplicados desde el panel.
+
+Corrección local posterior: `AxisModulePage.tsx` consulta los módulos del eje y elige el que tiene más preguntas, con fecha e ID como desempate estable. También distingue fallos de lectura y guardado, deja de marcar la actividad como guardada si falla la inserción y sustituye las opciones genéricas ajenas a la pregunta por respuesta libre cuando faltan opciones reales. No borra ni modifica filas remotas. TypeScript, ESLint del archivo y build web en modo producción pasaron; falta recorrido funcional con cuentas ficticias y comprobación de RLS. Ningún cambio de este apartado se ha desplegado.

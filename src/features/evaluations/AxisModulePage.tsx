@@ -7,6 +7,7 @@ import './AssessmentShared.css'
 
 interface Question {
     id: string
+    module_id: string
     text: string
     type: 'scale' | 'multiple' | 'open'
     options: string[]
@@ -34,34 +35,69 @@ export default function AxisModulePage() {
     const [loading, setLoading] = useState(true)
     const [saving, setSaving] = useState(false)
     const [done, setDone] = useState(false)
+    const [loadError, setLoadError] = useState(false)
+    const [saveError, setSaveError] = useState(false)
+    const [completionWarning, setCompletionWarning] = useState(false)
 
     const axis = axisName || 'amor'
     const meta = AXIS_META[axis] || AXIS_META.amor
 
     useEffect(() => {
+        let cancelled = false
+        setLoading(true)
+        setLoadError(false)
+        setQuestions([])
+        setModuleId(null)
+        setCurrent(0)
+        setAnswers({})
+        setDone(false)
+        setSaveError(false)
+        setCompletionWarning(false)
         const load = async () => {
-            // 1. Get module id for this axis
-            const { data: mod } = await supabase
+            // Existing data has duplicate modules for each axis. Pick the module
+            // with the most questions, preferring the newest on a tie.
+            const { data: modules, error: modulesError } = await supabase
                 .from('assessment_modules')
-                .select('id')
+                .select('id, created_at')
                 .eq('axis', axis)
-                .limit(1)
-                .maybeSingle()
+                .order('created_at', { ascending: false })
+                .order('id', { ascending: false })
 
-            if (!mod) { setLoading(false); return }
-            setModuleId(mod.id)
+            if (cancelled) return
+            if (modulesError) {
+                setLoadError(true)
+                setLoading(false)
+                return
+            }
+            if (!modules?.length) { setLoading(false); return }
 
-            // 2. Get questions for this module
-            const { data: qs } = await supabase
+            const { data: allQuestions, error: questionsError } = await supabase
                 .from('assessment_questions')
-                .select('id, text, type, options, order_index')
-                .eq('module_id', mod.id)
+                .select('id, module_id, text, type, options, order_index')
+                .in('module_id', modules.map(module => module.id))
                 .order('order_index')
 
-            setQuestions((qs || []) as Question[])
+            if (cancelled) return
+            if (questionsError) {
+                setLoadError(true)
+                setLoading(false)
+                return
+            }
+            const grouped = new Map<string, Question[]>()
+            for (const question of (allQuestions || []) as Question[]) {
+                const group = grouped.get(question.module_id) || []
+                group.push(question)
+                grouped.set(question.module_id, group)
+            }
+            const selected = [...modules].sort((a, b) =>
+                (grouped.get(b.id)?.length || 0) - (grouped.get(a.id)?.length || 0)
+            )[0]
+            setModuleId(selected.id)
+            setQuestions(grouped.get(selected.id) || [])
             setLoading(false)
         }
-        load()
+        void load()
+        return () => { cancelled = true }
     }, [axis])
 
     const q = questions[current]
@@ -79,33 +115,43 @@ export default function AxisModulePage() {
             setCurrent(c => c + 1)
         } else {
             // Final — save all answers
+            setSaveError(false)
+            setCompletionWarning(false)
             setSaving(true)
             try {
+                if (!user || !moduleId) throw new Error('Sesión o módulo no disponible')
                 const rows = Object.entries(answers).map(([question_id, value]) => ({
-                    user_id: user!.id,
+                    user_id: user.id,
                     question_id,
                     module_id: moduleId,
                     value,
                 }))
-                await supabase.from('assessment_answers').insert(rows)
+                const { error: answersError } = await supabase.from('assessment_answers').insert(rows)
+                if (answersError) throw answersError
 
                 // Update assessments_done in profiles
-                const { data: profile } = await supabase
+                const { data: profile, error: profileError } = await supabase
                     .from('profiles')
                     .select('assessments_done')
-                    .eq('id', user!.id)
+                    .eq('id', user.id)
                     .single()
 
-                const done = profile?.assessments_done ?? []
-                if (!done.includes(axis)) {
-                    await supabase.from('profiles')
-                        .update({ assessments_done: [...done, axis] })
-                        .eq('id', user!.id)
+                if (profileError) {
+                    setCompletionWarning(true)
+                } else {
+                    const completed = profile?.assessments_done ?? []
+                    if (!completed.includes(axis)) {
+                        const { error: progressError } = await supabase.from('profiles')
+                            .update({ assessments_done: [...completed, axis] })
+                            .eq('id', user.id)
+                        if (progressError) setCompletionWarning(true)
+                    }
                 }
 
                 setDone(true)
             } catch (e) {
                 console.error('[AxisModule] Error saving:', e)
+                setSaveError(true)
             } finally {
                 setSaving(false)
             }
@@ -127,6 +173,7 @@ export default function AxisModulePage() {
                         <CheckCircle size={18} color="var(--success)" />
                         <span>Actividad guardada</span>
                     </div>
+                    {completionWarning && <p role="alert">Tus respuestas se guardaron, pero no pudimos actualizar el progreso. Puedes volver más tarde.</p>}
                     <p className="assessment-disclaimer">
                         Esta actividad es educativa y voluntaria. No produce un diagnóstico ni determina tu acceso.
                     </p>
@@ -151,7 +198,9 @@ export default function AxisModulePage() {
             <div className="assessment-page flex-center" style={{ flexDirection: 'column', gap: 16, textAlign: 'center', padding: '2rem' }}>
                 <span style={{ fontSize: 48 }}>{meta.icon}</span>
                 <h2>{meta.name}</h2>
-                <p style={{ color: 'var(--text-secondary)' }}>Este módulo aún está en preparación. ¡Vuelve pronto!</p>
+                <p style={{ color: 'var(--text-secondary)' }} role={loadError ? 'alert' : undefined}>
+                    {loadError ? 'No pudimos cargar las preguntas. Comprueba tu conexión e inténtalo más tarde.' : 'Este módulo aún está en preparación. ¡Vuelve pronto!'}
+                </p>
                 <button className="assessment-back-btn" onClick={() => navigate('/home')}>
                     <ArrowLeft size={16} /> Volver
                 </button>
@@ -204,12 +253,7 @@ export default function AxisModulePage() {
                 {/* Multiple choice */}
                 {q.type === 'multiple' && (
                     <div className="assessment-options">
-                        {(q.options?.length > 0 ? q.options : [
-                            'Exploración y descubrimiento',
-                            'Construcción y estabilidad',
-                            'Consolidación y profundidad',
-                            'Reinvención y cambio',
-                        ]).map((opt: string) => (
+                        {Array.isArray(q.options) && q.options.length > 0 ? q.options.map((opt: string) => (
                             <button
                                 key={opt}
                                 className={`assessment-option ${answers[q.id] === opt ? 'assessment-option--active' : ''}`}
@@ -218,7 +262,16 @@ export default function AxisModulePage() {
                             >
                                 {opt}
                             </button>
-                        ))}
+                        )) : (
+                            <textarea
+                                className="assessment-textarea"
+                                placeholder="Escribe tu respuesta con tus propias palabras..."
+                                aria-label="Tu respuesta"
+                                value={answers[q.id] || ''}
+                                onChange={e => handleAnswer(e.target.value)}
+                                rows={3}
+                            />
+                        )}
                     </div>
                 )}
 
@@ -249,9 +302,10 @@ export default function AxisModulePage() {
                     <>Completar módulo <CheckCircle size={18} /></>
                 )}
             </button>
+            {saveError && <p role="alert">No pudimos guardar tus respuestas. Revisa tu conexión e inténtalo de nuevo.</p>}
 
             <p className="assessment-disclaimer">
-                Tus respuestas son privadas y protegidas por cifrado. No son un diagnóstico clínico.
+                Evita incluir datos que no quieras guardar. Esta actividad no ofrece un diagnóstico clínico.
             </p>
         </div>
     )
