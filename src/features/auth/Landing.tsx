@@ -1,5 +1,5 @@
 import { Link } from 'react-router-dom'
-import { Heart, Shield, Brain, Sparkles, ArrowRight, Star, BookOpen, Mail, Instagram } from 'lucide-react'
+import { Heart, Shield, Brain, Sparkles, ArrowRight, Star, BookOpen, Mail, Instagram, Smartphone } from 'lucide-react'
 import './Landing.css'
 
 export default function Landing() {
@@ -37,6 +37,16 @@ export default function Landing() {
                             Comenzar gratis
                             <ArrowRight size={18} />
                         </Link>
+                        <a
+                            href="https://play.google.com/store/apps/details?id=mx.lovia.app"
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            className="landing__cta landing__cta--android"
+                            aria-label="Descargar LovIA en Google Play para Android (abre una pestaña nueva)"
+                        >
+                            <Smartphone size={20} aria-hidden="true" />
+                            Disponible en Android · Google Play
+                        </a>
                         <button 
                             className="landing__cta landing__cta--secondary"
                             onClick={() => document.querySelector('.landing__features')?.scrollIntoView({ behavior: 'smooth' })}

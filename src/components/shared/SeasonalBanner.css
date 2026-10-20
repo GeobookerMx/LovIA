@@ -1,31 +1,131 @@
 .seasonal-banner {
   position: relative;
   z-index: 20;
+  width: 100%;
+  color: #fff7ed;
+  background: radial-gradient(circle at 12% 50%, #9a3412 0, transparent 31%),
+    radial-gradient(circle at 92% 15%, #7e22ce 0, transparent 30%),
+    linear-gradient(110deg, #32104f, #581c87 54%, #471329);
+  border-bottom: 3px solid #fb923c;
+  box-shadow: 0 8px 28px rgba(28, 8, 49, 0.3);
+}
+
+.seasonal-banner__inner {
+  position: relative;
+  display: grid;
+  grid-template-columns: 7rem minmax(0, 1fr) auto;
+  align-items: center;
+  gap: clamp(1rem, 3vw, 2rem);
+  width: min(100%, 1200px);
+  min-height: 10rem;
+  margin: 0 auto;
+  padding: 1.15rem 4.75rem 1.15rem 1.5rem;
+}
+
+.seasonal-banner__art {
   display: flex;
   align-items: center;
-  gap: 0.75rem;
-  min-height: 4.25rem;
-  padding: 0.5rem 1rem;
-  color: #fff7ed;
-  background: linear-gradient(110deg, #542188, #6b21a8 55%, #9a3412);
-  border-bottom: 2px solid #fb923c;
+  justify-content: center;
+  width: 7rem;
+  height: 7rem;
+  border-radius: 1.75rem;
+  background: rgba(255, 255, 255, 0.08);
+  border: 1px solid rgba(255, 237, 213, 0.3);
 }
-.seasonal-banner__icon { width: 2.5rem; height: 2.5rem; flex: none; }
-.seasonal-banner__copy { display: flex; flex-direction: column; gap: 0.15rem; line-height: 1.3; }
-.seasonal-banner__copy strong { font-size: 0.95rem; }
-.seasonal-banner__copy span { font-size: 0.85rem; }
+
+.seasonal-banner__icon { width: 6.25rem; height: 6.25rem; }
+
+.seasonal-banner__copy {
+  display: flex;
+  flex-direction: column;
+  gap: 0.35rem;
+  line-height: 1.3;
+}
+
+.seasonal-banner__eyebrow {
+  width: fit-content;
+  color: #fef3c7;
+  font-size: 0.75rem;
+  font-weight: 800;
+  letter-spacing: 0.11em;
+  text-transform: uppercase;
+}
+
+.seasonal-banner__copy strong {
+  font-family: var(--font-heading);
+  font-size: clamp(1.5rem, 3vw, 2.35rem);
+  line-height: 1.12;
+}
+
+.seasonal-banner__copy > span:last-child {
+  color: #fff7ed;
+  font-size: clamp(0.95rem, 1.5vw, 1.1rem);
+}
+
+.seasonal-banner__action {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.4rem;
+  min-height: 3rem;
+  padding: 0.7rem 1.2rem;
+  border-radius: 999px;
+  color: #341237;
+  background: #ffedd5;
+  font-weight: 800;
+  white-space: nowrap;
+  text-decoration: none;
+  box-shadow: 0 4px 16px rgba(17, 7, 31, 0.25);
+}
+
+.seasonal-banner__action:hover,
+.seasonal-banner__action:focus-visible {
+  color: #341237;
+  background: #fed7aa;
+  outline: 3px solid #fff7ed;
+  outline-offset: 2px;
+}
+
 .seasonal-banner__close {
-  margin-left: auto;
-  flex: none;
+  position: absolute;
+  top: 0.65rem;
+  right: 0.75rem;
+  display: grid;
+  place-items: center;
   width: 2.75rem;
   height: 2.75rem;
   border: 1px solid #fff7ed;
-  border-radius: 0.6rem;
+  border-radius: 0.7rem;
   color: #fff7ed;
-  background: transparent;
+  background: rgba(38, 12, 62, 0.65);
   cursor: pointer;
-  font-size: 1.5rem;
+  font-size: 1.6rem;
   line-height: 1;
 }
-.seasonal-banner__close:hover, .seasonal-banner__close:focus-visible { background: #ffffff26; outline: 2px solid #fff7ed; outline-offset: 2px; }
-@media (max-width: 420px) { .seasonal-banner__copy span { font-size: 0.76rem; } }
+
+.seasonal-banner__close:hover,
+.seasonal-banner__close:focus-visible {
+  background: #5b2184;
+  outline: 2px solid #fff7ed;
+  outline-offset: 2px;
+}
+
+@media (max-width: 700px) {
+  .seasonal-banner__inner {
+    grid-template-columns: 4.5rem minmax(0, 1fr);
+    gap: 0.7rem 0.9rem;
+    min-height: 0;
+    padding: 1rem 3.75rem 1.15rem 1rem;
+  }
+
+  .seasonal-banner__art { width: 4.5rem; height: 4.5rem; border-radius: 1.2rem; }
+  .seasonal-banner__icon { width: 4.2rem; height: 4.2rem; }
+  .seasonal-banner__copy strong { font-size: clamp(1.35rem, 5vw, 1.8rem); }
+  .seasonal-banner__copy > span:last-child { font-size: 0.9rem; }
+  .seasonal-banner__action { grid-column: 1 / -1; justify-self: start; min-height: 2.75rem; }
+}
+
+@media (max-width: 360px) {
+  .seasonal-banner__inner { padding-right: 3.35rem; }
+  .seasonal-banner__eyebrow { font-size: 0.65rem; }
+}
