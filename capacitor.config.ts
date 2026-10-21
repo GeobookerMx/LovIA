@@ -38,8 +38,8 @@ const config: CapacitorConfig = {
   android: {
     // Mínimo Android 7 (API 24) — cubre 97%+ de dispositivos activos
     minSdkVersion: 24,
-    // Target más reciente requerido por Google Play desde 2024
-    targetSdkVersion: 34,
+    // Mantener alineado con android/variables.gradle y el requisito actual de Play.
+    targetSdkVersion: 36,
     // Permite mixed content solo en debug (desactivado en release)
     allowMixedContent: false,
     // Soporte para teclado que empuja el contenido (evita superposición)

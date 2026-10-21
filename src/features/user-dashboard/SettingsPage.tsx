@@ -165,7 +165,16 @@ export default function SettingsPage() {
                 </div>
 
                 {/* Paso 1: botón inicial */}
-                <p className="settings-item__desc">La eliminación automática está temporalmente desactivada mientras se verifica el borrado completo de datos y archivos. Para solicitarla, escribe a clienteslovia@gmail.com.</p>
+                <p className="settings-item__desc">La eliminación automática está temporalmente desactivada mientras verificamos el borrado completo de datos y archivos.</p>
+                <a className="settings-item glass" href="https://lovia.com.mx/delete-account" target="_blank" rel="noopener noreferrer" style={{ display: 'flex', textDecoration: 'none' }}>
+                    <div className="settings-item__left">
+                        <Trash2 size={18} style={{ color: 'var(--danger)' }} />
+                        <div>
+                            <div className="settings-item__label" style={{ color: 'var(--danger)' }}>Solicitar eliminación de cuenta y datos</div>
+                            <div className="settings-item__desc">Abre las instrucciones públicas de LovIA</div>
+                        </div>
+                    </div>
+                </a>
                 {accountDeletionAvailable && deleteStep === 0 && (
                     <button
                         className="settings-item glass"

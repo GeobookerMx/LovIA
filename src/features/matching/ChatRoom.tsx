@@ -34,19 +34,14 @@ export default function ChatRoom() {
         let subscription: any
 
         async function fetchInitialData() {
-            // 1. Fetch match and other user info
-            const { data: match, error: matchError } = await supabase
-                .from('matches')
-                .select(`
-                    current_level,
-                    user_a:profiles!matches_user_a_id_fkey(id, alias, avatar_url, visibility_mode),
-                    user_b:profiles!matches_user_b_id_fkey(id, alias, avatar_url, visibility_mode)
-                `)
-                .eq('id', matchId)
-                .single()
-
-            if (matchError || !match) {
-                console.error('Error fetching match:', matchError)
+            // 1. La ficha del otro usuario se limita y autoriza en servidor.
+            const [matchResult, cardResult] = await Promise.all([
+                supabase.from('matches').select('current_level').eq('id', matchId).maybeSingle(),
+                supabase.rpc('lovia_match_cards_v1', { p_match_id: matchId }).maybeSingle(),
+            ])
+            const match = matchResult.data
+            if (matchResult.error || cardResult.error || !match || !cardResult.data) {
+                console.error('Error fetching match:', matchResult.error || cardResult.error)
                 navigate('/matches')
                 return
             }
@@ -57,12 +52,8 @@ export default function ChatRoom() {
                 return
             }
 
-            // Supabase returns related records as objects if not an array relationship, but TS sometimes warns.
-            const userA = Array.isArray(match.user_a) ? match.user_a[0] : match.user_a
-            const userB = Array.isArray(match.user_b) ? match.user_b[0] : match.user_b
-
-            const other = userA?.id === user?.id ? userB : userA
-            setOtherUser(other)
+            const card = cardResult.data as { target_user_id: string }
+            setOtherUser({ ...card, id: card.target_user_id })
             setCurrentLevel(match.current_level)
 
             // 2. Fetch messages
@@ -175,7 +166,7 @@ export default function ChatRoom() {
     }
 
     // Determine Avatar based on visibility
-    let otherAvatar = otherUser?.avatar_url || 'https://via.placeholder.com/50'
+    let otherAvatar = otherUser?.avatar_url || '/icons/icon-192.png'
     let maskClass = ''
     if (otherUser?.visibility_mode === 'essence') maskClass = 'match-card__visibility--essence'
     else if (otherUser?.visibility_mode === 'gradual') maskClass = 'match-card__visibility--gradual'

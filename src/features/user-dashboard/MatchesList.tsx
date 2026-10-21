@@ -28,17 +28,9 @@ export default function MatchesList() {
             if (!user) return
             setLoadError(false)
             
-            // Buscar matches donde el usuario es user_a o user_b
+            // El servidor devuelve solo tarjetas de conexiones autorizadas.
             const { data, error } = await supabase
-                .from('matches')
-                .select(`
-                    id, 
-                    current_level,
-                    user_a:profiles!matches_user_a_id_fkey(id, alias, age, city, avatar_url, visibility_mode),
-                    user_b:profiles!matches_user_b_id_fkey(id, alias, age, city, avatar_url, visibility_mode)
-                `)
-                .or(`user_a_id.eq.${user.id},user_b_id.eq.${user.id}`)
-                .eq('status', 'active')
+                .rpc('lovia_match_cards_v1')
 
             if (error) {
                 console.error(error)
@@ -47,22 +39,16 @@ export default function MatchesList() {
                 return
             }
 
-            const formatted: MatchData[] = data.map((m: any) => {
-                // Determinar quién es 'el otro' en el match
-                const isUserA = m.user_a.id === user.id
-                const other = isUserA ? m.user_b : m.user_a
-
-                return {
-                    match_id: m.id,
-                    target_user_id: other.id,
-                    alias: other.alias || 'Anónimo',
-                    age: other.age,
-                    city: other.city || 'Ubicación oculta',
-                    avatar_url: other.avatar_url || 'https://via.placeholder.com/150',
-                    visibility_mode: other.visibility_mode || 'gradual',
-                    current_level: m.current_level
-                }
-            })
+            const formatted: MatchData[] = (data || []).map((card: any) => ({
+                match_id: card.match_id,
+                target_user_id: card.target_user_id,
+                alias: card.alias || 'Persona de LovIA',
+                age: card.age,
+                city: card.city || 'Ubicación oculta',
+                avatar_url: card.avatar_url || '/icons/icon-192.png',
+                visibility_mode: card.visibility_mode || 'gradual',
+                current_level: card.current_level,
+            }))
 
             setMatches(formatted)
             setLoading(false)

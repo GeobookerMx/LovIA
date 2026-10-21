@@ -38,6 +38,12 @@
   status = 200
   force  = true
 
+[[redirects]]
+  from   = "/delete-account"
+  to     = "/delete-account.html"
+  status = 200
+  force  = true
+
 # assetlinks para TWA / Capacitor Android (Digital Asset Links)
 [[redirects]]
   from   = "/.well-known/assetlinks.json"

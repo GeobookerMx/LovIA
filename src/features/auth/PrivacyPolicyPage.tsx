@@ -76,7 +76,7 @@ export default function PrivacyPolicyPage() {
 
                     <section className="pp-section">
                         <h2>7. Tus derechos</h2>
-                        <p>Puedes solicitar acceso, rectificación, cancelación u oposición, así como revocar el consentimiento cuando corresponda. Escribe a <a href={`mailto:${CONTACT}`}>{CONTACT}</a> con la cuenta relacionada y una descripción clara de tu solicitud. Podremos pedir información razonable para verificar que eres la persona titular.</p>
+                        <p>Puedes solicitar acceso, rectificación, cancelación u oposición, así como revocar el consentimiento cuando corresponda. Escribe a <a href={`mailto:${CONTACT}`}>{CONTACT}</a> con la cuenta relacionada y una descripción clara de tu solicitud. Podremos pedir información razonable para verificar que eres la persona titular. Para eliminar tu cuenta y datos, consulta también <a href="/delete-account">las instrucciones públicas de LovIA</a>.</p>
                     </section>
 
                     <section className="pp-section">

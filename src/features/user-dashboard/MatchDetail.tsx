@@ -56,24 +56,20 @@ export default function MatchDetail() {
     useEffect(() => {
         async function fetchMatch() {
             if (!user || !id) return
-            const { data, error } = await supabase
-                .from('matches')
-                .select(`
-                    *,
-                    user_a:profiles!matches_user_a_id_fkey(id, alias, age, city, avatar_url, visibility_mode),
-                    user_b:profiles!matches_user_b_id_fkey(id, alias, age, city, avatar_url, visibility_mode)
-                `)
-                .eq('id', id)
-                .single()
+            const [matchResult, cardResult] = await Promise.all([
+                supabase.from('matches').select('*').eq('id', id).maybeSingle(),
+                supabase.rpc('lovia_match_cards_v1', { p_match_id: id }).maybeSingle(),
+            ])
 
-            if (error || !data) {
-                console.error(error)
+            if (matchResult.error || cardResult.error || !matchResult.data || !cardResult.data) {
+                console.error(matchResult.error || cardResult.error)
                 setLoading(false)
                 return
             }
 
-            setMatch(data)
-            setOtherUser(data.user_a.id === user.id ? data.user_b : data.user_a)
+            setMatch(matchResult.data)
+            const card = cardResult.data as { target_user_id: string }
+            setOtherUser({ ...card, id: card.target_user_id })
             setLoading(false)
         }
         fetchMatch()
@@ -172,7 +168,7 @@ export default function MatchDetail() {
                     </div>
                 )}
                 <img 
-                    src={otherUser.avatar_url || 'https://via.placeholder.com/300'} 
+                    src={otherUser.avatar_url || '/icons/icon-192.png'}
                     alt="profile" 
                     className={photoClass} 
                     style={{ width: '100%', height: '100%', objectFit: 'cover' }}
