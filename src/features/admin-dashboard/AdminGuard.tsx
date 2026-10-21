@@ -51,9 +51,10 @@ export default function AdminGuard() {
         <button
           style={styles.btn}
           onClick={async () => {
+            try { sessionStorage.setItem('lovia_admin_next', '1') } catch { /* sin storage */ }
             await supabase.auth.signInWithOAuth({
               provider: 'google',
-              options: { redirectTo: `${window.location.origin}/auth/callback?next=/admin` }
+              options: { redirectTo: `${window.location.origin}/auth/callback` }
             })
           }}
         >

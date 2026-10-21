@@ -3,6 +3,15 @@ import { useNavigate, useSearchParams } from 'react-router-dom'
 import { supabase } from '../../lib/supabase'
 import { Loader2, AlertCircle } from 'lucide-react'
 
+function wantsAdmin(next: string | null): boolean {
+  let stored = false
+  try {
+    stored = sessionStorage.getItem('lovia_admin_next') === '1'
+    if (stored) sessionStorage.removeItem('lovia_admin_next')
+  } catch { /* sin storage */ }
+  return next === '/admin' || stored
+}
+
 export default function AuthCallbackPage() {
   const navigate = useNavigate()
   const [searchParams] = useSearchParams()
@@ -20,7 +29,7 @@ export default function AuthCallbackPage() {
         subscription.unsubscribe()
         console.log('[LovIA] AuthCallback: sesión recibida.')
 
-        if (searchParams.get('next') === '/admin') {
+        if (wantsAdmin(searchParams.get('next'))) {
           navigate('/admin', { replace: true })
           return
         }
@@ -77,7 +86,7 @@ export default function AuthCallbackPage() {
         subscription.unsubscribe()
         console.log('[LovIA] AuthCallback: sesión verificada.')
 
-        if (searchParams.get('next') === '/admin') {
+        if (wantsAdmin(searchParams.get('next'))) {
           navigate('/admin', { replace: true })
           return
         }
