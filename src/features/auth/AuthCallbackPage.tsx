@@ -20,6 +20,16 @@ export default function AuthCallbackPage() {
   useEffect(() => {
     let navigated = false
 
+    // Si el proveedor (Google/Apple) devolvió un error, avisar al usuario de inmediato.
+    const hashParams = new URLSearchParams(window.location.hash.replace(/^#/, ''))
+    const providerError = searchParams.get('error_description') || hashParams.get('error_description')
+      || searchParams.get('error') || hashParams.get('error')
+    if (providerError) {
+      console.warn('[LovIA] AuthCallback: el proveedor devolvió un error:', providerError)
+      setErrorMsg('No pudimos completar el acceso con ese proveedor. Entra con tu correo y contraseña o inténtalo más tarde.')
+      return
+    }
+
     // Fallback: listen for auth state change in case the hash is processed AFTER mount
     // (common on Android Chrome WebView where OAuth token arrives asynchronously)
     const { data: { subscription } } = supabase.auth.onAuthStateChange(async (event, session) => {
@@ -78,7 +88,7 @@ export default function AuthCallbackPage() {
           await new Promise((r) => setTimeout(r, 5000))
           if (navigated) return
           subscription.unsubscribe()
-          navigate('/login', { replace: true })
+          setErrorMsg('No pudimos iniciar tu sesión. Entra con tu correo y contraseña o inténtalo de nuevo.')
           return
         }
 
