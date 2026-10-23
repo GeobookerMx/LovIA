@@ -125,25 +125,21 @@
     border: 1px solid var(--border-default);
 }
 
-.landing__cta--android {
-    color: #f7f3ff;
-    background: #3c2768;
-    border: 1px solid #b392ef;
-    box-shadow: 0 6px 24px rgba(75, 43, 124, 0.25);
-    text-align: center;
+.landing__google-play {
+    display: inline-block;
+    line-height: 0;
+    border-radius: 8px;
 }
 
-.landing__cta--android:hover,
-.landing__cta--android:focus-visible {
-    color: #fff;
-    background: #533389;
-    border-color: #e4d3ff;
-    outline: 2px solid #e4d3ff;
+.landing__google-play img {
+    display: block;
+    width: 190px;
+    height: auto;
+}
+
+.landing__google-play:focus-visible {
+    outline: 3px solid #e4d3ff;
     outline-offset: 2px;
-}
-
-@media (max-width: 420px) {
-    .landing__cta--android { max-width: min(100%, 20rem); }
 }
 
 .landing__cta--secondary:hover {
