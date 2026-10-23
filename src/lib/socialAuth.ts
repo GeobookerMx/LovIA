@@ -71,7 +71,7 @@ export async function signInWithGoogle(): Promise<void> {
 export async function signInWithApple(): Promise<void> {
   if (isNative()) {
     try {
-      const { SignInWithApple } = await import('@capacitor-community/apple-sign-in')
+      const { AppleSignIn, SignInScope } = await import('@capawesome/capacitor-apple-sign-in')
       
       // 1. Generar un nonce aleatorio seguro
       const rawNonce = Array.from(window.crypto.getRandomValues(new Uint8Array(32)))
@@ -84,25 +84,20 @@ export async function signInWithApple(): Promise<void> {
       const hashedNonce = hashArray.map(b => b.toString(16).padStart(2, '0')).join('')
 
 
-      const options = {
-        clientId: 'com.geobooker.lovia', // Bundle ID de la app iOS
-        redirectURI: 'https://www.lovia.com.mx/auth/callback',
-        scopes: 'email name',
-        nonce: hashedNonce,
-      }
-
       console.log('[Apple Sign In] Iniciando flujo nativo...')
-      const result = await SignInWithApple.authorize(options)
+      const result = await AppleSignIn.signIn({
+        scopes: [SignInScope.Email, SignInScope.FullName],
+        nonce: hashedNonce,
+      })
       
-      const { identityToken } = result.response
-      if (!identityToken) {
+      if (!result.idToken) {
         throw new Error('No se recibió identityToken del proveedor de Apple')
       }
 
       console.log('[Apple Sign In] Intercambiando idToken con Supabase...')
       const { error } = await supabase.auth.signInWithIdToken({
         provider: 'apple',
-        token: identityToken,
+        token: result.idToken,
         nonce: rawNonce, // Enviamos el nonce original (sin hashear) a Supabase
       })
 
