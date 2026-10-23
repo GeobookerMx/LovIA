@@ -30,8 +30,8 @@ const config: CapacitorConfig = {
   ios: {
     scheme: 'LovIA',
     contentInset: 'automatic',
-    // Mínimo iOS 14 para APIs modernas (URLSession, SwiftUI compatible)
-    minVersion: '14.0',
+    // Capacitor 8 requiere iOS 15 o superior.
+    minVersion: '15.0',
   },
 
   // ── Android ───────────────────────────────────────────────────────────────
