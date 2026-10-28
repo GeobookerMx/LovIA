@@ -25,7 +25,7 @@ export default function AuthCallbackPage() {
     const providerError = searchParams.get('error_description') || hashParams.get('error_description')
       || searchParams.get('error') || hashParams.get('error')
     if (providerError) {
-      console.warn('[LovIA] AuthCallback: el proveedor devolvió un error:', providerError)
+      // La descripción del proveedor puede incluir datos de la cuenta; no enviarla a logs.
       setErrorMsg('No pudimos completar el acceso con ese proveedor. Entra con tu correo y contraseña o inténtalo más tarde.')
       return
     }

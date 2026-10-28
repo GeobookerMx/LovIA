@@ -1,6 +1,7 @@
 import { Link } from 'react-router-dom'
 import { Heart, Shield, Brain, Sparkles, ArrowRight, Star, BookOpen, Mail, Instagram } from 'lucide-react'
 import { isWeb } from '../../lib/platform'
+import RelationshipsContext from './RelationshipsContext'
 import './Landing.css'
 
 export default function Landing() {
@@ -21,11 +22,11 @@ export default function Landing() {
                         Lov<span className="text-gradient">IA!</span>
                     </h1>
                     <p className="landing__subtitle">
-                        Conecta desde quien eres
+                        Conoce personas con intención. Aprende a construir relaciones.
                     </p>
                     <p className="landing__description">
-                        Conoce personas, reflexiona sobre tus vínculos y encuentra herramientas
-                        para cuidar tus relaciones a tu ritmo.
+                        Explora personas, aclara lo que buscas y practica comunicación,
+                        límites y acuerdos a tu ritmo.
                     </p>
                     <p className="landing__audience">Para personas adultas. Explorar personas y conversar requiere consentimiento y controles de seguridad.</p>
 
@@ -106,6 +107,27 @@ export default function Landing() {
                     <div className="landing__path glass"><Brain size={24} /><h3>Quiero comprenderme mejor</h3><p>Usa la Guía, ejercicios y Mi Diario de forma voluntaria.</p></div>
                     <div className="landing__path glass"><Shield size={24} /><h3>Quiero cuidar mi relación</h3><p>Explora herramientas de comunicación sin aparecer por ello en descubrimiento.</p></div>
                 </div>
+            </section>
+
+            <RelationshipsContext />
+
+            <section className="landing__editorial" aria-labelledby="landing-editorial-title">
+                <div className="landing__context-heading">
+                    <span className="landing__context-kicker">Ideas para guardar</span>
+                    <h2 id="landing-editorial-title">Una pregunta puede abrir una conversación</h2>
+                    <p>Dos guías breves de LovIA para aclarar intenciones y hablar de un desacuerdo. Son ejemplos educativos, no testimonios de usuarios.</p>
+                </div>
+                <div className="landing__editorial-grid">
+                    <figure className="landing__editorial-card glass">
+                        <img src="/editorial/intencion.webp" width="960" height="1200" loading="lazy" decoding="async" alt="Cuatro preguntas para elegir con intención: qué relación quiero construir, qué valores quiero compartir, qué límites necesito y qué acuerdos debemos conversar." />
+                        <figcaption>Antes de conectar, aclara lo que buscas.</figcaption>
+                    </figure>
+                    <figure className="landing__editorial-card glass">
+                        <img src="/editorial/conversacion.webp" width="960" height="1200" loading="lazy" decoding="async" alt="Cuatro frases para un desacuerdo cotidiano: pide una pausa, describe lo que pasó, expresa cómo te sientes y propón un acuerdo escuchando la respuesta." />
+                        <figcaption>Una conversación más clara se construye entre ambos.</figcaption>
+                    </figure>
+                </div>
+                <Link to="/register" className="landing__cta landing__cta--primary">Explorar LovIA <ArrowRight size={18} /></Link>
             </section>
 
             {/* Footer */}

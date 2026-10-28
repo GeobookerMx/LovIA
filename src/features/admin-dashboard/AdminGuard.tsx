@@ -22,7 +22,7 @@ export default function AdminGuard() {
 
       setUserEmail(user.email ?? null)
       const { data: allowed, error } = await supabase.rpc('is_admin')
-      if (active) setState(error ? 'unavailable' : allowed === true && user.app_metadata?.role === 'admin' ? 'allowed' : 'denied')
+      if (active) setState(error ? 'unavailable' : allowed === true ? 'allowed' : 'denied')
     }
 
     void check()
