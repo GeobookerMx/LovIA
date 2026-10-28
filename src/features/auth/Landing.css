@@ -429,8 +429,28 @@
 .landing__context-note { border-radius: var(--radius-lg); padding: var(--space-5); margin-top: var(--space-5); font-size: var(--fs-sm); }
 .landing__context-note p { margin: 6px 0; }
 
+/* Infografia Banner */
+.landing__infografia-banner {
+    margin: 0 0 var(--space-8);
+    overflow: hidden;
+    border-radius: var(--radius-lg);
+    text-align: left;
+}
+.landing__infografia-banner img {
+    display: block;
+    width: 100%;
+    height: auto;
+    object-fit: cover;
+}
+.landing__infografia-banner figcaption {
+    padding: var(--space-4);
+    color: var(--text-secondary);
+    font-size: var(--fs-sm);
+    line-height: 1.5;
+}
+
 .landing__editorial { max-width: 980px; margin: 0 auto; padding: var(--space-8) var(--space-6) var(--space-10); text-align: center; }
-.landing__editorial-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(min(100%, 320px), 1fr)); gap: var(--space-5); margin-bottom: var(--space-6); }
+.landing__editorial-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(min(100%, 260px), 1fr)); gap: var(--space-5); margin-bottom: var(--space-6); }
 .landing__editorial-card { margin: 0; overflow: hidden; border-radius: var(--radius-lg); text-align: left; }
 .landing__editorial-card img { display: block; width: 100%; height: auto; aspect-ratio: 4 / 5; object-fit: cover; }
 .landing__editorial-card figcaption { padding: var(--space-4); color: var(--text-secondary); font-size: var(--fs-sm); line-height: 1.5; }
@@ -500,4 +520,4 @@
 
 .landing__footer-link:hover {
     opacity: 1;
-}
+}

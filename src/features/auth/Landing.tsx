@@ -113,18 +113,41 @@ export default function Landing() {
 
             <section className="landing__editorial" aria-labelledby="landing-editorial-title">
                 <div className="landing__context-heading">
-                    <span className="landing__context-kicker">Ideas para guardar</span>
-                    <h2 id="landing-editorial-title">Una pregunta puede abrir una conversación</h2>
-                    <p>Dos guías breves de LovIA para aclarar intenciones y hablar de un desacuerdo. Son ejemplos educativos, no testimonios de usuarios.</p>
+                    <span className="landing__context-kicker">Guías e Infografía</span>
+                    <h2 id="landing-editorial-title">Claridad, intención y contexto</h2>
+                    <p>Herramientas y datos para pensar cómo nos relacionamos. Contenido educativo para tu camino en LovIA.</p>
                 </div>
+
+                {/* Infografía panorámica */}
+                <figure className="landing__infografia-banner glass">
+                    <img 
+                        src="/editorial/infografia_contexto.webp" 
+                        width="1440" 
+                        height="450" 
+                        loading="lazy" 
+                        decoding="async" 
+                        alt="Infografía: Relaciones en contexto, economía, decisiones y preguntas para elegir con intención." 
+                    />
+                    <figcaption>Panorama internacional y nacional: datos demográficos, decisiones familiares y preguntas clave para dialogar con intención.</figcaption>
+                </figure>
+
+                {/* 4 Posts Oficiales */}
                 <div className="landing__editorial-grid">
                     <figure className="landing__editorial-card glass">
-                        <img src="/editorial/intencion.webp" width="960" height="1200" loading="lazy" decoding="async" alt="Cuatro preguntas para elegir con intención: qué relación quiero construir, qué valores quiero compartir, qué límites necesito y qué acuerdos debemos conversar." />
-                        <figcaption>Antes de conectar, aclara lo que buscas.</figcaption>
+                        <img src="/editorial/intencion.webp" width="960" height="1200" loading="lazy" decoding="async" alt="Antes de conectar, aclara lo que buscas: cuatro preguntas para elegir con intención." />
+                        <figcaption><strong>Conecta con intención:</strong> Preguntas clave antes de elegir y avanzar.</figcaption>
                     </figure>
                     <figure className="landing__editorial-card glass">
-                        <img src="/editorial/conversacion.webp" width="960" height="1200" loading="lazy" decoding="async" alt="Cuatro frases para un desacuerdo cotidiano: pide una pausa, describe lo que pasó, expresa cómo te sientes y propón un acuerdo escuchando la respuesta." />
-                        <figcaption>Una conversación más clara se construye entre ambos.</figcaption>
+                        <img src="/editorial/conocete.webp" width="960" height="1200" loading="lazy" decoding="async" alt="Conócete antes de conectar: explora tus valores, límites y lo que deseas en una relación." />
+                        <figcaption><strong>Conócete primero:</strong> Identifica tus límites, necesidades y valores.</figcaption>
+                    </figure>
+                    <figure className="landing__editorial-card glass">
+                        <img src="/editorial/cuidar.webp" width="960" height="1200" loading="lazy" decoding="async" alt="También es para cuidar tu relación: ideas y ejercicios para hablar de comunicación, confianza y límites." />
+                        <figcaption><strong>Cuida tu relación:</strong> Para parejas que buscan fortalecer sus acuerdos.</figcaption>
+                    </figure>
+                    <figure className="landing__editorial-card glass">
+                        <img src="/editorial/claridad.webp" width="960" height="1200" loading="lazy" decoding="async" alt="Más claridad para tus relaciones: Conexiones, Guía, Mi Diario y Ejercicios a tu ritmo." />
+                        <figcaption><strong>Más claridad:</strong> Tu espacio personal para reflexionar y crecer.</figcaption>
                     </figure>
                 </div>
                 <Link to="/register" className="landing__cta landing__cta--primary">Explorar LovIA <ArrowRight size={18} /></Link>
