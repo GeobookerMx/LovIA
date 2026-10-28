@@ -207,6 +207,80 @@ export default function BookPage() {
                     ))}
                 </div>
 
+                {/* 6 Tarjetas de Lectura y Reflexión (2-5 min) */}
+                <div className="book-cards-section">
+                    <div className="book-cards-section__header">
+                        <h4>6 Lecturas y reflexiones del libro</h4>
+                        <p>Píldoras breves de 2 a 5 minutos extraídas del libro para reflexionar a tu propio ritmo.</p>
+                    </div>
+
+                    <div className="book-cards-list">
+                        {[
+                            {
+                                num: '01',
+                                title: 'Autoconocimiento',
+                                fragment: '«Es importante identificar, de manera individual, las características que se tienen al abordar la relación o comenzarla: cómo soy, qué necesito y qué puedo ofrecer en una relación.»',
+                                synthesis: 'Antes de conectar con alguien, conviene mirar lo propio: cómo eres, qué necesitas y qué ofreces.',
+                                question: '¿Qué necesito hoy en una relación y qué puedo ofrecer con honestidad?',
+                                time: '3 min'
+                            },
+                            {
+                                num: '02',
+                                title: 'Intención y Momento de Vida',
+                                fragment: '«Comprender las características individuales y los momentos de vida de las personas, con el objetivo de ayudar a crear relaciones de calidad.»',
+                                synthesis: 'Tu momento de vida influye en lo que buscas. Nombrarlo ayuda a conversar con claridad y sin falsas expectativas.',
+                                question: '¿Qué tipo de relación quiero construir en esta etapa de mi vida y por qué?',
+                                time: '3 min'
+                            },
+                            {
+                                num: '03',
+                                title: 'Metas Individuales',
+                                fragment: '«Es vital entender y comunicar las metas individuales; no deben ser calificadas como más o menos importantes.»',
+                                synthesis: 'Las metas de cada persona valen igual. En una relación sana se conversan y respetan, no se jerarquizan.',
+                                question: '¿Qué meta personal quiero cuidar y proteger mientras construyo un vínculo?',
+                                time: '4 min'
+                            },
+                            {
+                                num: '04',
+                                title: 'Límites y Cuidado',
+                                fragment: '«La tolerancia no es aguantar lo inaguantable, ni ceder hasta no reconocernos.»',
+                                synthesis: 'Ser flexible no significa renunciar a tu identidad. Conocer y comunicar tus límites es parte del amor propio.',
+                                question: '¿En qué aspectos puedo ser flexible y cuáles son mis límites innegociables?',
+                                time: '3 min'
+                            },
+                            {
+                                num: '05',
+                                title: 'Confianza Continua',
+                                fragment: '«La confianza debe renovarse continuamente, sin que necesariamente haya un conflicto.»',
+                                synthesis: 'La confianza no se trabaja solo tras una crisis; se alimenta día a día con comunicación clara y acuerdos cumplidos.',
+                                question: '¿Qué hábito diario o conversación pequeña puede fortalecer la confianza mutua?',
+                                time: '3 min'
+                            },
+                            {
+                                num: '06',
+                                title: 'Diferencias entre Relaciones',
+                                fragment: '«Todas las relaciones son diferentes, y en cada una existen factores y etapas de vida distintos.»',
+                                synthesis: 'No existe un molde único ni obligatorio. Puedes definir y acordar tu relación según lo que ambos necesitan y eligen.',
+                                question: '¿Qué visión de relación se adapta a mis valores reales, más allá de la presión social?',
+                                time: '4 min'
+                            }
+                        ].map(card => (
+                            <div key={card.num} className="book-card-item glass">
+                                <div className="book-card-item__top">
+                                    <span className="book-card-item__tag">{card.num} · {card.time}</span>
+                                    <h5>{card.title}</h5>
+                                </div>
+                                <blockquote className="book-card-item__quote">{card.fragment}</blockquote>
+                                <p className="book-card-item__synthesis"><strong>Enfoque:</strong> {card.synthesis}</p>
+                                <div className="book-card-item__prompt">
+                                    <strong>Pregunta para reflexionar:</strong>
+                                    <p>{card.question}</p>
+                                </div>
+                            </div>
+                        ))}
+                    </div>
+                </div>
+
                 {/* Estado de descarga */}
                 {downloadLog.downloaded && (
                     <div className="book-already-downloaded glass">

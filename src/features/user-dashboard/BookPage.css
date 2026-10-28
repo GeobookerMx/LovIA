@@ -449,3 +449,90 @@
     background: rgba(255, 107, 138, 0.12);
     border-color: rgba(255, 107, 138, 0.5);
 }
+
+/* ─── Book Cards Section (6 Tarjetas) ── */
+.book-cards-section {
+    margin: 16px 0;
+}
+.book-cards-section__header {
+    margin-bottom: 14px;
+    text-align: left;
+}
+.book-cards-section__header h4 {
+    font-size: 1rem;
+    font-weight: 700;
+    color: var(--text-primary);
+    margin-bottom: 4px;
+}
+.book-cards-section__header p {
+    font-size: 0.8rem;
+    color: var(--text-secondary);
+    line-height: 1.4;
+}
+.book-cards-list {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+}
+.book-card-item {
+    padding: 16px;
+    border-radius: 14px;
+    border: 1px solid rgba(255, 255, 255, 0.08);
+    background: rgba(255, 255, 255, 0.03);
+    text-align: left;
+}
+.book-card-item__top {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    margin-bottom: 10px;
+}
+.book-card-item__tag {
+    font-size: 0.7rem;
+    font-weight: 700;
+    color: var(--love-rose);
+    background: rgba(255, 107, 138, 0.12);
+    padding: 3px 8px;
+    border-radius: 10px;
+}
+.book-card-item__top h5 {
+    font-size: 0.92rem;
+    font-weight: 600;
+    color: var(--text-primary);
+    margin: 0;
+}
+.book-card-item__quote {
+    margin: 0 0 10px;
+    padding-left: 10px;
+    border-left: 2px solid var(--love-warm);
+    font-style: italic;
+    font-size: 0.82rem;
+    color: var(--text-secondary);
+    line-height: 1.5;
+}
+.book-card-item__synthesis {
+    font-size: 0.82rem;
+    color: var(--text-secondary);
+    margin-bottom: 10px;
+    line-height: 1.5;
+}
+.book-card-item__prompt {
+    background: rgba(255, 255, 255, 0.04);
+    padding: 10px 12px;
+    border-radius: 10px;
+    border: 1px solid rgba(255, 255, 255, 0.05);
+}
+.book-card-item__prompt strong {
+    display: block;
+    font-size: 0.75rem;
+    color: var(--love-rose);
+    margin-bottom: 3px;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+}
+.book-card-item__prompt p {
+    margin: 0;
+    font-size: 0.82rem;
+    color: var(--text-primary);
+    line-height: 1.4;
+}
