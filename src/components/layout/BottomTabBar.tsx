@@ -1,16 +1,15 @@
 import { Link } from 'react-router-dom'
 import { Home, Heart, MapPin, BookOpen, User } from 'lucide-react'
+import { isRadarAvailable } from '../../lib/discoveryAvailability'
 import './BottomTabBar.css'
 
 interface Props {
     currentPath: string
 }
 
-const radarEnabled = import.meta.env.VITE_ENABLE_RADAR === 'true'
-
 const tabs = [
     { path: '/home', icon: Home, label: 'Inicio' },
-    ...(radarEnabled ? [{ path: '/radar', icon: MapPin, label: 'Explorar' }] : []),
+    ...(isRadarAvailable ? [{ path: '/radar', icon: MapPin, label: 'Explorar' }] : []),
     { path: '/modules', icon: BookOpen, label: 'Guía' },
     { path: '/matches', icon: Heart, label: 'Conexiones' },
     { path: '/profile', icon: User, label: 'Perfil' },

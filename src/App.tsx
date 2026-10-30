@@ -7,6 +7,7 @@ import { Loader2 } from 'lucide-react'
 import ErrorBoundary from './components/shared/ErrorBoundary'
 import OfflineBanner from './components/shared/OfflineBanner'
 import SeasonalBanner from './components/shared/SeasonalBanner'
+import { isRadarAvailable } from './lib/discoveryAvailability'
 
 // ─── Eagerly loaded (critical path) ───
 import ProtectedRoute from './components/auth/ProtectedRoute'
@@ -176,7 +177,7 @@ function AppRoutes() {
             {/* User Dashboard (with tab bar) */}
             <Route element={<UserLayout />}>
               <Route path="/home" element={<Home />} />
-              <Route path="/radar" element={import.meta.env.VITE_ENABLE_RADAR === 'true' ? <RadarMap /> : <SafeRadarGate />} />
+              <Route path="/radar" element={isRadarAvailable ? <RadarMap /> : <SafeRadarGate />} />
               <Route path="/matches" element={<MatchesList />} />
               <Route path="/matches/:id" element={<MatchDetail />} />
               <Route path="/matches/:id/date-readiness" element={<DateReadinessCheck />} />

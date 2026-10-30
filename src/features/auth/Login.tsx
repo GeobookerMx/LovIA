@@ -1,10 +1,11 @@
-import { useState, useEffect, useRef } from 'react'
+import { useState, useEffect } from 'react'
 import { Link, useNavigate } from 'react-router-dom'
 import { useAuthStore } from '../../stores/authStore'
 import { supabase } from '../../lib/supabase'
 import { signInWithGoogle, signInWithApple } from '../../lib/socialAuth'
 import { Mail, Lock, ArrowRight, Eye, EyeOff, AlertCircle } from 'lucide-react'
 import SocialSignInButton from './SocialSignInButton'
+import { isIOS } from '../../lib/platform'
 import './Auth.css'
 
 export default function Login() {
@@ -16,18 +17,17 @@ export default function Login() {
     const [oauthLoading, setOauthLoading] = useState<'google' | 'apple' | null>(null)
     const { signIn, user, initialized } = useAuthStore()
     const navigate = useNavigate()
-    const manualSignIn = useRef(false)
-
-    // Redirigir si el usuario ya está autenticado — cubre el caso OAuth nativo donde
-    // appUrlOpen llama setSession y onAuthStateChange actualiza el store sin navegar.
+    // Un solo destino para contraseña y OAuth. La sesión actualizada por Supabase
+    // decide la navegación también cuando iOS regresa desde el navegador nativo.
     useEffect(() => {
-        if (!initialized || !user || manualSignIn.current) return
+        if (!initialized || !user) return
         let active = true
         void supabase.from('profiles').select('onboarding_completed').eq('id', user.id).maybeSingle()
             .then(({ data, error }) => {
                 if (!active) return
                 if (error) {
                     setError('No pudimos cargar tu perfil. Inténtalo de nuevo.')
+                    setSubmitting(false)
                     return
                 }
                 navigate(data?.onboarding_completed ? '/home' : '/onboarding', { replace: true })
@@ -39,54 +39,18 @@ export default function Login() {
         e.preventDefault()
         setError(null)
         setSubmitting(true)
-        manualSignIn.current = true
-
         try {
-            console.log('[LovIA] Login: intentando con email/password...')
             const result = await signIn(email, password)
 
             if (result.error) {
-                console.warn('[LovIA] Login error:', result.error)
                 setError(result.error)
+                setSubmitting(false)
                 return
             }
-
-            console.log('[LovIA] signIn exitoso — leyendo perfil...')
-            const { data: authData, error: getUserError } = await supabase.auth.getUser()
-
-            if (getUserError) {
-                console.warn('[LovIA] getUser error (no crítico):', getUserError.message)
-            }
-
-            const authUser = authData?.user
-
-            if (!authUser) {
-                setError('No se pudo confirmar la sesión. Inténtalo de nuevo.')
-                return
-            }
-
-            const { data: profile, error: profileError } = await supabase
-                .from('profiles')
-                .select('onboarding_completed')
-                .eq('id', authUser.id)
-                .maybeSingle()
-
-            if (profileError) {
-                console.warn('[LovIA] Error leyendo perfil:', profileError.message)
-                setError('Entraste a tu cuenta, pero no pudimos cargar tu perfil. Revisa tu conexión e inténtalo de nuevo.')
-                return
-            }
-
-            const destination = profile?.onboarding_completed ? '/home' : '/onboarding'
-            console.log('[LovIA] Login completo → ', destination)
-            navigate(destination)
-
         } catch {
             console.error('[LovIA] Error inesperado en inicio de sesión.')
             setError('Error al iniciar sesión. Por favor intenta de nuevo.')
-        } finally {
             setSubmitting(false)
-            manualSignIn.current = false
         }
     }
 
@@ -117,6 +81,7 @@ export default function Login() {
 
             <div className="auth-card glass-strong animate-scale-in">
                 <div className="auth-card__header">
+                    {isIOS() && <img className="auth-card__brand-mark" src="/icons/icon-1024.png" alt="" aria-hidden="true" />}
                     <h1>Lov<span className="text-gradient">IA!</span></h1>
                     <p>Inicia sesión en tu cuenta</p>
                 </div>

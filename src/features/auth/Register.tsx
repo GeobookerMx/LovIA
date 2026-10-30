@@ -7,6 +7,7 @@ import { Mail, Lock, User, ArrowRight, Eye, EyeOff, AlertCircle, CheckCircle, Lo
 import { trackEvent } from '../../lib/analytics'
 import LegalModal from '../../components/ui/LegalModal'
 import SocialSignInButton from './SocialSignInButton'
+import { isIOS } from '../../lib/platform'
 import './Auth.css'
 
 export default function Register() {
@@ -151,6 +152,7 @@ export default function Register() {
 
             <div className="auth-card glass-strong animate-scale-in">
                 <div className="auth-card__header">
+                    {isIOS() && <img className="auth-card__brand-mark" src="/icons/icon-1024.png" alt="" aria-hidden="true" />}
                     <h1>Lov<span className="text-gradient">IA!</span></h1>
                     <p>Crea tu cuenta</p>
                 </div>

@@ -10,6 +10,7 @@
     "lint": "eslint .",
     "preview": "vite preview",
     "icons": "node scripts/generate-icons.mjs",
+    "icons:ios": "node scripts/generate-icons.mjs --ios-only",
     "build:native": "cross-env VITE_CAPACITOR=true tsc -b && cross-env VITE_CAPACITOR=true vite build",
     "build:native:staging": "cross-env VITE_CAPACITOR=true tsc -b && cross-env VITE_CAPACITOR=true vite build --mode staging",
     "build:capacitor": "npm run build:native",

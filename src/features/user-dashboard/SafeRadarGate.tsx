@@ -7,7 +7,7 @@ export default function SafeRadarGate() {
       <div className="glass-strong" style={{ maxWidth: 440, padding: '2rem', borderRadius: 20 }}>
         <h1>Explorar con privacidad</h1>
         <p>Estamos preparando el mapa para mostrar zonas aproximadas y respetar tus bloqueos y preferencias de visibilidad.</p>
-        <p>Por ahora puedes revisar tus conexiones disponibles sin compartir tu ubicación.</p>
+        <p>Por ahora puedes revisar tus conexiones disponibles. LovIA no solicitará ni compartirá tu ubicación desde esta pantalla.</p>
         <Link className="btn btn-primary" to="/matches">Ver mis conexiones</Link>
       </div>
     </section>

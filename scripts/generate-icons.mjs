@@ -15,6 +15,18 @@ const __dirname = dirname(fileURLToPath(import.meta.url))
 const root = join(__dirname, '..')
 const svgPath = join(root, 'public', 'favicon.svg')
 const svgBuffer = readFileSync(svgPath)
+const iosMarkPath = join(root, 'assets', 'lovia-ios-mark-source.png')
+const iosIconSource = existsSync(iosMarkPath) ? readFileSync(iosMarkPath) : svgBuffer
+
+async function writeIosIcon(outPath) {
+  await sharp(iosIconSource)
+    .resize(1024, 1024)
+    .flatten({ background: '#0E0B2A' })
+    .toColourspace('srgb')
+    .withIccProfile('srgb')
+    .png({ compressionLevel: 9 })
+    .toFile(outPath)
+}
 
 // ── Directorios de salida ────────────────────────────────────────────────────
 const dirs = [
@@ -22,6 +34,15 @@ const dirs = [
   join(root, 'assets'),            // fuente para @capacitor/assets
 ]
 dirs.forEach(d => mkdirSync(d, { recursive: true }))
+
+// Recurso exclusivo de iOS: evita regenerar los iconos PWA y Android.
+if (process.argv.includes('--ios-only')) {
+  if (!existsSync(iosMarkPath)) throw new Error('Falta assets/lovia-ios-mark-source.png')
+  await writeIosIcon(join(root, 'assets', 'icon-only.png'))
+  await writeIosIcon(join(root, 'public', 'icons', 'icon-1024.png'))
+  console.log('Ícono LovIA iOS: 1024 × 1024, sRGB, sin transparencia.')
+  process.exit(0)
+}
 
 // ── Tamaños PWA / Web ────────────────────────────────────────────────────────
 const webSizes = [16, 32, 72, 96, 128, 144, 152, 167, 180, 192, 256, 384, 512]
@@ -41,6 +62,7 @@ console.log(`📄 Fuente SVG: ${svgPath}\n`)
 // ── Generar íconos en public/icons/ ─────────────────────────────────────────
 console.log('📱 Generando íconos para PWA / tiendas...')
 for (const size of allSizes) {
+  if (size === 1024) continue // el recurso iOS se escribe por separado
   const outPath = join(root, 'public', 'icons', `icon-${size}.png`)
   await sharp(svgBuffer)
     .resize(size, size)
@@ -51,10 +73,7 @@ for (const size of allSizes) {
 
 // ── Generar icon-1024.png (App Store root) ────────────────────────────────
 console.log('\n🍎 Generando ícono 1024×1024 para App Store...')
-await sharp(svgBuffer)
-  .resize(1024, 1024)
-  .png({ compressionLevel: 9 })
-  .toFile(join(root, 'public', 'icons', 'icon-1024.png'))
+await writeIosIcon(join(root, 'public', 'icons', 'icon-1024.png'))
 console.log('  ✅ icon-1024.png')
 
 // ── Generar assets/ para @capacitor/assets ───────────────────────────────────
@@ -66,11 +85,7 @@ console.log('  ✅ icon-1024.png')
 console.log('\n⚡ Generando assets/ para @capacitor/assets...')
 
 // icon-only: fondo sólido + ícono (iOS no permite transparencia en App Icon)
-await sharp(svgBuffer)
-  .resize(1024, 1024)
-  .flatten({ background: { r: 14, g: 11, b: 42 } }) // color #0E0B2A
-  .png()
-  .toFile(join(root, 'assets', 'icon-only.png'))
+await writeIosIcon(join(root, 'assets', 'icon-only.png'))
 console.log('  ✅ assets/icon-only.png      (iOS — sin transparencia)')
 
 // icon-foreground: con canal alfa (Android adaptive foreground layer)

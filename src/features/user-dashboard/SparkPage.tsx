@@ -1,5 +1,6 @@
 import { useState, useEffect, useCallback } from 'react'
 import { useNavigate } from 'react-router-dom'
+import { isRadarAvailable } from '../../lib/discoveryAvailability'
 import { Zap, ChevronLeft, ChevronRight, Flame, Loader2 } from 'lucide-react'
 import { supabase } from '../../lib/supabase'
 import { useAuthStore } from '../../stores/authStore'
@@ -231,8 +232,8 @@ export default function SparkPage() {
                         <button className="btn" style={{ padding: '10px 16px', borderRadius: 12, fontSize: '0.88rem',
                             background: 'rgba(255,255,255,0.05)', border: '1px solid var(--border-subtle)',
                             color: 'var(--text-secondary)' }}
-                            onClick={() => navigate(import.meta.env.VITE_ENABLE_RADAR === 'true' ? '/radar' : '/matches')}>
-                            {import.meta.env.VITE_ENABLE_RADAR === 'true' ? '🗺️ Explorar el Radar' : '💗 Ver mis conexiones'}
+                            onClick={() => navigate(isRadarAvailable ? '/radar' : '/matches')}>
+                            {isRadarAvailable ? '🗺️ Explorar el Radar' : '💗 Ver mis conexiones'}
                         </button>
                     </div>
 

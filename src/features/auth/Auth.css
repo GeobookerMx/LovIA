@@ -53,6 +53,15 @@
     margin-bottom: var(--space-6);
 }
 
+.auth-card__brand-mark {
+    display: block;
+    width: 76px;
+    height: 76px;
+    margin: 0 auto var(--space-2);
+    object-fit: cover;
+    border-radius: 18px;
+}
+
 .auth-card__header h1 {
     font-size: var(--fs-4xl);
     margin-bottom: var(--space-2);

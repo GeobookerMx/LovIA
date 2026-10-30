@@ -22,8 +22,9 @@ window.addEventListener('unhandledrejection', () => {
 if (Capacitor.isNativePlatform()) {
   import('@capacitor/app').then(({ App: CapApp }) => {
     let processingUrl: string | null = null
+    const processedCallbacks = new Set<string>()
     const handleDeepLink = async (url: string) => {
-      if (processingUrl === url) return
+      if (processingUrl) return
       let parsed: URL
       try { parsed = new URL(url) } catch { return }
       if (parsed.protocol !== 'lovia:' || parsed.hostname !== 'auth' || parsed.pathname !== '/callback' || parsed.username || parsed.password || parsed.port) {
@@ -31,9 +32,17 @@ if (Capacitor.isNativePlatform()) {
         return
       }
       processingUrl = url
-      console.log('[LovIA] [DeepLink] Callback recibido.')
  
       try {
+        // iOS puede entregar el mismo callback por appUrlOpen y getLaunchUrl.
+        // Guardamos sólo su huella, nunca el código o los tokens del enlace.
+        const digest = await crypto.subtle.digest('SHA-256', new TextEncoder().encode(url))
+        const callbackId = Array.from(new Uint8Array(digest), (byte) => byte.toString(16).padStart(2, '0')).join('')
+        if (processedCallbacks.has(callbackId)) return
+        if (processedCallbacks.size >= 32) processedCallbacks.clear()
+        processedCallbacks.add(callbackId)
+        console.log('[LovIA] [DeepLink] Callback recibido.')
+
         const { supabase } = await import('./lib/supabase')
         const { Browser }  = await import('@capacitor/browser')
  
