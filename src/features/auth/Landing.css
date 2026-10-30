@@ -22,6 +22,26 @@
     max-width: var(--max-content-width);
 }
 
+.landing__language {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    gap: .75rem;
+    margin-bottom: 1.25rem;
+    font-size: var(--fs-sm);
+    color: var(--text-secondary);
+}
+
+.landing__language a {
+    color: #f4bcf3;
+    text-underline-offset: .25rem;
+}
+
+.landing__language a:focus-visible {
+    outline: 3px solid #fff;
+    outline-offset: 3px;
+}
+
 .landing__badge {
     display: inline-flex;
     align-items: center;
