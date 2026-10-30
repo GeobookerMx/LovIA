@@ -17,9 +17,10 @@ const svgPath = join(root, 'public', 'favicon.svg')
 const svgBuffer = readFileSync(svgPath)
 const iosMarkPath = join(root, 'assets', 'lovia-ios-mark-source.png')
 const iosIconSource = existsSync(iosMarkPath) ? readFileSync(iosMarkPath) : svgBuffer
+const iosFullLogoPath = join(root, 'assets', 'lovia-full-logo-source.png')
 
-async function writeIosIcon(outPath) {
-  await sharp(iosIconSource)
+async function writeIosIcon(outPath, source = iosIconSource) {
+  await sharp(source)
     .resize(1024, 1024)
     .flatten({ background: '#0E0B2A' })
     .toColourspace('srgb')
@@ -32,15 +33,17 @@ async function writeIosIcon(outPath) {
 const dirs = [
   join(root, 'public', 'icons'),
   join(root, 'assets'),            // fuente para @capacitor/assets
+  join(root, 'assets', 'ios'),     // icono completo exclusivo del proyecto iOS
 ]
 dirs.forEach(d => mkdirSync(d, { recursive: true }))
 
 // Recurso exclusivo de iOS: evita regenerar los iconos PWA y Android.
 if (process.argv.includes('--ios-only')) {
   if (!existsSync(iosMarkPath)) throw new Error('Falta assets/lovia-ios-mark-source.png')
-  await writeIosIcon(join(root, 'assets', 'icon-only.png'))
+  if (!existsSync(iosFullLogoPath)) throw new Error('Falta assets/lovia-full-logo-source.png')
+  await writeIosIcon(join(root, 'assets', 'ios', 'icon.png'), readFileSync(iosFullLogoPath))
   await writeIosIcon(join(root, 'public', 'icons', 'icon-1024.png'))
-  console.log('Ícono LovIA iOS: 1024 × 1024, sRGB, sin transparencia.')
+  console.log('Ícono LovIA iOS completo: 1024 × 1024, sRGB, sin transparencia.')
   process.exit(0)
 }
 
@@ -71,8 +74,8 @@ for (const size of allSizes) {
   console.log(`  ✅ icon-${size}.png`)
 }
 
-// ── Generar icon-1024.png (App Store root) ────────────────────────────────
-console.log('\n🍎 Generando ícono 1024×1024 para App Store...')
+// ── Recurso 1024 de la UI; AppIcon iOS usa assets/ios/icon.png ─────────────
+console.log('\n🍎 Generando marca 1024×1024 para la interfaz...')
 await writeIosIcon(join(root, 'public', 'icons', 'icon-1024.png'))
 console.log('  ✅ icon-1024.png')
 
@@ -84,9 +87,12 @@ console.log('  ✅ icon-1024.png')
 
 console.log('\n⚡ Generando assets/ para @capacitor/assets...')
 
-// icon-only: fondo sólido + ícono (iOS no permite transparencia en App Icon)
+// icon-only compartido; assets/ios/icon.png sustituye sólo el icono iOS.
 await writeIosIcon(join(root, 'assets', 'icon-only.png'))
-console.log('  ✅ assets/icon-only.png      (iOS — sin transparencia)')
+console.log('  ✅ assets/icon-only.png      (marca compartida sin transparencia)')
+if (!existsSync(iosFullLogoPath)) throw new Error('Falta assets/lovia-full-logo-source.png')
+await writeIosIcon(join(root, 'assets', 'ios', 'icon.png'), readFileSync(iosFullLogoPath))
+console.log('  ✅ assets/ios/icon.png       (icono iOS con logo completo)')
 
 // icon-foreground: con canal alfa (Android adaptive foreground layer)
 await sharp(svgBuffer)
@@ -154,8 +160,8 @@ console.log(`
 Próximos pasos:
   1. Revisa public/icons/ — todos los PNGs están listos para PWA/web
   2. Revisa assets/       — fuente para Capacitor nativo
-  3. Ejecuta: npx @capacitor/assets generate
-     (genera íconos nativos en ios/ y android/ automáticamente)
-  4. Sube icon-1024.png a App Store Connect como ícono principal
+  3. En la Mac ejecuta: npx @capacitor/assets generate --ios
+     (usa assets/ios/icon.png como AppIcon de Xcode)
+  4. Revisa AppIcon en Xcode antes de archivar la app
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 `)
