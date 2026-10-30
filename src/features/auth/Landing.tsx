@@ -14,10 +14,12 @@ export default function Landing() {
                 <div className="landing__glow landing__glow--3" />
 
                 <div className="landing__hero-content animate-fade-in-up">
-                    <nav className="landing__language" aria-label="Idioma">
-                        <span aria-current="page">Español</span>
-                        <a href="/en/" lang="en">English</a>
-                    </nav>
+                    {isWeb() && (
+                        <nav className="landing__language" aria-label="Idioma">
+                            <span aria-current="page">Español</span>
+                            <a href="/en/" lang="en">English</a>
+                        </nav>
+                    )}
                     <div className="landing__badge">
                         <Star size={14} />
                         <span>Ingeniería Relacional</span>
