@@ -19,6 +19,12 @@
   force  = true
 
 [[redirects]]
+  from   = "/recursos/dinero-y-proyecto-de-vida"
+  to     = "/recursos/dinero-y-proyecto-de-vida.html"
+  status = 200
+  force  = true
+
+[[redirects]]
   from   = "/robots.txt"
   to     = "/robots.txt"
   status = 200

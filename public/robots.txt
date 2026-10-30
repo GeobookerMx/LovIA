@@ -1,20 +1,24 @@
 User-agent: *
 Allow: /
-
-# Páginas privadas — no indexar
 Disallow: /admin
-Disallow: /admin/
-Disallow: /auth/callback
+Disallow: /auth
+Disallow: /login
+Disallow: /register
+Disallow: /recover
 Disallow: /onboarding
+Disallow: /profile
+Disallow: /book
+Disallow: /community
+Disallow: /pricing
+Disallow: /spark
+Disallow: /radar
+Disallow: /verification
+Disallow: /matches
+Disallow: /modules
+Disallow: /guide
+Disallow: /assessment
+Disallow: /evaluations
+Disallow: /settings
 Disallow: /selfie-verification
-Disallow: /profile/settings
-Disallow: /profile/emergency-contacts
 
-# Indexar todo lo público
-Allow: /book
-Allow: /profile/creator
-Allow: /profile/science
-Allow: /pricing
-
-# Sitemap
-Sitemap: https://www.lovia.com.mx/sitemap.xml
+Sitemap: https://lovia.com.mx/sitemap.xml

@@ -12,7 +12,7 @@ interface FeatureFlag {
 const FLAG_LABELS: Record<string, { label: string; description: string }> = {
     finance_private_save: {
         label: 'Guardado privado — Finanzas',
-        description: 'Permite que los usuarios guarden sus respuestas del módulo "Dinero y proyecto de vida" en su cuenta de forma privada (RLS). Desactivado: las respuestas solo viven en pantalla.',
+        description: 'En revisión de permisos. Desactivado: las respuestas solo viven en pantalla. Se habilitará después de comprobar A/B, anónimo y Admin.',
     },
 }
 
@@ -98,9 +98,9 @@ export default function SystemConfig() {
                                 id={`flag-toggle-${flag.key}`}
                                 aria-pressed={flag.enabled}
                                 aria-label={`${flag.enabled ? 'Desactivar' : 'Activar'} ${meta.label}`}
-                                disabled={status === 'saving'}
+                                disabled={status === 'saving' || flag.key === 'finance_private_save'}
                                 onClick={() => void toggle(flag)}
-                                style={{ background: 'none', border: 'none', padding: 0, cursor: status === 'saving' ? 'wait' : 'pointer', color: flag.enabled ? 'var(--success)' : 'var(--text-tertiary)', flexShrink: 0, marginTop: 2 }}
+                                style={{ background: 'none', border: 'none', padding: 0, cursor: status === 'saving' || flag.key === 'finance_private_save' ? 'not-allowed' : 'pointer', color: flag.enabled ? 'var(--success)' : 'var(--text-tertiary)', flexShrink: 0, marginTop: 2 }}
                             >
                                 {status === 'saving'
                                     ? <Loader2 size={28} className="animate-spin" />

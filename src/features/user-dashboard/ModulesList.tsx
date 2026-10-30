@@ -124,7 +124,7 @@ export default function ModulesList() {
             {/* Stats */}
             <div className="modules-page__stats animate-fade-in-up">
                 <div className="modules-page__stat glass">
-                    <span className="modules-page__stat-value">{modules.length}</span>
+                    <span className="modules-page__stat-value">{modules.length + 1}</span>
                     <span className="modules-page__stat-label">Módulos</span>
                 </div>
                 <div className="modules-page__stat glass">
@@ -145,20 +145,20 @@ export default function ModulesList() {
                 </p>
             </div>
 
-            <button type="button" className="modules-page__card glass" onClick={() => navigate('/guide/finance')}>
-                <span className="modules-page__card-icon" aria-hidden="true"><Wallet size={24} /></span>
-                <span className="modules-page__card-content">
-                    <strong>Dinero y proyecto de vida</strong>
-                    <span className="modules-page__card-subtitle">Explora tus prioridades y conversa sobre acuerdos. Actividad opcional y privada.</span>
-                </span>
-                <ArrowRight size={18} aria-hidden="true" />
-            </button>
-
             {loadError && <p role="alert">No pudimos cargar los módulos. Revisa tu conexión y vuelve a abrir esta página.</p>}
             {!loadError && modules.length === 0 && <p>Aún no hay módulos disponibles. Puedes empezar con una Chispa o Mi Diario.</p>}
 
             {/* Module Cards */}
             <div className="modules-page__list stagger-children">
+                <button type="button" className="modules-page__card glass" onClick={() => navigate('/guide/finance')}>
+                    <span className="modules-page__card-icon" aria-hidden="true"><Wallet size={24} /></span>
+                    <span className="modules-page__card-content">
+                        <span className="modules-page__card-top"><strong>Dinero y proyecto de vida</strong></span>
+                        <span className="modules-page__card-subtitle">Explora tus prioridades y conversa sobre acuerdos. Actividad opcional y privada.</span>
+                        <span className="modules-page__card-meta"><span><Clock size={12} /> 4 sesiones</span><span><BookOpen size={12} /> 18 preguntas</span></span>
+                    </span>
+                    <ArrowRight size={18} aria-hidden="true" />
+                </button>
                 {modules.map((mod) => (
                     <button
                         key={mod.id}

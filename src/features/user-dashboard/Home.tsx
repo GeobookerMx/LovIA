@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
-import { ArrowRight, BookOpen, BookHeart, Heart, Share2, Sparkles, UserRound, Wallet } from 'lucide-react'
+import { ArrowRight, BookOpen, BookHeart, Heart, Share2, Sparkles, UserRound, Wallet, X } from 'lucide-react'
 import { useAuthStore } from '../../stores/authStore'
 import { LOVIA_GOALS, readLoviaGoal, type LoviaGoal } from '../../lib/loviaGoals'
 import { mexicoCityDate } from '../../lib/campaignDates'
@@ -17,6 +17,22 @@ export default function Home() {
   const [goalError, setGoalError] = useState<string | null>(null)
   const [spark, setSpark] = useState<string | null>(null)
   const [showShare, setShowShare] = useState(false)
+  const [financeNoticeClosed, setFinanceNoticeClosed] = useState(false)
+
+  useEffect(() => {
+    try {
+      setFinanceNoticeClosed(user?.id ? localStorage.getItem(`lovia-finance-notice:${user.id}`) === 'closed' : false)
+    } catch {
+      setFinanceNoticeClosed(false)
+    }
+  }, [user?.id])
+
+  const closeFinanceNotice = () => {
+    setFinanceNoticeClosed(true)
+    try {
+      if (user?.id) localStorage.setItem(`lovia-finance-notice:${user.id}`, 'closed')
+    } catch { /* La invitación se cierra en esta sesión aunque el navegador bloquee almacenamiento. */ }
+  }
 
   useEffect(() => {
     let active = true
@@ -52,6 +68,20 @@ export default function Home() {
           <Share2 size={19} />
         </button>
       </header>
+
+      {!financeNoticeClosed && (
+        <section className="home__finance-spotlight" aria-labelledby="home-finance-heading">
+          <div className="home__finance-spotlight-top">
+            <span className="home__finance-tag"><Wallet size={16} aria-hidden="true" /> Nuevo en LovIA</span>
+            <button type="button" className="home__finance-close" onClick={closeFinanceNotice} aria-label="Cerrar invitación a Dinero y proyecto de vida"><X size={20} /></button>
+          </div>
+          <h2 id="home-finance-heading">Dinero y proyecto de vida</h2>
+          <p>Descubre qué es importante para ti y encuentra preguntas para conversar en pareja. Cuatro sesiones breves, a tu ritmo y sin calificaciones.</p>
+          <button type="button" className="home__finance-cta" onClick={() => navigate('/guide/finance')}>
+            Explorar el nuevo módulo <ArrowRight size={18} aria-hidden="true" />
+          </button>
+        </section>
+      )}
 
       <section className="home__panel home__panel--goal" aria-labelledby="home-goal-heading">
         <div className="home__section-heading">

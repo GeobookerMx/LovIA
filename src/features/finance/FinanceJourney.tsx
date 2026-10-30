@@ -8,7 +8,6 @@ import {
   deleteFinanceAnswers, isFinanceSaveEnabled, loadFinanceAnswers, saveFinanceAnswer,
   SKIP_PRIVATE, SKIP_UNSURE, type FinanceAnswer,
 } from './financeStorage'
-import FinanceSharePanel from './FinanceSharePanel'
 import './FinanceJourney.css'
 
 type SaveState = 'idle' | 'saving' | 'saved' | 'error'
@@ -275,9 +274,6 @@ export default function FinanceJourney() {
           ))}
         </div>
       </section>
-
-      {/* Panel de conversaciones compartidas — solo visible para usuarios autenticados */}
-      {userId && <FinanceSharePanel myAnswers={answers} />}
 
       <footer className="finance-page__footer">
         <p>Contenido educativo original de LovIA, no una escala psicológica o financiera validada. No sustituye asesoría profesional.</p>

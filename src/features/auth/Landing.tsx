@@ -1,5 +1,5 @@
 import { Link } from 'react-router-dom'
-import { Heart, Shield, Brain, Sparkles, ArrowRight, Star, BookOpen, Mail, Instagram } from 'lucide-react'
+import { Heart, Shield, Brain, Sparkles, ArrowRight, Star, BookOpen, Mail, Instagram, Wallet } from 'lucide-react'
 import { isWeb } from '../../lib/platform'
 import RelationshipsContext from './RelationshipsContext'
 import './Landing.css'
@@ -58,6 +58,13 @@ export default function Landing() {
                         </button>
                     </div>
                 </div>
+            </section>
+
+            <section className="landing__finance-feature" aria-labelledby="landing-finance-title">
+                <span><Wallet size={18} aria-hidden="true" /> Nuevo recurso</span>
+                <h2 id="landing-finance-title">Dinero y proyecto de vida</h2>
+                <p>Preguntas para conocer tus prioridades y conversar sobre acuerdos, sin calificaciones ni promesas de compatibilidad.</p>
+                <a href="/recursos/dinero-y-proyecto-de-vida">Lee la guía gratuita <ArrowRight size={17} aria-hidden="true" /></a>
             </section>
 
             {/* Features */}
