@@ -4,17 +4,9 @@
 SET LOCAL lock_timeout = '5s';
 SET LOCAL statement_timeout = '30s';
 
-DO $guard$
-BEGIN
-  IF to_regclass('public.book_cards') IS NOT NULL THEN
-    RAISE EXCEPTION 'Ya existe book_cards; revisar antes de aplicar';
-  END IF;
-END;
-$guard$;
-
-CREATE TABLE public.book_cards (
+CREATE TABLE IF NOT EXISTS public.book_cards (
   id          uuid PRIMARY KEY DEFAULT gen_random_uuid(),
-  num         text NOT NULL CHECK (num ~ '^[0-9]{1,3}$'),   -- '01', '02', ...
+  num         text NOT NULL CHECK (num ~ '^[0-9]{1,3}$'),
   title       text NOT NULL CHECK (char_length(title) BETWEEN 3 AND 120),
   fragment    text NOT NULL CHECK (char_length(fragment) BETWEEN 10 AND 600),
   synthesis   text NOT NULL CHECK (char_length(synthesis) BETWEEN 10 AND 400),
@@ -27,9 +19,11 @@ CREATE TABLE public.book_cards (
 );
 
 -- Trigger updated_at
-CREATE FUNCTION public.book_cards_touch_updated_at()
+CREATE OR REPLACE FUNCTION public.book_cards_touch_updated_at()
 RETURNS trigger LANGUAGE plpgsql SET search_path = '' AS $$
 BEGIN NEW.updated_at := now(); RETURN NEW; END; $$;
+
+DROP TRIGGER IF EXISTS book_cards_touch ON public.book_cards;
 CREATE TRIGGER book_cards_touch BEFORE UPDATE ON public.book_cards
   FOR EACH ROW EXECUTE FUNCTION public.book_cards_touch_updated_at();
 
@@ -38,19 +32,24 @@ REVOKE ALL ON TABLE public.book_cards FROM PUBLIC, anon, authenticated;
 GRANT SELECT ON TABLE public.book_cards TO anon, authenticated;
 GRANT INSERT, UPDATE, DELETE ON TABLE public.book_cards TO authenticated;
 
--- Lectura pública (solo publicadas)
+-- Políticas idempotentes
+DROP POLICY IF EXISTS "BookCards: lectura pública" ON public.book_cards;
 CREATE POLICY "BookCards: lectura pública" ON public.book_cards
   FOR SELECT TO anon, authenticated USING (published = true);
 
--- Admin ve todo (incluyendo no publicadas)
+DROP POLICY IF EXISTS "BookCards: admin lee todo" ON public.book_cards;
 CREATE POLICY "BookCards: admin lee todo" ON public.book_cards
   FOR SELECT TO authenticated USING (public.is_admin());
 
--- Solo admin puede escribir
+DROP POLICY IF EXISTS "BookCards: admin escribe" ON public.book_cards;
 CREATE POLICY "BookCards: admin escribe" ON public.book_cards
   FOR INSERT TO authenticated WITH CHECK (public.is_admin());
+
+DROP POLICY IF EXISTS "BookCards: admin actualiza" ON public.book_cards;
 CREATE POLICY "BookCards: admin actualiza" ON public.book_cards
   FOR UPDATE TO authenticated USING (public.is_admin()) WITH CHECK (public.is_admin());
+
+DROP POLICY IF EXISTS "BookCards: admin borra" ON public.book_cards;
 CREATE POLICY "BookCards: admin borra" ON public.book_cards
   FOR DELETE TO authenticated USING (public.is_admin());
 
