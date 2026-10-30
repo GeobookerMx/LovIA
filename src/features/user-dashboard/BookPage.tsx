@@ -19,6 +19,9 @@ import './BookPage.css'
 // ─── URL del libro en Supabase Storage ───────────────────────────────────────
 const BOOK_PDF_URL = `${import.meta.env.VITE_SUPABASE_URL}/storage/v1/object/public/books/Evolucion%20de%20las%20Relaciones%20de%20Pareja%20PDF.pdf`
 const BOOK_FILENAME = 'Evolucion-de-las-Relaciones-de-Pareja-JuanPablo-Pena.pdf'
+// Las seis tarjetas aún no tienen aprobación editorial del autor. El borrador
+// permanece en este archivo para revisión, fuera de la publicación visible.
+const BOOK_CARDS_APPROVED = false
 // ─────────────────────────────────────────────────────────────────────────────
 
 
@@ -132,7 +135,7 @@ export default function BookPage() {
                                 <div className="book-cover__title-wrap">
                                     <p className="book-cover__pre">Juan Pablo Peña García</p>
                                     <h3 className="book-cover__title">Evolución de las Relaciones de Pareja</h3>
-                                    <p className="book-cover__sub">Psicología Evolutiva · 2023</p>
+                                    <p className="book-cover__sub">Lectura y reflexión sobre relaciones</p>
                                 </div>
                             </div>
                         </div>
@@ -208,7 +211,7 @@ export default function BookPage() {
                 </div>
 
                 {/* 6 Tarjetas de Lectura y Reflexión (2-5 min) */}
-                <div className="book-cards-section">
+                {BOOK_CARDS_APPROVED && <div className="book-cards-section">
                     <div className="book-cards-section__header">
                         <h4>6 Lecturas y reflexiones del libro</h4>
                         <p>Píldoras breves de 2 a 5 minutos extraídas del libro para reflexionar a tu propio ritmo.</p>
@@ -279,7 +282,7 @@ export default function BookPage() {
                             </div>
                         ))}
                     </div>
-                </div>
+                </div>}
 
                 {/* Estado de descarga */}
                 {downloadLog.downloaded && (
@@ -342,7 +345,7 @@ export default function BookPage() {
                     </div>
                     <div>
                         <strong>Juan Pablo Peña García</strong>
-                        <p>Psicólogo · Psicología Evolutiva · @psjuanpablopg</p>
+                        <p>Autor · @psjuanpablopg</p>
                     </div>
                     <ArrowLeft size={16} style={{ transform: 'rotate(180deg)', color: 'var(--text-tertiary)' }} />
                 </div>
