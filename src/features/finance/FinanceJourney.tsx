@@ -1,7 +1,9 @@
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { ArrowLeft, ArrowRight, BookHeart, MessageCircle, RefreshCcw, ShieldCheck, Wallet } from 'lucide-react'
+import { useAuthStore } from '../../stores/authStore'
 import { financeQuestionGroups, financeScenarios } from './financeContent'
+import { deleteFinanceAnswers, isFinanceSaveEnabled, loadFinanceAnswers, saveFinanceAnswer } from './financeStorage'
 import './FinanceJourney.css'
 
 interface ShortQuestion {
@@ -46,17 +48,79 @@ const shortQuestions: ShortQuestion[] = [
   },
 ]
 
+type SaveState = 'idle' | 'saving' | 'saved' | 'error'
+
 export default function FinanceJourney() {
   const navigate = useNavigate()
+  const userId = useAuthStore((state) => state.user?.id ?? null)
   const [started, setStarted] = useState(false)
   const [step, setStep] = useState(0)
   const [finished, setFinished] = useState(false)
   const [answers, setAnswers] = useState<Record<string, string[]>>({})
   const [scenarioChoices, setScenarioChoices] = useState<Record<number, number>>({})
+  const [saveEnabled, setSaveEnabled] = useState(false)
+  const [saveState, setSaveState] = useState<SaveState>('idle')
   const question = shortQuestions[step]
   const selected = answers[question.id] ?? []
 
+  // Interruptor y reanudación. Al cambiar de cuenta o cerrar sesión se descarta todo
+  // el estado privado en memoria antes de consultar al servidor.
+  useEffect(() => {
+    let active = true
+    setAnswers({})
+    setStep(0)
+    setStarted(false)
+    setFinished(false)
+    setSaveState('idle')
+    setSaveEnabled(false)
+    if (!userId) return
+    void isFinanceSaveEnabled().then(async (enabled) => {
+      if (!active || !enabled) return
+      setSaveEnabled(true)
+      try {
+        const saved = await loadFinanceAnswers()
+        if (!active || Object.keys(saved).length === 0) return
+        setAnswers(saved)
+        const next = shortQuestions.findIndex((item) => !saved[item.id])
+        setStep(next === -1 ? shortQuestions.length - 1 : next)
+      } catch {
+        // Sin lectura no se bloquea el recorrido; sólo se empieza vacío.
+      }
+    })
+    return () => { active = false }
+  }, [userId])
+
+  const advance = async () => {
+    const last = step === shortQuestions.length - 1
+    if (saveEnabled && userId) {
+      if (saveState === 'saving') return
+      setSaveState('saving')
+      try {
+        await saveFinanceAnswer(userId, question.id, selected)
+        setSaveState('saved')
+      } catch {
+        setSaveState('error')
+        return
+      }
+    }
+    if (last) setFinished(true)
+    else setStep(step + 1)
+  }
+
+  const clearSaved = async (): Promise<boolean> => {
+    if (!saveEnabled || !userId) return false
+    try {
+      await deleteFinanceAnswers(userId)
+      setSaveState('idle')
+      return true
+    } catch {
+      setSaveState('error')
+      return false
+    }
+  }
+
   const choose = (option: string) => {
+    setSaveState('idle')
     setAnswers((current) => {
       const previous = current[question.id] ?? []
       if (!question.multiple || skipOptions.includes(option)) return { ...current, [question.id]: [option] }
@@ -73,6 +137,7 @@ export default function FinanceJourney() {
     setStep(0)
     setFinished(false)
     setStarted(false)
+    setSaveState('idle')
   }
 
   return (
@@ -94,7 +159,9 @@ export default function FinanceJourney() {
           <div><span className="finance-page__eyebrow">Me conozco</span><h2 id="finance-exercise-title">Cinco preguntas para empezar</h2></div>
           <span className="finance-page__time">Unos 3 minutos</span>
         </div>
-        <p className="finance-page__privacy">Tus elecciones sólo viven en esta pantalla. No se guardan en LovIA ni se envían a otra persona; al salir se borran.</p>
+        <p className="finance-page__privacy">{saveEnabled
+          ? 'Tus elecciones se guardan en tu cuenta para que puedas continuar después. Son privadas: nadie más las ve, ni se envían a otra persona. Puedes borrarlas cuando quieras.'
+          : 'Tus elecciones sólo viven en esta pantalla. No se guardan en LovIA ni se envían a otra persona; al salir se borran.'}</p>
         {!started && <button type="button" className="finance-page__primary" onClick={() => setStarted(true)}>Explorar mis prioridades <ArrowRight size={18} aria-hidden="true" /></button>}
         {started && !finished && (
           <div className="finance-page__activity">
@@ -109,9 +176,11 @@ export default function FinanceJourney() {
                 ))}
               </div>
             </fieldset>
+            {saveState === 'error' && <p role="alert" className="finance-page__privacy">No pudimos guardar tu respuesta. Sigue en pantalla; revisa tu conexión y vuelve a pulsar Continuar para reintentar.</p>}
+            {saveState === 'saved' && <p role="status" className="finance-page__privacy">Guardado en tu cuenta.</p>}
             <div className="finance-page__controls">
               <button type="button" onClick={() => step === 0 ? reset() : setStep(step - 1)}>Atrás</button>
-              <button type="button" className="finance-page__primary" disabled={selected.length === 0} onClick={() => step === shortQuestions.length - 1 ? setFinished(true) : setStep(step + 1)}>{step === shortQuestions.length - 1 ? 'Ver mi reflexión' : 'Continuar'} <ArrowRight size={17} aria-hidden="true" /></button>
+              <button type="button" className="finance-page__primary" disabled={selected.length === 0 || saveState === 'saving'} onClick={() => void advance()}>{saveState === 'saving' ? 'Guardando…' : step === shortQuestions.length - 1 ? 'Ver mi reflexión' : 'Continuar'} <ArrowRight size={17} aria-hidden="true" /></button>
             </div>
           </div>
         )}
@@ -127,6 +196,7 @@ export default function FinanceJourney() {
             <div className="finance-page__controls">
               <button type="button" onClick={() => { setFinished(false); setStep(shortQuestions.length - 1) }}>Cambiar una respuesta</button>
               <button type="button" onClick={reset}><RefreshCcw size={17} aria-hidden="true" /> Empezar de nuevo</button>
+              {saveEnabled && <button type="button" onClick={() => void clearSaved().then((ok) => { if (ok) reset() })}>Borrar mis respuestas guardadas</button>}
             </div>
             <button type="button" className="finance-page__journal" onClick={() => navigate('/profile/journal')}><BookHeart size={18} aria-hidden="true" /> Si quieres conservar una idea, escríbela tú en Mi Diario <ArrowRight size={16} aria-hidden="true" /></button>
           </div>
