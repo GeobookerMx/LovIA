@@ -6,7 +6,7 @@
  */
 
 import { useState } from 'react'
-import { ArrowLeft, Bell, Eye, Globe, Palette, User, Shield, Trash2, Loader2, AlertTriangle, X } from 'lucide-react'
+import { ArrowLeft, Eye, User, Shield, Trash2, Loader2, AlertTriangle, X } from 'lucide-react'
 import { useNavigate } from 'react-router-dom'
 import { useSettingsStore } from '../../stores/settingsStore'
 import { useAuthStore } from '../../stores/authStore'
@@ -60,34 +60,6 @@ export default function SettingsPage() {
                 <h2>Configuración</h2>
             </div>
 
-            {/* Notifications */}
-            <div className="settings-section">
-                <div className="settings-section__title">🔔 Notificaciones</div>
-                <p className="settings-item__desc">Estas preferencias se guardan en este dispositivo. El envío todavía requiere sincronización con el servidor.</p>
-
-                <ToggleItem
-                    icon={<Bell size={18} />}
-                    label="Notificaciones push"
-                    desc="Matches, sparks, check-ins"
-                    active={settings.pushEnabled}
-                    onToggle={() => settings.toggle('pushEnabled')}
-                />
-                <ToggleItem
-                    icon={<Bell size={18} />}
-                    label="Email semanal"
-                    desc="Resumen de tu progreso"
-                    active={settings.weeklyEmail}
-                    onToggle={() => settings.toggle('weeklyEmail')}
-                />
-                <ToggleItem
-                    icon={<Bell size={18} />}
-                    label="Recordatorio Daily Spark"
-                    desc="Notificación diaria para tu chispa"
-                    active={settings.sparkReminder}
-                    onToggle={() => settings.toggle('sparkReminder')}
-                />
-            </div>
-
             {/* Privacy */}
             <div className="settings-section">
                 <div className="settings-section__title">🔒 Privacidad</div>
@@ -108,46 +80,6 @@ export default function SettingsPage() {
                     active={settings.anonymousData}
                     onToggle={() => settings.toggle('anonymousData')}
                 />
-            </div>
-
-            {/* Appearance */}
-            <div className="settings-section">
-                <div className="settings-section__title">🎨 Apariencia</div>
-
-                <div className="settings-item glass">
-                    <div className="settings-item__left">
-                        <Palette size={18} className="settings-item__icon" />
-                        <div>
-                            <div className="settings-item__label">Tema</div>
-                        </div>
-                    </div>
-                    <select
-                        className="settings-select"
-                        value={settings.theme}
-                        onChange={(e) => settings.setTheme(e.target.value as 'dark' | 'light' | 'system')}
-                    >
-                        <option value="dark">Oscuro</option>
-                        <option value="light">Claro</option>
-                        <option value="system">Sistema</option>
-                    </select>
-                </div>
-
-                <div className="settings-item glass">
-                    <div className="settings-item__left">
-                        <Globe size={18} className="settings-item__icon" />
-                        <div>
-                            <div className="settings-item__label">Idioma</div>
-                        </div>
-                    </div>
-                    <select
-                        className="settings-select"
-                        value={settings.language}
-                        onChange={(e) => settings.setLanguage(e.target.value as 'es' | 'en')}
-                    >
-                        <option value="es">Español</option>
-                        <option value="en">English</option>
-                    </select>
-                </div>
             </div>
 
             {/* Account */}

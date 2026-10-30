@@ -6,11 +6,13 @@ interface Props {
     currentPath: string
 }
 
+const radarEnabled = import.meta.env.VITE_ENABLE_RADAR === 'true'
+
 const tabs = [
     { path: '/home', icon: Home, label: 'Inicio' },
-    { path: '/radar', icon: MapPin, label: 'Explorar' },
+    ...(radarEnabled ? [{ path: '/radar', icon: MapPin, label: 'Explorar' }] : []),
     { path: '/modules', icon: BookOpen, label: 'Guía' },
-    { path: '/matches', icon: Heart, label: 'Mensajes' },
+    { path: '/matches', icon: Heart, label: 'Conexiones' },
     { path: '/profile', icon: User, label: 'Perfil' },
 ]
 

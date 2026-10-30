@@ -91,7 +91,7 @@ export default function Landing() {
                         <Sparkles size={24} color="var(--success)" />
                     </div>
                     <h3>Mejora Continua</h3>
-                    <p>Aprende a tu ritmo sin que tus ejercicios condicionen el descubrimiento.</p>
+                    <p>Explora preguntas y ejercicios breves para conocerte mejor, a tu ritmo.</p>
                 </div>
             </section>
 

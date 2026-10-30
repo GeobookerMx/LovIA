@@ -111,7 +111,7 @@ export default function Home() {
           <BookOpen size={24} aria-hidden="true" />
           <div>
             <h2 id="home-tools-heading">Sigue a tu ritmo</h2>
-            <p>Las actividades son opcionales y no cambian tu valor ni tu visibilidad.</p>
+            <p>Usa la Guía y Mi Diario a tu ritmo. Ningún resultado define tu valor.</p>
           </div>
         </div>
         <div className="home__tools">

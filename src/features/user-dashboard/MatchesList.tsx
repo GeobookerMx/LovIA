@@ -22,10 +22,14 @@ export default function MatchesList() {
     const [matches, setMatches] = useState<MatchData[]>([])
     const [loading, setLoading] = useState(true)
     const [loadError, setLoadError] = useState(false)
+    const [retryCount, setRetryCount] = useState(0)
 
     useEffect(() => {
         async function fetchMatches() {
-            if (!user) return
+            if (!user) {
+                setLoading(false)
+                return
+            }
             setLoadError(false)
             
             // El servidor devuelve solo tarjetas de conexiones autorizadas.
@@ -55,7 +59,7 @@ export default function MatchesList() {
         }
 
         fetchMatches()
-    }, [user])
+    }, [user, retryCount])
 
     // Determinar la clase CSS de la foto según el modo y el nivel del match
     const getPhotoClass = (mode: string, level: number) => {
@@ -84,9 +88,9 @@ export default function MatchesList() {
         return (
             <div className="matches-page">
                 <div className="matches-page__empty glass" role="alert">
-                    <h1>No pudimos cargar tus conversaciones</h1>
-                    <p>Revisa tu conexión e inténtalo de nuevo. Tus conversaciones no se han borrado.</p>
-                    <button className="matches-page__cta" onClick={() => window.location.reload()}>Reintentar</button>
+                    <h1>No pudimos cargar tus conexiones</h1>
+                    <p>Revisa tu conexión e inténtalo de nuevo. Tus conexiones no se han borrado.</p>
+                    <button className="matches-page__cta" onClick={() => { setLoading(true); setRetryCount((count) => count + 1) }}>Reintentar</button>
                 </div>
             </div>
         )

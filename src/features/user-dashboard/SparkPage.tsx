@@ -231,8 +231,8 @@ export default function SparkPage() {
                         <button className="btn" style={{ padding: '10px 16px', borderRadius: 12, fontSize: '0.88rem',
                             background: 'rgba(255,255,255,0.05)', border: '1px solid var(--border-subtle)',
                             color: 'var(--text-secondary)' }}
-                            onClick={() => navigate('/radar')}>
-                            🗺️ Explorar el Radar
+                            onClick={() => navigate(import.meta.env.VITE_ENABLE_RADAR === 'true' ? '/radar' : '/matches')}>
+                            {import.meta.env.VITE_ENABLE_RADAR === 'true' ? '🗺️ Explorar el Radar' : '💗 Ver mis conexiones'}
                         </button>
                     </div>
 

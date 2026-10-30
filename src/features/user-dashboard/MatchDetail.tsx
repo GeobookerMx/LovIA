@@ -30,13 +30,13 @@ const gateRequirements: Record<number, {
     2: {
         testName: 'Test de Stroop',
         testRoute: '/evaluations/stroop',
-        description: 'Completa el Test de Stroop para demostrar control inhibitorio — una habilidad clave para la comunicación de pareja.',
+        description: 'Esta versión pide completar la actividad para avanzar. Su resultado no mide compatibilidad ni determina cómo te relacionas.',
         icon: <Brain size={18} />,
     },
     3: {
         testName: 'Digit Span (Memoria de Trabajo)',
         testRoute: '/evaluations/digit-span',
-        description: 'Completa el test para verificar tu capacidad de memoria de trabajo — esencial para escuchar activamente.',
+        description: 'Esta versión pide completar la actividad para avanzar. Su resultado no mide compatibilidad ni determina cómo escuchas a otra persona.',
         icon: <Brain size={18} />,
     },
 }
@@ -182,16 +182,6 @@ export default function MatchDetail() {
 
             {/* Info cards */}
             <div className="match-detail__info-grid">
-                <div className="match-detail__info-card glass">
-                    <span className="match-detail__info-label">Compatibilidad</span>
-                    <span className="match-detail__info-value" style={{
-                        color: match.compatibility_score >= 70 ? 'var(--freq-high)' :
-                            match.compatibility_score >= 50 ? 'var(--freq-mid)' : 'var(--freq-low)'
-                    }}>
-                        {match.compatibility_score}%
-                    </span>
-                </div>
-
                 <div className="match-detail__info-card glass">
                     <span className="match-detail__info-label">Nivel actual</span>
                     <span className="match-detail__info-value">{match.current_level}/5</span>
