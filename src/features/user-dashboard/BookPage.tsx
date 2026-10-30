@@ -19,9 +19,8 @@ import './BookPage.css'
 // ─── URL del libro en Supabase Storage ───────────────────────────────────────
 const BOOK_PDF_URL = `${import.meta.env.VITE_SUPABASE_URL}/storage/v1/object/public/books/Evolucion%20de%20las%20Relaciones%20de%20Pareja%20PDF.pdf`
 const BOOK_FILENAME = 'Evolucion-de-las-Relaciones-de-Pareja-JuanPablo-Pena.pdf'
-// Las seis tarjetas aún no tienen aprobación editorial del autor. El borrador
-// permanece en este archivo para revisión, fuera de la publicación visible.
-const BOOK_CARDS_APPROVED = false
+// Las seis tarjetas fueron aprobadas por el autor el 29 de octubre de 2026.
+const BOOK_CARDS_APPROVED = true
 // ─────────────────────────────────────────────────────────────────────────────
 
 
