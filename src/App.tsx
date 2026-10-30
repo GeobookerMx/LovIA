@@ -69,6 +69,7 @@ const SpecialistRegisterPage = lazy(() => import('./features/user-dashboard/Spec
 // ─── Lazy loaded: Admin ───
 const ModulesList = lazy(() => import('./features/user-dashboard/ModulesList'))
 const ModuleDetail = lazy(() => import('./features/user-dashboard/ModuleDetail'))
+const FinanceJourney = lazy(() => import('./features/finance/FinanceJourney'))
 
 // ─── Lazy loaded: Evaluations (heavy game components) ───
 const FrustrationTolerance = lazy(() => import('./features/evaluations/FrustrationTolerance'))
@@ -213,6 +214,7 @@ function AppRoutes() {
               <Route path="/book" element={<BookPage />} />
               <Route path="/modules" element={<ModulesList />} />
               <Route path="/modules/:moduleId" element={<ModuleDetail />} />
+              <Route path="/guide/finance" element={<FinanceJourney />} />
               <Route path="/pricing" element={<PricingPage />} />
               <Route path="/verification" element={<VerificationFlow />} />
               <Route path="/evaluations/frustration" element={<FrustrationTolerance />} />

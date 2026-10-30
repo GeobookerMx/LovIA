@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
-import { ArrowLeft, CheckCircle, Clock, BookOpen, Brain, Heart, MessageCircle, Shield, Flame, Loader2 } from 'lucide-react'
+import { ArrowLeft, ArrowRight, CheckCircle, Clock, BookOpen, Brain, Heart, MessageCircle, Shield, Flame, Loader2, Wallet } from 'lucide-react'
 import { supabase } from '../../lib/supabase'
 import { useAuthStore } from '../../stores/authStore'
 import './ModulesPages.css'
@@ -144,6 +144,15 @@ export default function ModulesList() {
                     Explora los módulos a tu ritmo. Su progreso es personal y no determina si puedes conocer a alguien.
                 </p>
             </div>
+
+            <button type="button" className="modules-page__card glass" onClick={() => navigate('/guide/finance')}>
+                <span className="modules-page__card-icon" aria-hidden="true"><Wallet size={24} /></span>
+                <span className="modules-page__card-content">
+                    <strong>Dinero y proyecto de vida</strong>
+                    <span className="modules-page__card-subtitle">Explora tus prioridades y conversa sobre acuerdos. Actividad opcional y privada.</span>
+                </span>
+                <ArrowRight size={18} aria-hidden="true" />
+            </button>
 
             {loadError && <p role="alert">No pudimos cargar los módulos. Revisa tu conexión y vuelve a abrir esta página.</p>}
             {!loadError && modules.length === 0 && <p>Aún no hay módulos disponibles. Puedes empezar con una Chispa o Mi Diario.</p>}

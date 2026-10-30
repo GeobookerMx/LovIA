@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
-import { ArrowRight, BookOpen, BookHeart, Heart, Share2, Sparkles, UserRound } from 'lucide-react'
+import { ArrowRight, BookOpen, BookHeart, Heart, Share2, Sparkles, UserRound, Wallet } from 'lucide-react'
 import { useAuthStore } from '../../stores/authStore'
 import { LOVIA_GOALS, readLoviaGoal, type LoviaGoal } from '../../lib/loviaGoals'
 import { mexicoCityDate } from '../../lib/campaignDates'
@@ -116,6 +116,7 @@ export default function Home() {
         </div>
         <div className="home__tools">
           <button type="button" onClick={() => navigate('/modules')}><BookOpen size={20} /> Guía y ejercicios <ArrowRight size={17} /></button>
+          <button type="button" onClick={() => navigate('/guide/finance')}><Wallet size={20} /> Dinero y proyecto de vida <ArrowRight size={17} /></button>
           <button type="button" onClick={() => navigate('/profile/journal')}><BookHeart size={20} /> Mi Diario <ArrowRight size={17} /></button>
           <button type="button" onClick={() => navigate('/profile/edit')}><UserRound size={20} /> Mi perfil <ArrowRight size={17} /></button>
           <button type="button" onClick={() => navigate('/matches')}><Heart size={20} /> Mis conexiones <ArrowRight size={17} /></button>

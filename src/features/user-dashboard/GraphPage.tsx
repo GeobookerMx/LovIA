@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react'
-import { ArrowLeft, ArrowRight, BookHeart, BookOpen, Loader2 } from 'lucide-react'
+import { ArrowLeft, ArrowRight, BookHeart, BookOpen, Loader2, Wallet } from 'lucide-react'
 import { useNavigate } from 'react-router-dom'
 import { supabase } from '../../lib/supabase'
 import { useAuthStore } from '../../stores/authStore'
@@ -64,6 +64,11 @@ export default function GraphPage() {
       <h1>Mi recorrido</h1>
     </header>
     <p className="profile-sub__subtitle">Tu aprendizaje y tus respuestas son privados. Las actividades son opcionales y no miden compatibilidad.</p>
+    <section className="chart-card glass-strong" aria-labelledby="journey-finance-title">
+      <h2 id="journey-finance-title">Dinero y proyecto de vida</h2>
+      <p>Una pausa opcional para explorar tus prioridades y conversar sobre acuerdos. Esta actividad no guarda tus elecciones.</p>
+      <button type="button" onClick={() => navigate('/guide/finance')}><Wallet size={18} /> Explorar el tema <ArrowRight size={17} /></button>
+    </section>
     {loading && <div className="chart-card glass-strong" role="status"><Loader2 size={20} className="animate-spin" /> Cargando tu recorrido…</div>}
     {error && <div className="chart-card glass-strong" role="alert">No pudimos cargar tu recorrido. Comprueba la conexión y vuelve a abrir esta pantalla.</div>}
     {journey && !error && <>
