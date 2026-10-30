@@ -11,14 +11,14 @@ window.addEventListener('unhandledrejection', () => {
 })
 
 // ── Deep Link Handler para OAuth Nativo ──────────────────────────────────────
-// CRÍTICO: Sin este listener, el token de Google/Apple nunca llega a Supabase
-// después de que SFSafariViewController cierra y redirige a lovia://auth/callback.
+// Recibe el retorno de OAuth nativo y establece la sesión una sola vez.
+// Login y Register deciden el destino según el perfil; este listener no navega.
 //
 // Flujo:
 //   1. signInWithGoogle/Apple abre SFSafariViewController con skipBrowserRedirect:true
 //   2. El proveedor redirige a lovia://auth/callback#access_token=...&refresh_token=...
 //   3. iOS dispara el evento appUrlOpen → este listener lo captura
-//   4. Supabase procesa el token y dispara onAuthStateChange → authStore actualiza
+//   4. Supabase procesa el token y authStore actualiza la pantalla de acceso
 if (Capacitor.isNativePlatform()) {
   import('@capacitor/app').then(({ App: CapApp }) => {
     let processingUrl: string | null = null
@@ -49,21 +49,6 @@ if (Capacitor.isNativePlatform()) {
         console.log('[LovIA] [DeepLink] Parseando URL...')
         const urlObj = parsed
  
-        // ── Helper: navegar a /home de forma segura con HashRouter ──────
-        const navigateToHome = () => {
-          setTimeout(() => {
-            const hash = window.location.hash
-            console.log('[LovIA] [DeepLink] Verificando navegación tras autenticación.')
-            const isAuthPage = !hash || hash === '#/' || hash.startsWith('#/login')
-            if (isAuthPage) {
-              console.log('[LovIA] [DeepLink] Redirigiendo a #/home...')
-              window.location.hash = '#/home'
-            } else {
-              console.log('[LovIA] [DeepLink] Navegación actual conservada.')
-            }
-          }, 800) // Esperar a que onAuthStateChange actualice el store
-        }
- 
         // ── FLUJO 1: PKCE (iOS — SFSafariViewController) ──────────────
         const code = urlObj.searchParams.get('code')
         if (code) {
@@ -75,7 +60,6 @@ if (Capacitor.isNativePlatform()) {
             console.error('[LovIA] [DeepLink] Falló el intercambio PKCE.')
           } else {
             console.log('[LovIA] [DeepLink] Sesión PKCE establecida con éxito ✅')
-            navigateToHome()
           }
           return
         }
@@ -107,7 +91,6 @@ if (Capacitor.isNativePlatform()) {
             console.error('[LovIA] [DeepLink] Falló la sesión OAuth.')
           } else {
             console.log('[LovIA] [DeepLink] Sesión OAuth establecida con éxito ✅')
-            navigateToHome()
           }
         } else {
           const errorDesc = params.get('error_description') || params.get('error')

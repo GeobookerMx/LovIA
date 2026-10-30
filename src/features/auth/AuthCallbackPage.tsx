@@ -16,46 +16,49 @@ export default function AuthCallbackPage() {
   const navigate = useNavigate()
   const [searchParams] = useSearchParams()
   const [errorMsg, setErrorMsg] = useState<string | null>(null)
+  const hashParams = new URLSearchParams(window.location.hash.replace(/^#/, ''))
+  const providerError = searchParams.get('error_description') || hashParams.get('error_description')
+    || searchParams.get('error') || hashParams.get('error')
+  const visibleError = providerError
+    ? 'No pudimos completar el acceso con ese proveedor. Entra con tu correo y contraseña o inténtalo más tarde.'
+    : errorMsg
 
   useEffect(() => {
     let navigated = false
+    let active = true
 
     // Si el proveedor (Google/Apple) devolvió un error, avisar al usuario de inmediato.
-    const hashParams = new URLSearchParams(window.location.hash.replace(/^#/, ''))
-    const providerError = searchParams.get('error_description') || hashParams.get('error_description')
-      || searchParams.get('error') || hashParams.get('error')
-    if (providerError) {
-      // La descripción del proveedor puede incluir datos de la cuenta; no enviarla a logs.
-      setErrorMsg('No pudimos completar el acceso con ese proveedor. Entra con tu correo y contraseña o inténtalo más tarde.')
-      return
-    }
+    // La descripción del proveedor puede incluir datos privados; nunca mostrarla ni registrarla.
+    if (providerError) return
 
     // Fallback: listen for auth state change in case the hash is processed AFTER mount
     // (common on Android Chrome WebView where OAuth token arrives asynchronously)
-    const { data: { subscription } } = supabase.auth.onAuthStateChange(async (event, session) => {
-      if (navigated) return
+    const { data: { subscription } } = supabase.auth.onAuthStateChange((event, session) => {
+      if (!active || navigated) return
       if ((event === 'SIGNED_IN' || event === 'TOKEN_REFRESHED') && session?.user) {
-        navigated = true
-        subscription.unsubscribe()
-        console.log('[LovIA] AuthCallback: sesión recibida.')
+        const userId = session.user.id
+        // La consulta al perfil debe ocurrir fuera del callback de Supabase Auth.
+        setTimeout(() => {
+          if (!active || navigated) return
+          navigated = true
+          subscription.unsubscribe()
+          console.log('[LovIA] AuthCallback: sesión recibida.')
 
-        if (wantsAdmin(searchParams.get('next'))) {
-          navigate('/admin', { replace: true })
-          return
-        }
+          if (wantsAdmin(searchParams.get('next'))) {
+            navigate('/admin', { replace: true })
+            return
+          }
 
-        const { data: profile, error: profileError } = await supabase
-          .from('profiles')
-          .select('onboarding_completed')
-          .eq('id', session.user.id)
-          .maybeSingle()
-
-        if (profileError) {
-          setErrorMsg('Entraste a tu cuenta, pero no pudimos cargar tu perfil. Vuelve a intentarlo.')
-          return
-        }
-        const destination = profile?.onboarding_completed ? '/home' : '/onboarding'
-        navigate(destination, { replace: true })
+          void supabase.from('profiles').select('onboarding_completed').eq('id', userId).maybeSingle()
+            .then(({ data: profile, error: profileError }) => {
+              if (!active) return
+              if (profileError) {
+                setErrorMsg('Entraste a tu cuenta, pero no pudimos cargar tu perfil. Vuelve a intentarlo.')
+                return
+              }
+              navigate(profile?.onboarding_completed ? '/home' : '/onboarding', { replace: true })
+            })
+        }, 0)
       }
     })
 
@@ -128,12 +131,13 @@ export default function AuthCallbackPage() {
     finish()
 
     return () => {
+      active = false
       subscription.unsubscribe()
     }
-  }, [navigate, searchParams])
+  }, [navigate, searchParams, providerError])
 
 
-  if (errorMsg) {
+  if (visibleError) {
     return (
       <div style={{
         display: 'flex',
@@ -148,7 +152,7 @@ export default function AuthCallbackPage() {
         textAlign: 'center',
       }}>
         <AlertCircle size={40} color="var(--love-rose, #FF4D6D)" />
-        <p style={{ fontSize: '1rem', color: 'var(--text-secondary, #aaa)' }}>{errorMsg}</p>
+        <p style={{ fontSize: '1rem', color: 'var(--text-secondary, #aaa)' }}>{visibleError}</p>
         <button
           onClick={() => navigate('/login', { replace: true })}
           style={{

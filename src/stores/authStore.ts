@@ -98,7 +98,7 @@ export const useAuthStore = create<AuthState>((set, get) => ({
             }
 
             if (!globalAuthSubscription) {
-                const { data: { subscription } } = supabase.auth.onAuthStateChange(async (event, session) => {
+                const { data: { subscription } } = supabase.auth.onAuthStateChange((event, session) => {
                     console.log('[LovIA] onAuthStateChange:', event)
                     if (get().user?.id !== session?.user?.id) {
                         bindPrivateState(session?.user?.id ?? null)
@@ -111,8 +111,14 @@ export const useAuthStore = create<AuthState>((set, get) => ({
                     })
 
                 if (session?.user) {
-                    get().loadProfile()
-                    loadServerData()
+                    const ownerId = session.user.id
+                    // Las llamadas a Supabase dentro de onAuthStateChange pueden
+                    // bloquear el intercambio de código OAuth. Ejecutarlas después.
+                    setTimeout(() => {
+                        if (get().user?.id !== ownerId) return
+                        void get().loadProfile()
+                        void loadServerData()
+                    }, 0)
                 } else {
                     set({ profile: null })
                 }

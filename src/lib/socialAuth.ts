@@ -16,7 +16,7 @@
  * - Deep link `lovia://auth/callback` configurado en Xcode (Info.plist) y Android (AndroidManifest)
  */
 import { supabase } from './supabase'
-import { isNative } from './platform'
+import { isIOS, isNative } from './platform'
 
 // ── URL Helpers ──────────────────────────────────────────────────────────────
 
@@ -69,7 +69,7 @@ export async function signInWithGoogle(): Promise<void> {
 // ── Apple Login ──────────────────────────────────────────────────────────────
 
 export async function signInWithApple(): Promise<void> {
-  if (isNative()) {
+  if (isIOS()) {
     try {
       const { AppleSignIn, SignInScope } = await import('@capawesome/capacitor-apple-sign-in')
       
@@ -103,10 +103,20 @@ export async function signInWithApple(): Promise<void> {
 
       if (error) throw error
       console.log('[Apple Sign In] Sesión nativa establecida.')
-    } catch (err: any) {
+    } catch (err: unknown) {
       console.error('[Apple Sign In] Error en el flujo nativo.')
       throw err
     }
+  } else if (isNative()) {
+    // El plugin necesita un Service ID y initialize() en Android. El flujo
+    // OAuth ya configurado en Supabase usa el mismo retorno nativo que Google.
+    const { data, error } = await supabase.auth.signInWithOAuth({
+      provider: 'apple',
+      options: { redirectTo: NATIVE_REDIRECT, skipBrowserRedirect: true },
+    })
+    if (error) throw error
+    if (!data?.url) throw new Error('No se recibió la URL de acceso con Apple.')
+    await openBrowserNative(data.url)
   } else {
     // Modo web: flujo normal
     const { error } = await supabase.auth.signInWithOAuth({
