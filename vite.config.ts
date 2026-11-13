@@ -33,7 +33,8 @@ export default defineConfig(({ mode }) => {
       // El PWA (Service Worker) debe estar DESACTIVADO en builds nativos de Capacitor.
       // En builds web normales, se habilita normalmente.
       ...(!isCapacitor ? [VitePWA({
-        registerType: 'autoUpdate',
+        registerType: 'prompt',
+        injectRegister: null,
         includeAssets: ['favicon.svg', 'robots.txt', 'icons/*.png'],
         manifest: {
           name: 'LovIA! — Parejas de Calidad',

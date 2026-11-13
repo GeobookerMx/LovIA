@@ -1,40 +1,38 @@
-import { useState, useEffect } from 'react'
+import { useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { ArrowLeft, Save, User, MapPin } from 'lucide-react'
 import { useAuthStore } from '../../stores/authStore'
+import type { PublicProfile } from '../../lib/database.types'
 import { trackEvent } from '../../lib/analytics'
 import './ProfilePages.css'
 
 export default function EditProfilePage() {
+    const profile = useAuthStore(state => state.profile)
+    return <EditProfileForm key={profile?.id ?? 'pending'} profile={profile} />
+}
+
+function EditProfileForm({ profile }: { profile: PublicProfile | null }) {
     const navigate = useNavigate()
-    const { profile, updateProfile } = useAuthStore()
+    const updateProfile = useAuthStore(state => state.updateProfile)
     
     const [formData, setFormData] = useState<{
         alias: string
         city: string
         full_name?: string
-    }>({
-        alias: '',
-        city: '',
-        full_name: ''
-    })
+    }>(() => ({
+        alias: profile?.alias || '',
+        city: profile?.city || '',
+        full_name: profile?.full_name || '',
+    }))
     const [isSaving, setIsSaving] = useState(false)
     const [successMsg, setSuccessMsg] = useState('')
-
-    useEffect(() => {
-        if (profile) {
-            setFormData({
-                alias: (profile as any).alias || '',
-                city: (profile as any).city || '',
-                full_name: (profile as any).full_name || '',
-            })
-        }
-    }, [profile])
+    const [saveError, setSaveError] = useState('')
 
     const handleSave = async (e: React.FormEvent) => {
         e.preventDefault()
         setIsSaving(true)
         setSuccessMsg('')
+        setSaveError('')
 
         // Guardar todos los campos editables del perfil
         const updates = {
@@ -52,7 +50,7 @@ export default function EditProfilePage() {
             setTimeout(() => navigate('/profile'), 1500)
         } else {
             trackEvent('error_profile_save', { error })
-            alert('Error al guardar: ' + error)
+            setSaveError('No pudimos guardar tu perfil. Revisa tu conexión e inténtalo de nuevo.')
         }
     }
 
@@ -118,6 +116,7 @@ export default function EditProfilePage() {
                         {successMsg}
                     </div>
                 )}
+                {saveError && <p role="alert" style={{ color: 'var(--danger)', textAlign: 'center' }}>{saveError}</p>}
 
                 <button 
                     type="submit" 

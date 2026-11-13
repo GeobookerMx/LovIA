@@ -1,34 +1,31 @@
 import { useEffect, useState } from 'react'
 
 export default function OfflineBanner() {
-  const [isOnline, setIsOnline] = useState(navigator.onLine)
-  const [wasOffline, setWasOffline] = useState(false)
-  const [showReconnected, setShowReconnected] = useState(false)
+  const [status, setStatus] = useState<'online' | 'offline' | 'reconnected'>(navigator.onLine ? 'online' : 'offline')
 
   useEffect(() => {
+    let timer: ReturnType<typeof setTimeout> | null = null
     const handleOffline = () => {
-      setIsOnline(false)
-      setWasOffline(true)
-      setShowReconnected(false)
+      if (timer) clearTimeout(timer)
+      setStatus('offline')
     }
 
     const handleOnline = () => {
-      setIsOnline(true)
-      if (wasOffline) {
-        setShowReconnected(true)
-        setTimeout(() => setShowReconnected(false), 3000)
-      }
+      if (timer) clearTimeout(timer)
+      setStatus(previous => previous === 'offline' ? 'reconnected' : 'online')
+      timer = setTimeout(() => setStatus('online'), 3000)
     }
 
     window.addEventListener('offline', handleOffline)
     window.addEventListener('online', handleOnline)
     return () => {
+      if (timer) clearTimeout(timer)
       window.removeEventListener('offline', handleOffline)
       window.removeEventListener('online', handleOnline)
     }
-  }, [wasOffline])
+  }, [])
 
-  if (isOnline && !showReconnected) return null
+  if (status === 'online') return null
 
   return (
     <div
@@ -36,7 +33,7 @@ export default function OfflineBanner() {
       aria-live="polite"
       style={{
         position: 'fixed',
-        top: 0,
+        top: 'env(safe-area-inset-top, 0px)',
         left: 0,
         right: 0,
         zIndex: 9999,
@@ -47,13 +44,13 @@ export default function OfflineBanner() {
         padding: '10px 16px',
         fontSize: '14px',
         fontWeight: 500,
-        backgroundColor: isOnline ? '#166534' : '#7f1d1d',
+        backgroundColor: status === 'reconnected' ? '#166534' : '#7f1d1d',
         color: '#fff',
         boxShadow: '0 2px 8px rgba(0,0,0,0.4)',
         transition: 'background-color 0.3s ease',
       }}
     >
-      {isOnline ? (
+      {status === 'reconnected' ? (
         <>
           <span style={{ fontSize: '16px' }}>✓</span>
           Conexión restaurada

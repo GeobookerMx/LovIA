@@ -71,6 +71,7 @@ export interface Database {
 export interface PublicProfile {
     id: string
     alias: string
+    full_name?: string | null
     avatar_url: string
     age: number | null
     gender: string
@@ -82,7 +83,7 @@ export interface PublicProfile {
     visibility_mode: 'classic' | 'gradual' | 'essence'
     onboarding_completed: boolean
     attachment_style?: string | null
-    ocean_scores?: any | null
+    ocean_scores?: Record<string, number> | null
     core_values?: string[] | null
     assessments_done?: string[] | null
     spark_streak?: number | null

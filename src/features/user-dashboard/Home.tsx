@@ -1,9 +1,9 @@
 import { useEffect, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
-import { ArrowRight, BookOpen, BookHeart, Heart, Share2, Sparkles, UserRound, Wallet, X } from 'lucide-react'
+import { ArrowRight, BookOpen, BookHeart, Heart, Share2, Sparkles, UserRound, Wallet, X, TrendingUp, Gift } from 'lucide-react'
 import { useAuthStore } from '../../stores/authStore'
 import { LOVIA_GOALS, readLoviaGoal, type LoviaGoal } from '../../lib/loviaGoals'
-import { mexicoCityDate } from '../../lib/campaignDates'
+import { mexicoCityDate, isChristmasCampaign } from '../../lib/campaignDates'
 import { supabase } from '../../lib/supabase'
 import ShareCard from '../../components/shared/ShareCard'
 import './Home.css'
@@ -136,6 +136,54 @@ export default function Home() {
         </div>
       </section>
 
+      {/* Tarjeta permanente de Economía de la relación — visible aunque el spotlight haya sido cerrado */}
+      <section className="home__panel home__panel--finance" aria-labelledby="home-finance-card-heading">
+        <div className="home__section-heading">
+          <TrendingUp size={24} aria-hidden="true" />
+          <div>
+            <span className="home__eyebrow">💰 Módulo</span>
+            <h2 id="home-finance-card-heading">Economía de la relación</h2>
+            <p>Claridad sobre dinero, metas y acuerdos. Cuatro sesiones breves, sin calificaciones.</p>
+          </div>
+        </div>
+        <button type="button" className="home__finance-card-cta" onClick={() => navigate('/guide/finance')}>
+          Explorar módulo <ArrowRight size={17} aria-hidden="true" />
+        </button>
+      </section>
+
+      {/* Tarjeta de temporada Navideña 2026 */}
+      {isChristmasCampaign() && (
+        <section className="home__panel" style={{
+          background: 'linear-gradient(135deg, rgba(30, 10, 45, 0.85) 0%, rgba(70, 15, 30, 0.75) 50%, rgba(15, 45, 25, 0.85) 100%)',
+          border: '1px solid rgba(253, 224, 71, 0.4)',
+          boxShadow: '0 8px 32px rgba(253, 224, 71, 0.1)'
+        }} aria-labelledby="home-xmas-heading">
+          <div className="home__section-heading">
+            <Gift size={24} style={{ color: '#FDE047' }} aria-hidden="true" />
+            <div>
+              <span className="home__eyebrow" style={{ color: '#FDE047' }}>🎄 Especial Fin de Año 2026</span>
+              <h2 id="home-xmas-heading" style={{ color: '#FFF' }}>Propósitos de pareja 2027</h2>
+              <p style={{ color: 'rgba(255,255,255,0.85)' }}>
+                Escribe tus deseos, límites sanos y metas afectivas para el año que viene.
+              </p>
+            </div>
+          </div>
+          <div className="home__reflection-actions" style={{ marginTop: '1rem' }}>
+            <button type="button" onClick={() => navigate('/profile/journal')} style={{
+              background: 'linear-gradient(135deg, #EAB308, #EF4444)',
+              color: '#FFF',
+              border: 'none',
+              fontWeight: 600
+            }}>
+              Escribir propósitos en Mi Diario ✨
+            </button>
+            <button type="button" onClick={() => navigate('/book')}>
+              Leer libro de Parejas 📖
+            </button>
+          </div>
+        </section>
+      )}
+
       <section className="home__panel" aria-labelledby="home-tools-heading">
         <div className="home__section-heading">
           <BookOpen size={24} aria-hidden="true" />
@@ -150,6 +198,7 @@ export default function Home() {
           <button type="button" onClick={() => navigate('/profile/journal')}><BookHeart size={20} /> Mi Diario <ArrowRight size={17} /></button>
           <button type="button" onClick={() => navigate('/profile/edit')}><UserRound size={20} /> Mi perfil <ArrowRight size={17} /></button>
           <button type="button" onClick={() => navigate('/matches')}><Heart size={20} /> Mis conexiones <ArrowRight size={17} /></button>
+          <button type="button" onClick={() => navigate('/profile/creator')}><UserRound size={20} /> Acerca del autor <ArrowRight size={17} /></button>
         </div>
       </section>
 

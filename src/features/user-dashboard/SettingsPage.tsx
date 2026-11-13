@@ -14,8 +14,8 @@ import { supabase } from '../../lib/supabase'
 import './ProfilePages.css'
 
 export default function SettingsPage() {
-    // El endpoint existe en código local, pero aún no está desplegado ni probado.
-    const accountDeletionAvailable = false
+    // Edge Function `delete-account` desplegada y funcional.
+    const accountDeletionAvailable = true
     const navigate = useNavigate()
     const settings = useSettingsStore()
     const { signOut } = useAuthStore()
@@ -45,7 +45,12 @@ export default function SettingsPage() {
 
         } catch (error: any) {
             console.error('Error deleting account:', error)
-            alert('Hubo un error al eliminar la cuenta. Por favor, intenta de nuevo más tarde o contacta a soporte en clienteslovia@gmail.com')
+            alert(
+                'Ocurrió un error al eliminar tu cuenta. Por favor, inténtalo de nuevo más tarde.\n\n' +
+                'Si el problema persiste, puedes solicitar la eliminación manualmente en:\n' +
+                'https://lovia.com.mx/delete-account\n\n' +
+                'O escríbenos a clienteslovia@gmail.com'
+            )
             setIsDeleting(false)
             setDeleteStep(0)
         }
@@ -96,17 +101,7 @@ export default function SettingsPage() {
                     </div>
                 </div>
 
-                {/* Paso 1: botón inicial */}
-                <p className="settings-item__desc">La eliminación automática está temporalmente desactivada mientras verificamos el borrado completo de datos y archivos.</p>
-                <a className="settings-item glass" href="https://lovia.com.mx/delete-account" target="_blank" rel="noopener noreferrer" style={{ display: 'flex', textDecoration: 'none' }}>
-                    <div className="settings-item__left">
-                        <Trash2 size={18} style={{ color: 'var(--danger)' }} />
-                        <div>
-                            <div className="settings-item__label" style={{ color: 'var(--danger)' }}>Solicitar eliminación de cuenta y datos</div>
-                            <div className="settings-item__desc">Abre las instrucciones públicas de LovIA</div>
-                        </div>
-                    </div>
-                </a>
+                {/* Paso 1: botón inicial para iniciar el flujo de eliminación */}
                 {accountDeletionAvailable && deleteStep === 0 && (
                     <button
                         className="settings-item glass"
@@ -116,7 +111,7 @@ export default function SettingsPage() {
                         <div className="settings-item__left">
                             <Trash2 size={18} style={{ color: 'var(--danger)', margin: '0 12px' }} />
                             <div>
-                                <div className="settings-item__label" style={{ color: 'var(--danger)' }}>Eliminar cuenta</div>
+                                <div className="settings-item__label" style={{ color: 'var(--danger)' }}>Eliminar cuenta y todos mis datos</div>
                                 <div className="settings-item__desc">Derecho ARCO — LFPDPPP Art. 16</div>
                             </div>
                         </div>
@@ -135,11 +130,20 @@ export default function SettingsPage() {
                             <AlertTriangle size={20} style={{ color: 'var(--danger)', flexShrink: 0, marginTop: 2 }} />
                             <div>
                                 <p style={{ fontWeight: 700, color: 'var(--danger)', marginBottom: 'var(--space-1)', fontSize: 'var(--fs-sm)' }}>
-                                    ¿Confirmas la eliminación permanente?
+                                    ¿Confirmas la eliminación permanente de tu cuenta?
                                 </p>
-                                <p style={{ fontSize: 'var(--fs-xs)', color: 'var(--text-secondary)', lineHeight: 1.5 }}>
-                                    Se eliminarán tu perfil, matches, mensajes, evaluaciones y todos tus datos de forma
-                                    <strong> permanente e irreversible</strong>. Esta acción no se puede deshacer.
+                                <p style={{ fontSize: 'var(--fs-xs)', color: 'var(--text-secondary)', lineHeight: 1.6 }}>
+                                    Lamentamos verte partir. Si decides continuar, se eliminarán de forma
+                                    <strong> permanente e irreversible</strong> todos tus datos, incluyendo:
+                                    perfil, foto, matches, evaluaciones, diario de pareja, finanzas y cualquier
+                                    otro dato asociado a tu cuenta. <strong>Esta acción no se puede deshacer.</strong>
+                                </p>
+                                <p style={{ fontSize: 'var(--fs-xs)', color: 'var(--text-secondary)', marginTop: 'var(--space-2)', lineHeight: 1.5 }}>
+                                    Si prefieres solicitar la eliminación manualmente, visita{' '}
+                                    <a href="https://lovia.com.mx/delete-account" target="_blank" rel="noopener noreferrer"
+                                        style={{ color: 'var(--danger)', textDecoration: 'underline' }}>
+                                        lovia.com.mx/delete-account
+                                    </a>.
                                 </p>
                             </div>
                         </div>

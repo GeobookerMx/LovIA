@@ -19,10 +19,12 @@
 
 .tab-bar__item {
     display: flex;
+    flex: 1 1 0;
+    min-width: 0;
     flex-direction: column;
     align-items: center;
     gap: 2px;
-    padding: var(--space-2) var(--space-3);
+    padding: var(--space-2) var(--space-1);
     color: var(--text-tertiary);
     text-decoration: none;
     transition: color var(--duration-fast) var(--ease-out),
@@ -50,9 +52,10 @@
 }
 
 .tab-bar__label {
-    font-size: var(--fs-xs);
+    font-size: clamp(0.65rem, 2.5vw, var(--fs-xs));
     font-weight: var(--fw-medium);
     line-height: 1;
+    white-space: nowrap;
 }
 
 .tab-bar__icon {

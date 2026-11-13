@@ -1,6 +1,7 @@
 import { Component } from 'react';
 import type { ErrorInfo, ReactNode } from 'react';
 import { AlertTriangle, RefreshCcw } from 'lucide-react';
+import { isNative } from '../../lib/platform';
 
 interface Props {
   children?: ReactNode;
@@ -29,7 +30,7 @@ export class ErrorBoundary extends Component<Props, State> {
 
   private handleReset = () => {
     this.setState({ hasError: false, error: undefined });
-    window.location.href = '/'; // Regresar al inicio seguro
+    window.location.replace(isNative() ? '/#/' : '/');
   };
 
   public render() {
@@ -44,14 +45,14 @@ export class ErrorBoundary extends Component<Props, State> {
             <AlertTriangle size={64} style={styles.icon} />
             <h1 style={styles.title}>Ups, algo salió mal</h1>
             <p style={styles.subtitle}>
-              Ocurrió un error inesperado en la aplicación. Nuestros ingenieros ya han sido notificados.
+              Ocurrió un error inesperado. Puedes reiniciar LovIA y volver a intentarlo.
             </p>
-            {this.state.error && (
+            {import.meta.env.DEV && this.state.error && (
               <pre style={styles.errorDetails}>
                 {this.state.error.message}
               </pre>
             )}
-            <button onClick={this.handleReset} style={styles.button}>
+            <button type="button" onClick={this.handleReset} style={styles.button}>
               <RefreshCcw size={18} style={{ marginRight: 8 }} />
               Volver al inicio
             </button>

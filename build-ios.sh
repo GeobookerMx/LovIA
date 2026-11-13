@@ -1,37 +1,37 @@
-#!/bin/bash
-# =============================================================
-# LovIA — Script Automático de Build para iOS
-# Uso en la iMac: cd "~/APP PAREJAS" && bash build-ios.sh
-# =============================================================
-set -e
+#!/usr/bin/env bash
+# Prepara los recursos web nativos y abre el proyecto iOS existente en Xcode.
+# Ejecutar en la iMac desde el repositorio: bash build-ios.sh
+set -euo pipefail
 
-echo ""
-echo "🚀 [LovIA] Iniciando proceso de build para iOS..."
-echo "====================================================="
+cd "$(dirname "$0")"
 
-echo "1/4 📥 Descargando últimos cambios de GitHub..."
-git pull origin main
+if [[ ! -d ios/App ]]; then
+  echo "No se encontro ios/App. Recupera el proyecto iOS de la iMac antes de sincronizar." >&2
+  echo "Si esta es una instalacion nueva, usa 'npx cap add ios' y configura firma y enlaces nativos en Xcode." >&2
+  exit 1
+fi
 
-echo "2/4 📦 Instalando dependencias (por si hay nuevas)..."
-npm install --legacy-peer-deps
+for tool in node npm xcodebuild; do
+  if ! command -v "$tool" >/dev/null 2>&1; then
+    echo "Falta $tool en la iMac." >&2
+    exit 1
+  fi
+done
 
-echo "3/4 🏗️ Compilando el proyecto Vite..."
-npm run build
+echo "Instalando las dependencias fijadas en package-lock.json..."
+npm ci --legacy-peer-deps
 
-echo "4/4 🔄 Sincronizando con Capacitor iOS..."
+echo "Compilando la version nativa de produccion..."
+npm run build:native
+
+VITE_SUPABASE_EXPECTED_REF=nbpidjpkanwynlhdxowx npm run verify:env
+if [[ -e dist/sw.js || -e dist/registerSW.js ]]; then
+  echo "El build nativo contiene archivos PWA. Se detuvo la sincronizacion." >&2
+  exit 1
+fi
+
+echo "Sincronizando los recursos con iOS..."
 npx cap sync ios
 
-echo "====================================================="
-echo "✅ ¡Build completado con éxito!"
-echo ""
-echo "Aperturando Xcode..."
+echo "Abriendo Xcode para revisar firma, version y generar el Archive..."
 npx cap open ios
-
-echo ""
-echo "⚠️ PASOS FINALES EN XCODE:"
-echo "1. Selecciona 'Any iOS Device (arm64)'."
-echo "2. Aumenta el 'Build Number'."
-echo "3. En el menú, selecciona: Product → Clean Build Folder (CRÍTICO)."
-echo "4. En el menú, selecciona: Product → Archive."
-echo "5. Distribuye a App Store Connect."
-echo "====================================================="

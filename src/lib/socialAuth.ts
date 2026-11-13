@@ -53,9 +53,8 @@ export async function signInWithGoogle(): Promise<void> {
       },
     })
     if (error) throw error
-    if (data?.url) {
-      await openBrowserNative(data.url)
-    }
+    if (!data?.url) throw new Error('No se recibió la URL de acceso con Google.')
+    await openBrowserNative(data.url)
   } else {
     // Modo web: flujo normal
     const { error } = await supabase.auth.signInWithOAuth({

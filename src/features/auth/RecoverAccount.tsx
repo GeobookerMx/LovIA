@@ -30,20 +30,33 @@ export default function RecoverAccount() {
       setBusy(false)
       return
     }
-    const { error } = await supabase.auth.resetPasswordForEmail(email.trim(), {
-      redirectTo: `${origin}/recover?mode=reset`,
-    })
-    setMessage(error ? 'No pudimos enviar el enlace. Inténtalo de nuevo.' : 'Si la cuenta existe, recibirás un enlace de recuperación. Revisa también spam.')
-    setBusy(false)
+    try {
+      const { error } = await supabase.auth.resetPasswordForEmail(email.trim(), {
+        redirectTo: `${origin}/recover?mode=reset`,
+      })
+      setMessage(error ? 'No pudimos enviar el enlace. Inténtalo de nuevo.' : 'Si la cuenta existe, recibirás un enlace de recuperación. Revisa también spam.')
+    } catch {
+      setMessage('No pudimos conectar con el servicio. Revisa tu conexión e inténtalo de nuevo.')
+    } finally {
+      setBusy(false)
+    }
   }
 
   const updatePassword = async (event: React.FormEvent) => {
     event.preventDefault()
     setBusy(true)
-    const { error } = await supabase.auth.updateUser({ password })
-    setMessage(error ? 'El enlace expiró o la contraseña no pudo actualizarse. Solicita otro enlace.' : 'Contraseña actualizada. Ya puedes iniciar sesión.')
-    if (!error) setPassword('')
-    setBusy(false)
+    try {
+      const { error } = await supabase.auth.updateUser({ password })
+      setMessage(error ? 'El enlace expiró o la contraseña no pudo actualizarse. Solicita otro enlace.' : 'Contraseña actualizada. Ya puedes iniciar sesión.')
+      if (!error) {
+        setPassword('')
+        setCanReset(false)
+      }
+    } catch {
+      setMessage('No pudimos conectar con el servicio. Revisa tu conexión e inténtalo de nuevo.')
+    } finally {
+      setBusy(false)
+    }
   }
 
   return (

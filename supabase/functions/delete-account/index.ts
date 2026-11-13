@@ -42,7 +42,22 @@ serve(async (req) => {
       }
     )
 
-    // 3. Delete the user (this cascades to profiles, matches, etc. per DB setup)
+    // 3. Delete the user via Admin API (requires SERVICE_ROLE key — never use anon key here).
+    //    Supabase Auth cascade: deleting auth.users will cascade to auth-linked rows.
+    //    Make sure the following tables have ON DELETE CASCADE on their user_id FK:
+    //
+    // TODO (developer): Verify CASCADE is configured for each of these tables:
+    //   - public.profiles         → user_id FK → auth.users.id
+    //   - public.matches          → user_id / partner_id FK
+    //   - public.evaluaciones     → user_id FK
+    //   - public.diary_entries    → user_id FK  (diario de pareja)
+    //   - public.finances         → user_id FK
+    //   - storage.objects         → (photos) must be deleted manually or via storage policy;
+    //                               Supabase Storage does NOT auto-delete on user delete.
+    //                               Consider calling supabaseAdmin.storage.from('avatars').remove([...])
+    //                               before deleting the user, or set up a DB trigger.
+    //
+    // TODO (developer): Confirm RLS policies won't block admin deletes on the above tables.
     console.log(`Deleting user: ${user.id}`)
     const { error: deleteError } = await supabaseAdmin.auth.admin.deleteUser(user.id)
     

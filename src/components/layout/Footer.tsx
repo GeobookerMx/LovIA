@@ -1,5 +1,5 @@
 import { Link } from 'react-router-dom'
-import { Mail, ShieldCheck } from 'lucide-react'
+import { Mail } from 'lucide-react'
 import './Footer.css'
 
 export default function Footer() {
@@ -17,12 +17,8 @@ export default function Footer() {
             </a>
 
             <div className="app-footer__links">
-                <Link to="/profile/legal" className="app-footer__link">Aviso de Privacidad</Link>
-                <Link to="/profile/legal" className="app-footer__link">Términos de Uso</Link>
-                <Link to="/profile/legal" className="app-footer__link">
-                    <ShieldCheck size={14} style={{ display: 'inline', verticalAlign: 'text-bottom', marginRight: '4px' }} />
-                    Desarrollo Seguro
-                </Link>
+                <Link to="/privacy" className="app-footer__link">Aviso de privacidad</Link>
+                <Link to="/profile/legal" className="app-footer__link">Ayuda y seguridad</Link>
             </div>
 
             <span className="app-footer__copyright">

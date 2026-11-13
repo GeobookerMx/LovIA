@@ -97,6 +97,8 @@ export default function Register() {
             setNeedsEmailConfirmation(result.needsEmailConfirmation)
             setSuccess(true)
             if (!result.needsEmailConfirmation) setTimeout(() => navigate('/onboarding'), 1500)
+        } catch {
+            setError('No pudimos crear tu cuenta. Revisa tu conexión e inténtalo de nuevo.')
         } finally {
             setSubmitting(false)
         }

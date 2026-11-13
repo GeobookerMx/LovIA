@@ -15,4 +15,9 @@ export function isHalloweenCampaign(date: Date = new Date()): boolean {
   return day >= '2026-10-19' && day <= '2026-11-01'
 }
 
+export function isChristmasCampaign(date: Date = new Date()): boolean {
+  const day = mexicoCityDate(date)
+  return (day >= '2026-11-12' && day <= '2027-01-06')
+}
+
 export const FREE_ACCESS_END_LABEL = '31 de enero de 2027'

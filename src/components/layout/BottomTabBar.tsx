@@ -15,11 +15,19 @@ const tabs = [
     { path: '/profile', icon: User, label: 'Perfil' },
 ]
 
+function activeSection(path: string): string {
+    if (/^\/(modules|guide|book|assessment|evaluations)(\/|$)/.test(path)) return '/modules'
+    if (/^\/(profile|verification|selfie-verification|crisis)(\/|$)/.test(path)) return '/profile'
+    if (/^\/(home|spark|community)(\/|$)/.test(path)) return '/home'
+    if (/^\/matches(\/|$)/.test(path)) return '/matches'
+    return path
+}
+
 export default function BottomTabBar({ currentPath }: Props) {
     return (
         <nav className="tab-bar" role="navigation" aria-label="Navegación principal">
             {tabs.map(({ path, icon: Icon, label }) => {
-                const isActive = currentPath === path || currentPath.startsWith(`${path}/`)
+                const isActive = activeSection(currentPath) === path
                 return (
                     <Link
                         key={path}

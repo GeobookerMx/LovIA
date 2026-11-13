@@ -6,8 +6,8 @@ import { useAuthStore } from './stores/authStore'
 import { Loader2 } from 'lucide-react'
 import ErrorBoundary from './components/shared/ErrorBoundary'
 import OfflineBanner from './components/shared/OfflineBanner'
+import PwaUpdatePrompt from './components/shared/PwaUpdatePrompt'
 import SeasonalBanner from './components/shared/SeasonalBanner'
-import { isRadarAvailable } from './lib/discoveryAvailability'
 
 // ─── Eagerly loaded (critical path) ───
 import ProtectedRoute from './components/auth/ProtectedRoute'
@@ -37,7 +37,6 @@ const SelfieVerification = lazy(() => import('./features/verification/SelfieVeri
 const AttachmentQuiz = lazy(() => import('./features/evaluations/AttachmentQuiz'))
 const BigFiveQuiz = lazy(() => import('./features/evaluations/BigFiveQuiz'))
 const ValuesSelector = lazy(() => import('./features/evaluations/ValuesSelector'))
-const RadarMap = lazy(() => import('./features/user-dashboard/RadarMap'))
 const SafeRadarGate = lazy(() => import('./features/user-dashboard/SafeRadarGate'))
 
 // ─── Lazy loaded: Profile & Charts ───
@@ -178,7 +177,7 @@ function AppRoutes() {
             {/* User Dashboard (with tab bar) */}
             <Route element={<UserLayout />}>
               <Route path="/home" element={<Home />} />
-              <Route path="/radar" element={isRadarAvailable ? <RadarMap /> : <SafeRadarGate />} />
+              <Route path="/radar" element={<SafeRadarGate />} />
               <Route path="/matches" element={<MatchesList />} />
               <Route path="/matches/:id" element={<MatchDetail />} />
               <Route path="/matches/:id/date-readiness" element={<DateReadinessCheck />} />
@@ -258,6 +257,7 @@ function App() {
     <QueryClientProvider client={queryClient}>
       <Router>
         <OfflineBanner />
+        {!isNative && <PwaUpdatePrompt />}
         {import.meta.env.VITE_APP_ENV !== 'production' && (
           <div role="status" style={{ position: 'fixed', top: 0, right: 0, zIndex: 10000, padding: '4px 10px', background: '#aa5b00', color: '#fff', fontSize: 12 }}>
             Entorno de pruebas: {import.meta.env.VITE_APP_ENV}

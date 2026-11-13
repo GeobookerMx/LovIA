@@ -21,11 +21,21 @@ interface AuthState {
     signOut: () => Promise<void>
     acceptLegal: () => void
     loadProfile: () => Promise<void>
-    updateProfile: (updates: Partial<PublicProfile>) => Promise<{ error: string | null }>
+    updateProfile: (updates: EditableProfilePatch) => Promise<{ error: string | null }>
 }
 
+type EditableProfilePatch = Partial<Pick<PublicProfile,
+    'alias' | 'full_name' | 'city' | 'avatar_url' | 'visibility_mode' |
+    'attachment_style' | 'ocean_scores' | 'core_values' | 'onboarding_completed'
+>>
+
+const editableProfileFields = [
+    'alias', 'full_name', 'city', 'avatar_url', 'visibility_mode',
+    'attachment_style', 'ocean_scores', 'core_values', 'onboarding_completed',
+] as const
+
 async function loadServerData() {
-    await Promise.all([
+    await Promise.allSettled([
         useEvaluationStore.getState().loadFromServer(),
         useSubscriptionStore.getState().loadFromServer(),
         useCheckInStore.getState().loadFromServer(),
@@ -134,6 +144,7 @@ export const useAuthStore = create<AuthState>((set, get) => ({
 
     signUp: async (email, password, name, consent) => {
         set({ loading: true })
+        try {
         const { data, error } = await supabase.auth.signUp({
             email,
             password,
@@ -149,25 +160,30 @@ export const useAuthStore = create<AuthState>((set, get) => ({
                 },
             },
         })
-        set({ loading: false })
         if (error) return { error: error.message, needsEmailConfirmation: false }
         return { error: null, needsEmailConfirmation: !data.session }
+        } finally {
+            set({ loading: false })
+        }
     },
 
     signIn: async (email, password) => {
         set({ loading: true })
+        try {
         const { data, error } = await supabase.auth.signInWithPassword({
             email,
             password,
         })
-        set({ loading: false })
         if (error) return { error: error.message }
         set({ user: data.user, session: data.session, legalAccepted: true })
         // ✅ Load profile and server data immediately after sign-in
         // (don't wait for the async onAuthStateChange event)
-        get().loadProfile()
-        loadServerData()
+        void get().loadProfile()
+        void loadServerData()
         return { error: null }
+        } finally {
+            set({ loading: false })
+        }
     },
 
     signOut: async () => {
@@ -211,11 +227,19 @@ export const useAuthStore = create<AuthState>((set, get) => ({
             const { data: { user } } = await supabase.auth.getUser()
             if (!user) return { error: 'No user logged in' }
 
-            // Cambiamos a upsert para evitar fallos si la fila no existe en la BD
+            // Aceptar solo campos editables; las columnas privilegiadas se protegen
+            // además con permisos y triggers de base de datos.
+            const allowedUpdates = Object.fromEntries(
+                editableProfileFields
+                    .filter(field => updates[field] !== undefined)
+                    .map(field => [field, updates[field]])
+            )
+            if (Object.keys(allowedUpdates).length === 0) return { error: 'No hay cambios de perfil válidos.' }
+
             const { data, error } = await supabase
                 .from('profiles')
                 .update({
-                    ...updates,
+                    ...allowedUpdates,
                     updated_at: new Date().toISOString()
                 })
                 .eq('id', user.id)

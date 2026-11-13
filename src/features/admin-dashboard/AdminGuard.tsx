@@ -2,18 +2,30 @@ import { useEffect, useState } from 'react'
 import { Outlet } from 'react-router-dom'
 import { supabase } from '../../lib/supabase'
 import { Shield, LogIn, AlertTriangle, Loader } from 'lucide-react'
+import { signInWithGoogle } from '../../lib/socialAuth'
 
 type State = 'loading' | 'allowed' | 'denied' | 'unavailable' | 'unauthenticated'
 
 export default function AdminGuard() {
   const [state, setState] = useState<State>('loading')
   const [userEmail, setUserEmail] = useState<string | null>(null)
+  const [authMessage, setAuthMessage] = useState<string | null>(null)
+  const [authBusy, setAuthBusy] = useState(false)
 
   useEffect(() => {
     let active = true
     const check = async () => {
       setState('loading')
-      const { data: { user }, error: authError } = await supabase.auth.getUser()
+      let user
+      let authError
+      try {
+        const result = await supabase.auth.getUser()
+        user = result.data.user
+        authError = result.error
+      } catch {
+        if (active) setState('unavailable')
+        return
+      }
       if (!active) return
       if (authError || !user) {
         setState('unauthenticated')
@@ -21,15 +33,21 @@ export default function AdminGuard() {
       }
 
       setUserEmail(user.email ?? null)
-      const { data: allowed, error } = await supabase.rpc('is_admin')
-      if (active) setState(error ? 'unavailable' : allowed === true ? 'allowed' : 'denied')
+      try {
+        const { data: allowed, error } = await supabase.rpc('is_admin')
+        if (active) setState(error ? 'unavailable' : allowed === true ? 'allowed' : 'denied')
+      } catch {
+        if (active) setState('unavailable')
+      }
     }
 
     void check()
+    let refreshTimer: ReturnType<typeof setTimeout> | null = null
     const { data: { subscription } } = supabase.auth.onAuthStateChange(() => {
-      void check()
+      if (refreshTimer) clearTimeout(refreshTimer)
+      refreshTimer = setTimeout(() => { if (active) void check() }, 0)
     })
-    return () => { active = false; subscription.unsubscribe() }
+    return () => { active = false; if (refreshTimer) clearTimeout(refreshTimer); subscription.unsubscribe() }
   }, [])
 
   // ── Loading ────────────────────────────────────────────────────────────────
@@ -48,14 +66,21 @@ export default function AdminGuard() {
         <Shield size={48} color="#FF4D6D" />
         <h1 style={styles.title}>Panel de Administración</h1>
         <p style={styles.subtitle}>Debes iniciar sesión para continuar</p>
+        {authMessage && <p role="alert" style={styles.subtitle}>{authMessage}</p>}
         <button
           style={styles.btn}
+          disabled={authBusy}
           onClick={async () => {
+            setAuthBusy(true)
+            setAuthMessage(null)
             try { sessionStorage.setItem('lovia_admin_next', '1') } catch { /* sin storage */ }
-            await supabase.auth.signInWithOAuth({
-              provider: 'google',
-              options: { redirectTo: `${window.location.origin}/auth/callback` }
-            })
+            try {
+              await signInWithGoogle()
+            } catch {
+              setAuthMessage('No pudimos iniciar sesión con Google. Inténtalo de nuevo.')
+            } finally {
+              setAuthBusy(false)
+            }
           }}
         >
           <LogIn size={18} />
@@ -85,11 +110,15 @@ export default function AdminGuard() {
         <p style={styles.subtitle}>
           La cuenta <strong style={{ color: '#FF4D6D' }}>{userEmail}</strong> no tiene permisos de administrador.
         </p>
+        {authMessage && <p role="alert" style={styles.subtitle}>{authMessage}</p>}
         <button
           style={{ ...styles.btn, background: 'rgba(255,255,255,0.08)', color: '#ccc' }}
           onClick={async () => {
-            await supabase.auth.signOut()
-            window.location.href = '/admin'
+            try {
+              await supabase.auth.signOut()
+            } catch {
+              setAuthMessage('No pudimos cerrar la sesión. Inténtalo de nuevo.')
+            }
           }}
         >
           Cambiar cuenta
