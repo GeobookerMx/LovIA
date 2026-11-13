@@ -1,85 +1,38 @@
-import { serve } from 'https://deno.land/std@0.177.0/http/server.ts'
-import { createClient } from 'https://esm.sh/@supabase/supabase-js@2.39.3'
+// Compatibility endpoint: initiates a tracked deletion request; never claims deletion.
+// The app calls the same RPC directly, so this function is not a deploy prerequisite.
+import { createClient } from 'https://esm.sh/@supabase/supabase-js@2.97.0'
 
 const corsHeaders = {
   'Access-Control-Allow-Origin': '*',
   'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',
+  'Access-Control-Allow-Methods': 'POST, OPTIONS',
 }
+const json = (body: unknown, status: number) => new Response(JSON.stringify(body), {
+  status, headers: { ...corsHeaders, 'Content-Type': 'application/json', 'Cache-Control': 'no-store' },
+})
 
-serve(async (req) => {
-  if (req.method === 'OPTIONS') {
-    return new Response('ok', { headers: corsHeaders })
-  }
-
+Deno.serve(async (req: Request) => {
+  if (req.method === 'OPTIONS') return new Response('ok', { headers: corsHeaders })
+  if (req.method !== 'POST') return json({ error: 'method_not_allowed' }, 405)
+  const authorization = req.headers.get('Authorization')
+  if (!authorization?.startsWith('Bearer ')) return json({ error: 'authentication_required' }, 401)
+  const url = Deno.env.get('SUPABASE_URL')
+  const key = Deno.env.get('SUPABASE_ANON_KEY')
+  if (!url || !key) return json({ error: 'service_unavailable' }, 503)
   try {
-    // 1. Validate auth token
-    const authHeader = req.headers.get('Authorization')
-    if (!authHeader) {
-      throw new Error('No Authorization header provided')
-    }
-
-    const supabaseClient = createClient(
-      Deno.env.get('SUPABASE_URL') ?? '',
-      Deno.env.get('SUPABASE_ANON_KEY') ?? '',
-      { global: { headers: { Authorization: authHeader } } }
-    )
-
-    // Get the user making the request
-    const { data: { user }, error: userError } = await supabaseClient.auth.getUser()
-    if (userError || !user) {
-      throw new Error('Unauthorized or expired token')
-    }
-
-    // 2. Initialize admin client with SERVICE_ROLE key
-    const supabaseAdmin = createClient(
-      Deno.env.get('SUPABASE_URL') ?? '',
-      Deno.env.get('SUPABASE_SERVICE_ROLE_KEY') ?? '',
-      {
-        auth: {
-          autoRefreshToken: false,
-          persistSession: false
-        }
-      }
-    )
-
-    // 3. Delete the user via Admin API (requires SERVICE_ROLE key — never use anon key here).
-    //    Supabase Auth cascade: deleting auth.users will cascade to auth-linked rows.
-    //    Make sure the following tables have ON DELETE CASCADE on their user_id FK:
-    //
-    // TODO (developer): Verify CASCADE is configured for each of these tables:
-    //   - public.profiles         → user_id FK → auth.users.id
-    //   - public.matches          → user_id / partner_id FK
-    //   - public.evaluaciones     → user_id FK
-    //   - public.diary_entries    → user_id FK  (diario de pareja)
-    //   - public.finances         → user_id FK
-    //   - storage.objects         → (photos) must be deleted manually or via storage policy;
-    //                               Supabase Storage does NOT auto-delete on user delete.
-    //                               Consider calling supabaseAdmin.storage.from('avatars').remove([...])
-    //                               before deleting the user, or set up a DB trigger.
-    //
-    // TODO (developer): Confirm RLS policies won't block admin deletes on the above tables.
-    console.log(`Deleting user: ${user.id}`)
-    const { error: deleteError } = await supabaseAdmin.auth.admin.deleteUser(user.id)
-    
-    if (deleteError) {
-      throw deleteError
-    }
-
-    return new Response(
-      JSON.stringify({ success: true, message: 'User deleted successfully' }),
-      {
-        headers: { ...corsHeaders, 'Content-Type': 'application/json' },
-        status: 200,
-      }
-    )
-  } catch (error: any) {
-    console.error('Delete account error:', error.message)
-    return new Response(
-      JSON.stringify({ error: error.message }),
-      {
-        headers: { ...corsHeaders, 'Content-Type': 'application/json' },
-        status: 400,
-      }
-    )
+    const client = createClient(url, key, {
+      global: { headers: { Authorization: authorization } },
+      auth: { persistSession: false, autoRefreshToken: false },
+    })
+    const { data: { user }, error: authError } = await client.auth.getUser()
+    if (authError || !user) return json({ error: 'authentication_required' }, 401)
+    let body: { confirmation?: unknown }
+    try { body = await req.json() } catch { return json({ error: 'invalid_confirmation' }, 422) }
+    if (body?.confirmation !== 'ELIMINAR') return json({ error: 'invalid_confirmation' }, 422)
+    const { data, error } = await client.rpc('request_account_deletion', { p_confirmation: 'ELIMINAR' })
+    if (error || !data || !['pending', 'processing'].includes(data.status)) return json({ error: 'request_not_confirmed' }, 503)
+    return json({ ...data, deleted: false }, 202)
+  } catch {
+    return json({ error: 'request_not_confirmed' }, 503)
   }
 })

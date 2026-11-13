@@ -18,6 +18,7 @@ const AVAILABLE_TAGS = ['Agradecido/a', 'Ansioso/a', 'Feliz', 'Triste', 'Enamora
 export default function JournalPage() {
     const navigate = useNavigate()
     const userId = useAuthStore(state => state.user?.id)
+    const sensitiveAllowed = useAuthStore(state => state.sensitiveConsent === true)
     const requestGeneration = useRef(0)
     const pendingInsertId = useRef<string | null>(null)
     const savingRef = useRef(false)
@@ -92,7 +93,7 @@ export default function JournalPage() {
     }
 
     const handleSubmit = async () => {
-        if (!content.trim() || !userId || savingRef.current) return
+        if (!sensitiveAllowed || !content.trim() || !userId || savingRef.current) return
         savingRef.current = true
         setSaving(true)
         setError(null)
@@ -142,17 +143,18 @@ export default function JournalPage() {
             </div>
 
             <div className="journal-entry-form glass-strong animate-fade-in">
+                {!sensitiveAllowed && <p role="note">El guardado de nuevas reflexiones está desactivado por tu elección de privacidad. Puedes leer o borrar lo anterior, o <button type="button" onClick={() => navigate('/profile/settings')}>revisar tus preferencias</button>.</p>}
                 <div style={{ display: 'flex', alignItems: 'center', gap: 8, color: 'var(--love-rose)', marginBottom: 8 }}>
                     <BookHeart size={18} /><span style={{ fontWeight: 500 }}>¿Cómo te sientes hoy?</span>
                 </div>
                 <textarea placeholder="Escribe lo que sientes, un pensamiento del día, o algo que quieras recordar..."
-                    value={content} onChange={event => setContent(event.target.value)} disabled={saving} />
+                    value={content} onChange={event => setContent(event.target.value)} disabled={saving || !sensitiveAllowed} />
                 <div className="journal-tags">
                     {AVAILABLE_TAGS.map(tag => <button key={tag} type="button"
                         className={`journal-tag ${selectedTags.includes(tag) ? 'selected' : ''}`}
-                        onClick={() => toggleTag(tag)} disabled={saving}>{tag}</button>)}
+                        onClick={() => toggleTag(tag)} disabled={saving || !sensitiveAllowed}>{tag}</button>)}
                 </div>
-                <button className="journal-submit" onClick={handleSubmit} disabled={saving || !content.trim()}>
+                <button className="journal-submit" onClick={handleSubmit} disabled={!sensitiveAllowed || saving || !content.trim()}>
                     {saving ? <Loader2 size={16} className="animate-spin" /> : <Send size={16} />} Guardar
                 </button>
             </div>

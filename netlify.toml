@@ -25,6 +25,18 @@
   force  = true
 
 [[redirects]]
+  from   = "/como-funciona"
+  to     = "/como-funciona.html"
+  status = 200
+  force  = true
+
+[[redirects]]
+  from   = "/en/how-it-works"
+  to     = "/en/how-it-works.html"
+  status = 200
+  force  = true
+
+[[redirects]]
   from   = "/en/resources/money-and-life-plans"
   to     = "/en/resources/money-and-life-plans.html"
   status = 200
@@ -87,6 +99,37 @@
     Content-Security-Policy    = "default-src 'none'; base-uri 'self'; form-action 'self' https://appleid.apple.com; connect-src 'self' https://*.supabase.co wss://*.supabase.co https://api.stripe.com https://api.mercadopago.com https://appleid.apple.com https://fonts.googleapis.com https://fonts.gstatic.com https://accounts.google.com; img-src 'self' data: https: blob:; font-src 'self' https://fonts.gstatic.com; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; script-src 'self' 'unsafe-inline' https://js.stripe.com https://appleid.cdn-apple.com; frame-src https://js.stripe.com https://hooks.stripe.com https://appleid.apple.com; worker-src 'self' blob:; media-src 'self' blob:; manifest-src 'self'; upgrade-insecure-requests;"
 
 # ── Cache de assets estáticos ─────────────────────────────────────────────────
+[[headers]]
+  for = "/build-info.json"
+  [headers.values]
+    Cache-Control = "no-store, max-age=0"
+    X-Robots-Tag = "noindex"
+
+[[headers]]
+  for = "/index.html"
+  [headers.values]
+    Cache-Control = "no-cache, max-age=0, must-revalidate"
+
+[[headers]]
+  for = "/login"
+  [headers.values]
+    X-Robots-Tag = "noindex"
+
+[[headers]]
+  for = "/register"
+  [headers.values]
+    X-Robots-Tag = "noindex"
+
+[[headers]]
+  for = "/recover"
+  [headers.values]
+    X-Robots-Tag = "noindex"
+
+[[headers]]
+  for = "/demo/mapa"
+  [headers.values]
+    X-Robots-Tag = "noindex"
+
 [[headers]]
   for = "/assets/*"
   [headers.values]

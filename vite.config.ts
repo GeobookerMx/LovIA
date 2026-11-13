@@ -1,6 +1,8 @@
 import { defineConfig, loadEnv } from 'vite'
 import react from '@vitejs/plugin-react'
 import { VitePWA } from 'vite-plugin-pwa'
+import { publicPagesPlugin } from './scripts/public-pages.mjs'
+import { buildStampPlugin, readBuildStamp } from './scripts/build-stamp.mjs'
 import { validatePublicEnvironment } from './src/lib/environment'
 
 export default defineConfig(({ mode }) => {
@@ -24,12 +26,15 @@ export default defineConfig(({ mode }) => {
   // se debe usar base './' y desactivar el Service Worker del PWA
   // para evitar el error "Failed to fetch dynamically imported module: https://localhost/..."
   const isCapacitor = env.VITE_CAPACITOR === 'true'
+  const buildStamp = readBuildStamp(isCapacitor)
 
   return {
     // base relativa es OBLIGATORIA para Capacitor — los assets se cargan desde el sistema de archivos
     base: isCapacitor ? './' : '/',
+    define: { __LOVIA_BUILD__: JSON.stringify(buildStamp) },
     plugins: [
       react(),
+      ...(!isCapacitor ? [publicPagesPlugin(), buildStampPlugin(buildStamp)] : []),
       // El PWA (Service Worker) debe estar DESACTIVADO en builds nativos de Capacitor.
       // En builds web normales, se habilita normalmente.
       ...(!isCapacitor ? [VitePWA({

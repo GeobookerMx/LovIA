@@ -1,6 +1,7 @@
 import { Navigate, Outlet } from 'react-router-dom'
 import { useAuthStore } from '../../stores/authStore'
 import { Loader2 } from 'lucide-react'
+import LegalConsentGate from './LegalConsentGate'
 
 export default function ProtectedRoute() {
     const { user, loading, initialized } = useAuthStore()
@@ -17,5 +18,5 @@ export default function ProtectedRoute() {
         return <Navigate to="/login" replace />
     }
 
-    return <Outlet />
+    return <LegalConsentGate key={user.id} userId={user.id}><Outlet /></LegalConsentGate>
 }

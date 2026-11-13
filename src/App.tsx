@@ -160,6 +160,7 @@ function AppRoutes() {
           <Route path="/" element={<Landing />} />
           <Route path="/login" element={<Login />} />
           <Route path="/register" element={<Register />} />
+          <Route path="/demo/mapa" element={<SafeRadarGate />} />
           <Route path="/auth/callback" element={<AuthCallbackPage />} />
           <Route path="/recover" element={<RecoverAccount />} />
           {/* Política de Privacidad pública — requerida por Google Play y App Store */}

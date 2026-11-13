@@ -4,6 +4,7 @@ import { useEvaluationStore } from './evaluationStore'
 import { useSubscriptionStore } from './subscriptionStore'
 import { useCheckInStore } from './checkInStore'
 import { useSettingsStore } from './settingsStore'
+import { recordLegalAcceptance } from '../lib/legalConsent'
 import type { User, Session } from '@supabase/supabase-js'
 import type { PublicProfile } from '../lib/database.types'
 
@@ -13,13 +14,13 @@ interface AuthState {
     profile: PublicProfile | null
     loading: boolean
     initialized: boolean
-    legalAccepted: boolean
+    sensitiveConsent: boolean | null
 
     initialize: () => Promise<void>
     signUp: (email: string, password: string, name: string, consent: { version: string; acceptedAt: string; sensitiveDataAccepted: boolean }) => Promise<{ error: string | null; needsEmailConfirmation: boolean }>
     signIn: (email: string, password: string) => Promise<{ error: string | null }>
     signOut: () => Promise<void>
-    acceptLegal: () => void
+    setSensitiveConsent: (userId: string, allowed: boolean) => void
     loadProfile: () => Promise<void>
     updateProfile: (updates: EditableProfilePatch) => Promise<{ error: string | null }>
 }
@@ -69,7 +70,7 @@ export const useAuthStore = create<AuthState>((set, get) => ({
     profile: null,
     loading: true,
     initialized: false,
-    legalAccepted: false,
+    sensitiveConsent: null,
 
     initialize: async () => {
         if (get().initialized) return // Evita ejecutar dos veces (React Strict Mode bug)
@@ -97,7 +98,7 @@ export const useAuthStore = create<AuthState>((set, get) => ({
                 user: session?.user ?? null,
                 loading: false,
                 initialized: true,
-                legalAccepted: !!session?.user,
+                sensitiveConsent: null,
             })
             clearTimeout(safetyTimer)
             console.log('[LovIA] AuthStore: inicializado.')
@@ -117,7 +118,7 @@ export const useAuthStore = create<AuthState>((set, get) => ({
                     set({
                         session,
                         user: session?.user ?? null,
-                        legalAccepted: !!session?.user || get().legalAccepted,
+                        sensitiveConsent: session?.user?.id === get().user?.id ? get().sensitiveConsent : null,
                     })
 
                 if (session?.user) {
@@ -161,6 +162,11 @@ export const useAuthStore = create<AuthState>((set, get) => ({
             },
         })
         if (error) return { error: error.message, needsEmailConfirmation: false }
+        if (data.session && consent.version) {
+            // Reutiliza la elección explícita del formulario; el servidor identifica
+            // la cuenta y la versión. Si falla, el gate permite reintentar al entrar.
+            await recordLegalAcceptance(consent.sensitiveDataAccepted).catch(() => undefined)
+        }
         return { error: null, needsEmailConfirmation: !data.session }
         } finally {
             set({ loading: false })
@@ -175,7 +181,7 @@ export const useAuthStore = create<AuthState>((set, get) => ({
             password,
         })
         if (error) return { error: error.message }
-        set({ user: data.user, session: data.session, legalAccepted: true })
+        set({ user: data.user, session: data.session, sensitiveConsent: null })
         // ✅ Load profile and server data immediately after sign-in
         // (don't wait for the async onAuthStateChange event)
         void get().loadProfile()
@@ -190,11 +196,11 @@ export const useAuthStore = create<AuthState>((set, get) => ({
         const { error } = await supabase.auth.signOut()
         if (error) throw error
         bindPrivateState(null)
-        set({ user: null, session: null, profile: null, legalAccepted: false })
+        set({ user: null, session: null, profile: null, sensitiveConsent: null })
     },
 
-    acceptLegal: () => {
-        set({ legalAccepted: true })
+    setSensitiveConsent: (userId, allowed) => {
+        if (get().user?.id === userId) set({ sensitiveConsent: allowed })
     },
 
     loadProfile: async () => {

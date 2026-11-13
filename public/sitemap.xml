@@ -2,33 +2,68 @@
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9" xmlns:xhtml="http://www.w3.org/1999/xhtml">
   <url>
     <loc>https://lovia.com.mx/</loc>
-    <lastmod>2026-10-30</lastmod>
+    <lastmod>2026-11-12</lastmod>
     <xhtml:link rel="alternate" hreflang="es-MX" href="https://lovia.com.mx/" />
+    <xhtml:link rel="alternate" hreflang="es" href="https://lovia.com.mx/" />
     <xhtml:link rel="alternate" hreflang="en" href="https://lovia.com.mx/en/" />
     <xhtml:link rel="alternate" hreflang="x-default" href="https://lovia.com.mx/" />
   </url>
   <url>
     <loc>https://lovia.com.mx/en/</loc>
-    <lastmod>2026-10-30</lastmod>
+    <lastmod>2026-11-12</lastmod>
     <xhtml:link rel="alternate" hreflang="es-MX" href="https://lovia.com.mx/" />
+    <xhtml:link rel="alternate" hreflang="es" href="https://lovia.com.mx/" />
     <xhtml:link rel="alternate" hreflang="en" href="https://lovia.com.mx/en/" />
     <xhtml:link rel="alternate" hreflang="x-default" href="https://lovia.com.mx/" />
   </url>
   <url>
     <loc>https://lovia.com.mx/recursos/dinero-y-proyecto-de-vida</loc>
-    <lastmod>2026-10-30</lastmod>
+    <lastmod>2026-11-12</lastmod>
     <xhtml:link rel="alternate" hreflang="es-MX" href="https://lovia.com.mx/recursos/dinero-y-proyecto-de-vida" />
+    <xhtml:link rel="alternate" hreflang="es" href="https://lovia.com.mx/recursos/dinero-y-proyecto-de-vida" />
     <xhtml:link rel="alternate" hreflang="en" href="https://lovia.com.mx/en/resources/money-and-life-plans" />
     <xhtml:link rel="alternate" hreflang="x-default" href="https://lovia.com.mx/recursos/dinero-y-proyecto-de-vida" />
   </url>
   <url>
     <loc>https://lovia.com.mx/en/resources/money-and-life-plans</loc>
-    <lastmod>2026-10-30</lastmod>
+    <lastmod>2026-11-12</lastmod>
     <xhtml:link rel="alternate" hreflang="es-MX" href="https://lovia.com.mx/recursos/dinero-y-proyecto-de-vida" />
+    <xhtml:link rel="alternate" hreflang="es" href="https://lovia.com.mx/recursos/dinero-y-proyecto-de-vida" />
     <xhtml:link rel="alternate" hreflang="en" href="https://lovia.com.mx/en/resources/money-and-life-plans" />
     <xhtml:link rel="alternate" hreflang="x-default" href="https://lovia.com.mx/recursos/dinero-y-proyecto-de-vida" />
   </url>
   <url>
-    <loc>https://lovia.com.mx/privacy</loc>
+    <loc>https://lovia.com.mx/como-funciona</loc>
+    <lastmod>2026-11-12</lastmod>
+    <xhtml:link rel="alternate" hreflang="es-MX" href="https://lovia.com.mx/como-funciona" />
+    <xhtml:link rel="alternate" hreflang="es" href="https://lovia.com.mx/como-funciona" />
+    <xhtml:link rel="alternate" hreflang="en" href="https://lovia.com.mx/en/how-it-works" />
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://lovia.com.mx/como-funciona" />
   </url>
+  <url>
+    <loc>https://lovia.com.mx/en/how-it-works</loc>
+    <lastmod>2026-11-12</lastmod>
+    <xhtml:link rel="alternate" hreflang="es-MX" href="https://lovia.com.mx/como-funciona" />
+    <xhtml:link rel="alternate" hreflang="es" href="https://lovia.com.mx/como-funciona" />
+    <xhtml:link rel="alternate" hreflang="en" href="https://lovia.com.mx/en/how-it-works" />
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://lovia.com.mx/como-funciona" />
+  </url>
+  <url>
+    <loc>https://lovia.com.mx/recursos/</loc>
+    <lastmod>2026-11-12</lastmod>
+    <xhtml:link rel="alternate" hreflang="es-MX" href="https://lovia.com.mx/recursos/" />
+    <xhtml:link rel="alternate" hreflang="es" href="https://lovia.com.mx/recursos/" />
+    <xhtml:link rel="alternate" hreflang="en" href="https://lovia.com.mx/en/resources/" />
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://lovia.com.mx/recursos/" />
+  </url>
+  <url>
+    <loc>https://lovia.com.mx/en/resources/</loc>
+    <lastmod>2026-11-12</lastmod>
+    <xhtml:link rel="alternate" hreflang="es-MX" href="https://lovia.com.mx/recursos/" />
+    <xhtml:link rel="alternate" hreflang="es" href="https://lovia.com.mx/recursos/" />
+    <xhtml:link rel="alternate" hreflang="en" href="https://lovia.com.mx/en/resources/" />
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://lovia.com.mx/recursos/" />
+  </url>
+  <url><loc>https://lovia.com.mx/privacy</loc></url>
+  <url><loc>https://lovia.com.mx/delete-account</loc></url>
 </urlset>

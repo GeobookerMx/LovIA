@@ -1,108 +1,41 @@
-# Eliminación de cuenta — Estado y guía de despliegue
+# Eliminación de cuenta: estado y procedimiento
 
-## ¿Qué hace la función?
+Actualizado el 13 de noviembre de 2026. La RPC de solicitudes y sus permisos ya están aplicados y verificados en producción. Registrar una solicitud **no ejecuta ni confirma un borrado completo**. La Edge Function `delete-account` sigue sin desplegar y no es requisito del cliente nuevo. Véase [el registro actualizado](release-web-2026-11-13.md).
 
-La Edge Function `supabase/functions/delete-account/index.ts` permite que un usuario autenticado elimine su propia cuenta de forma segura desde la PWA de LovIA.
+## Inicio dentro de la app
 
-### Flujo completo
+Perfil → Configuración → Eliminar mi cuenta → escribir ELIMINAR → Confirmar solicitud.
 
-1. **Frontend** (`SettingsPage.tsx`) invoca la función con `supabase.functions.invoke('delete-account')` usando el token JWT del usuario activo.
-2. **Edge Function** valida el token con el cliente anon (SUPABASE_ANON_KEY) para identificar al usuario.
-3. **Admin client** (inicializado con `SUPABASE_SERVICE_ROLE_KEY`) llama a `supabaseAdmin.auth.admin.deleteUser(user.id)`.
-4. Supabase elimina el registro en `auth.users`, y si las FK están configuradas con `ON DELETE CASCADE`, los datos relacionados se borran en cascada.
-5. El frontend cierra sesión y redirige al inicio.
+La RPC `public.request_account_deletion(text)` usa la identidad autenticada, comprueba que la cuenta exista y registra una única solicitud por usuario. Reintentar conserva la fecha original. La función privilegiada reside en `lovia_private`, con búsqueda fija, sin aceptar un ID objetivo ni permitir ejecución anónima; el wrapper público es `SECURITY INVOKER`.
 
-### UI — Doble confirmación (implementada)
+El usuario ve la fecha y el estado pendiente/en revisión. La cuenta permanece activa mientras se atiende. Si la RPC falla o devuelve una respuesta inesperada, no se confirma el registro ni se cierra sesión: se informa el error y se ofrece soporte. El usuario puede cancelar antes de enviar.
 
-| Paso | Qué ve el usuario |
-|------|-------------------|
-| 0 | Botón "Eliminar cuenta y todos mis datos" (rojo) |
-| 1 | Panel de advertencia con lista detallada de datos a eliminar + botón rojo de confirmación + enlace fallback manual |
-| — | En caso de error: `alert` con instrucciones + enlace a `lovia.com.mx/delete-account` |
+La cola `account_deletion_requests` permite SELECT propio o de administrador verificado por servidor; el cliente no puede insertar, cambiar estados o borrar filas directamente. El dashboard de Usuarios muestra hasta las 100 solicitudes más antiguas y distingue una cola vacía de un fallo de carga.
 
----
+El endpoint heredado `supabase/functions/delete-account/index.ts` también queda contenido: solo POST autenticado y confirmación explícita, responde 202 con `deleted: false` tras registrar la solicitud. No utiliza una clave de servicio ni borra cuentas. La app llama directamente a la RPC; desplegar este endpoint no es requisito.
 
-## Variables de entorno necesarias
+## Dependencia de publicación
 
-| Variable | Uso |
-|---|---|
-| `SUPABASE_URL` | URL del proyecto Supabase |
-| `SUPABASE_ANON_KEY` | Validar el JWT del usuario (cliente de usuario) |
-| `SUPABASE_SERVICE_ROLE_KEY` | Cliente admin para borrar el usuario (nunca exponer en frontend) |
+La migración `20261113135116_lovia_privacidad_finanzas_y_ubicacion.sql` debe estar aplicada y verificada antes de publicar esta pantalla. No ejecutar en bloque el historial antiguo no reconciliado. La migración no elimina cuentas, archivos ni respuestas y tampoco activa borrado automático.
 
-> [!CAUTION]
-> **Nunca uses `SUPABASE_SERVICE_ROLE_KEY` en el frontend.** Solo debe vivir en variables de entorno del servidor / Edge Function.
+Pruebas locales: anónimo denegado, confirmación incorrecta denegada, JWT de cuenta inexistente denegado, solicitudes idempotentes, A no ve B, admin puede leer la cola y ningún cliente puede alterar su estado. Se usa una base desechable con datos inventados; faltan las pruebas de integración del servicio remoto y dispositivos.
 
----
+## Atención operativa que falta validar
 
-## Cómo desplegar
+1. Asignar un responsable que revise la cola y el correo `clienteslovia@gmail.com`, verifique titularidad cuando sea necesario y comunique recepción y plazo. No se configuró un notificador, un SLA ni un trabajador automático.
+2. Inventariar datos y archivos de esa cuenta sin acceder innecesariamente a contenido íntimo. Revisar retención aplicable y referencias de moderación/auditoría antes de decidir su tratamiento.
+3. Revocar sesiones y la autorización del proveedor; Sign in with Apple necesita su revocación específica. Borrar una fila de Auth no invalida inmediatamente todos los JWT emitidos. No confirmar revocación sin comprobarla.
+4. Resolver archivos propios mediante la API de Storage. No borrar solo filas de `storage.objects`: eso no garantiza retirar los bytes. No borrar archivos compartidos de libros u otros negocios por pertenecer al mismo proyecto.
+5. Resolver las referencias `NO ACTION` verificadas en `audit_log`, `reports`, `verification_steps` y `crisis_alerts` conforme al tratamiento acordado; no convertirlas todas a cascada.
+6. Ejecutar el borrado desde un servicio autorizado y comprobar datos vinculados, acceso posterior, Storage y reintentos ante fallos parciales. Probar primero una cuenta desechable con avatar, diario, finanzas y referencias.
+7. Confirmar al usuario el resultado real y cualquier retención explicada. La solicitud desaparece en cascada al eliminar la cuenta de Auth; definir por separado la evidencia operativa mínima y su retención sin conservar contenido íntimo innecesario.
 
-```bash
-# Desde la raíz del proyecto
-supabase functions deploy delete-account
-```
+Este procedimiento aún no está automatizado ni probado de extremo a extremo. El registro de solicitudes y el correo son vías de inicio; **no bastan para declarar terminada la eliminación ni aprobadas las reglas de las tiendas**.
 
-Si es la primera vez, asegúrate de tener el CLI de Supabase instalado y sesión activa:
+## Vía web
 
-```bash
-supabase login
-supabase link --project-ref <TU_PROJECT_REF>
-supabase functions deploy delete-account
-```
+`https://lovia.com.mx/delete-account` explica cómo solicitar la baja desde el correo de la cuenta, incluso sin app instalada. No pedir contraseñas ni documentos en el primer mensaje. Comprobar que el equipo puede recibir y atender ese correo; esta sesión no envió mensajes.
 
-### Variables en producción
+Fuentes: [Supabase: datos y eliminación de usuarios](https://supabase.com/docs/guides/auth/managing-user-data), [Supabase: eliminación de objetos](https://supabase.com/docs/guides/storage/management/delete-objects), [Apple: eliminación de cuenta](https://developer.apple.com/support/offering-account-deletion-in-your-app/), [Google Play: eliminación de cuentas](https://support.google.com/googleplay/android-developer/answer/13327111).
 
-Si las variables no están configuradas en Supabase Dashboard → Settings → Edge Functions, agrégalas:
-
-```bash
-supabase secrets set SUPABASE_SERVICE_ROLE_KEY=<valor>
-```
-
----
-
-## Qué falta verificar / probar
-
-### Cascadas en base de datos
-
-> [!IMPORTANT]
-> La función borra el usuario de `auth.users`. Los datos en tablas públicas **solo se borran si tienen `ON DELETE CASCADE`** en su FK hacia `auth.users.id`.
-
-Tablas que deben auditarse:
-
-- [ ] `public.profiles` — FK `user_id → auth.users.id ON DELETE CASCADE`
-- [ ] `public.matches` — FK `user_id / partner_id`
-- [ ] `public.evaluaciones` — FK `user_id`
-- [ ] `public.diary_entries` — FK `user_id` (diario de pareja)
-- [ ] `public.finances` — FK `user_id`
-
-### Storage (fotos de perfil)
-
-> [!WARNING]
-> Supabase Storage **NO** elimina archivos automáticamente al borrar un usuario. Las fotos de perfil deben eliminarse explícitamente.
-
-Opciones:
-- Llamar a `supabaseAdmin.storage.from('avatars').remove([...])` **antes** de `deleteUser()` en la Edge Function.
-- Crear un trigger en la base de datos que llame a una función de limpieza.
-
-### Pruebas pendientes
-
-- [ ] Desplegar la función con `supabase functions deploy delete-account`
-- [ ] Probar el flujo completo en staging: login → Configuración → Eliminar cuenta → confirmación → cierre de sesión
-- [ ] Verificar que los datos en todas las tablas sean eliminados
-- [ ] Verificar que la foto de perfil sea eliminada de Storage
-- [ ] Probar el caso de error (función caída) → confirmar que el `alert` con enlace fallback aparece
-- [ ] Revisar logs de la Edge Function en Supabase Dashboard → Functions → Logs
-
----
-
-## Fallback manual
-
-Si la eliminación automática falla, el usuario puede solicitar la eliminación manualmente en:
-
-**https://lovia.com.mx/delete-account**
-
-O escribir a: **clienteslovia@gmail.com**
-
----
-
-*Última actualización: activación de `accountDeletionAvailable = true` en SettingsPage.tsx*
+Revisión general: [auditoría previa a builds](revision-prebuild-experiencia-seguridad-2026-11-12.md). Implementación: [mapa y contenciones](mapa-demo-y-correcciones-2026-11-12.md).

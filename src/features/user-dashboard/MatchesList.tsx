@@ -112,6 +112,7 @@ export default function MatchesList() {
                     </div>
                     <h2>Aún no hay conexiones activas</h2>
                     <p>Cuando una conexión esté disponible, la encontrarás aquí. Puedes seguir usando la Guía y Mi Diario mientras tanto.</p>
+                    <button className="matches-page__cta" onClick={() => navigate('/radar')} style={{ marginTop: 16 }}>Explorar mapa demo · Perfiles ficticios</button>
                     <button className="matches-page__cta" onClick={() => navigate('/modules')} style={{ marginTop: 20 }}>Abrir la Guía</button>
                 </div>
             ) : (

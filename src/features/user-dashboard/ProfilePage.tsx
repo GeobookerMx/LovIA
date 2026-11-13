@@ -4,6 +4,7 @@ import { useAuthStore } from '../../stores/authStore'
 import { useState, useRef } from 'react'
 import { supabase } from '../../lib/supabase'
 import { isIOS } from '../../lib/platform'
+import { ownedAvatarPath } from '../../lib/avatarStorage'
 
 const MAX_FILE_BYTES = 5 * 1024 * 1024 // 5 MB
 const ALLOWED_TYPES = ['image/jpeg', 'image/png', 'image/webp']
@@ -90,10 +91,21 @@ export default function ProfilePage() {
                 .from('avatars')
                 .getPublicUrl(filePath)
 
+            if (useAuthStore.getState().user?.id !== user.id) {
+                throw new Error('La sesión cambió durante la carga. Vuelve a intentarlo desde tu cuenta.')
+            }
             const { error: profileError } = await updateProfile({ avatar_url: publicUrl })
             if (profileError) {
                 await supabase.storage.from('avatars').remove([filePath])
                 throw new Error(profileError)
+            }
+            const previousPath = ownedAvatarPath(profile?.avatar_url, user.id, publicUrl)
+            if (previousPath && previousPath !== filePath) {
+                const { error: cleanupError } = await supabase.storage.from('avatars').remove([previousPath])
+                if (cleanupError) {
+                    showToast('error', 'Foto actualizada. No pudimos retirar el archivo anterior; contacta a soporte para revisarlo.')
+                    return
+                }
             }
             showToast('success', '¡Foto de perfil actualizada! 🎉')
 
@@ -104,11 +116,6 @@ export default function ProfilePage() {
             setUploading(false)
             e.target.value = ''
         }
-    }
-
-    const handleChangeVisibility = async (mode: 'classic' | 'gradual' | 'essence') => {
-        const { error } = await updateProfile({ visibility_mode: mode })
-        if (error) showToast('error', 'No se pudo guardar la visibilidad.')
     }
 
     return (
@@ -127,7 +134,7 @@ export default function ProfilePage() {
                     className="profile-page__avatar"
                     onClick={() => fileInputRef.current?.click()}
                     disabled={uploading}
-                    aria-label="Cambiar foto de perfil"
+                    aria-label="Cambiar foto de perfil pública"
                     style={{ cursor: 'pointer', position: 'relative', overflow: 'hidden', border: 0, padding: 0 }}
                     title="Cambiar foto de perfil"
                 >
@@ -167,36 +174,13 @@ export default function ProfilePage() {
                 </div>
             )}
 
-            {/* Visibility Mode Selector */}
-            <div className="glass" style={{ margin: 'var(--space-4) 0', padding: 'var(--space-4)', borderRadius: 'var(--radius-lg)' }}>
-                <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '12px' }}>
-                    <Eye size={18} color="var(--love-rose)" />
-                    <h3 style={{ margin: 0, fontSize: 'var(--fs-md)' }}>Mi visibilidad para el mundo</h3>
-                </div>
-                <div style={{ display: 'flex', gap: '8px', flexWrap: 'wrap' }}>
-                    <button 
-                        onClick={() => handleChangeVisibility('classic')}
-                        style={{ flex: 1, padding: '8px', borderRadius: '8px', border: profile?.visibility_mode === 'classic' ? '2px solid var(--love-rose)' : '1px solid var(--border-subtle)', background: 'transparent', color: 'var(--text-primary)'}}>
-                        Clásico
-                    </button>
-                    <button 
-                        onClick={() => handleChangeVisibility('gradual')}
-                        style={{ flex: 1, padding: '8px', borderRadius: '8px', border: profile?.visibility_mode === 'gradual' || !profile?.visibility_mode ? '2px solid var(--love-rose)' : '1px solid var(--border-subtle)', background: 'transparent', color: 'var(--text-primary)'}}>
-                        Gradual
-                    </button>
-                    <button 
-                        onClick={() => handleChangeVisibility('essence')}
-                        style={{ flex: 1, padding: '8px', borderRadius: '8px', border: profile?.visibility_mode === 'essence' ? '2px solid var(--love-rose)' : '1px solid var(--border-subtle)', background: 'transparent', color: 'var(--text-primary)'}}>
-                        Esencia
-                    </button>
-                </div>
-                <p style={{ fontSize: 'var(--fs-xs)', color: 'var(--text-secondary)', marginTop: '8px' }}>
-                    {profile?.visibility_mode === 'classic' && 'Tu foto es visible siempre.'}
-                    {(profile?.visibility_mode === 'gradual' || !profile?.visibility_mode) && 'Tu foto comienza difuminada y se aclara conforme avanzas niveles con tu match (Recomendado).'}
-                    {profile?.visibility_mode === 'essence' && 'Tu foto es totalmente invisible hasta el Nivel 3. Fomenta conexiones 100% emocionales.'}
-                </p>
-            </div>
-
+            {/* Los modos visuales no constituyen control de acceso al archivo. */}
+            <section className="glass" style={{ margin: 'var(--space-4) 0', padding: 'var(--space-4)', borderRadius: 'var(--radius-lg)' }} aria-labelledby="photo-privacy-title">
+                <h3 id="photo-privacy-title"><Eye size={18} aria-hidden="true" /> Privacidad de tu foto</h3>
+                <p>Actualmente las fotos de perfil se almacenan con una URL pública. No subas una imagen que necesites mantener privada.</p>
+                <p>Los modos Gradual y Esencia aún no ofrecen protección del archivo en el servidor y su selección está en preparación. Difuminar una foto en pantalla no oculta su URL.</p>
+                <button type="button" onClick={() => navigate('/profile/settings')} style={{ minHeight: 44, marginTop: 8 }}>Consultar privacidad y soporte</button>
+            </section>
             {/* Accesos rápidos personales */}
             <div className="profile-page__stats stagger-children">
                 <button type="button" className="profile-page__stat glass" onClick={() => navigate('/profile/edit')} style={{ cursor: 'pointer', color: 'var(--text-primary)' }}>

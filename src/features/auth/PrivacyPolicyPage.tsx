@@ -25,7 +25,9 @@ export default function PrivacyPolicyPage() {
                         <p><strong>Servicio:</strong> LovIA</p>
                         <p><strong>Responsable:</strong> Juan Pablo Peña García</p>
                         <p><strong>Contacto:</strong> <a href={`mailto:${CONTACT}`}>{CONTACT}</a></p>
-                        <p><strong>Última actualización:</strong> 20 de octubre de 2026</p>
+                        <p><strong>Última actualización:</strong> 13 de noviembre de 2026 · Versión 2026-11-13</p>
+                        <p>Registramos la versión aceptada, la confirmación de mayoría de edad y la elección opcional de datos sensibles en el servidor. Puedes revisar o revocar esta elección en Perfil → Configuración. No se asume por iniciar sesión con un proveedor.</p>
+                        <p>Las fotos de perfil actuales se entregan por URL pública; los modos de ocultamiento siguen en preparación. El mapa de demostración muestra perfiles ficticios, sin utilizar GPS ni representar actividad real. La baja se registra como una solicitud pendiente hasta completarla y confirmarla.</p>
                         <p><strong>Versión:</strong> 2026-10-20</p>
                     </div>
 

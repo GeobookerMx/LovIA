@@ -1,0 +1,43 @@
+.radar-demo { width: min(100%, 1120px); margin: auto; padding: 1.2rem 1rem calc(6rem + env(safe-area-inset-bottom, 0px)); color: var(--text-primary); }
+.radar-demo__header { display: flex; gap: .8rem; align-items: center; }
+.radar-demo__header h1 { font-size: clamp(1.5rem, 4vw, 2.3rem); margin: .6rem 0; }
+.radar-demo__back { display: grid; place-items: center; min-width: 44px; min-height: 44px; border: 1px solid var(--border-subtle); border-radius: .7rem; color: inherit; }
+.radar-demo__badge { display: inline-flex; gap: .4rem; align-items: center; padding: .35rem .6rem; color: #ffe8ae; background: #5a3d16; border: 1px solid #d1a749; border-radius: .5rem; font-size: .73rem; font-weight: 800; }
+.radar-demo__intro, .radar-demo p { line-height: 1.65; }
+.radar-demo__privacy { display: flex; gap: .65rem; align-items: flex-start; padding: .9rem; margin: 1rem 0; border: 1px solid #589683; border-radius: .8rem; background: #143e3338; }
+.radar-demo__privacy svg { flex-shrink: 0; margin-top: .2rem; color: #a3edd1; }
+.radar-demo__privacy p { margin: 0; }
+.radar-demo__controls { display: flex; gap: 1rem; align-items: center; flex-wrap: wrap; margin: 1.3rem 0; }
+.radar-demo__controls label { display: flex; gap: .6rem; align-items: center; font-weight: 650; }
+.radar-demo__controls select { min-height: 44px; padding: .5rem; border-radius: .5rem; border: 1px solid #b18bc4; background: #231536; color: #fff; }
+.radar-demo__controls p { flex: 1 1 240px; margin: 0; font-size: .88rem; color: var(--text-secondary); }
+.radar-demo__layout { display: grid; grid-template-columns: minmax(0, 1.5fr) minmax(260px, 1fr); gap: 1rem; }
+.radar-demo__map-panel, .radar-demo__detail, .radar-demo__next { min-width: 0; border: 1px solid var(--border-subtle); background: var(--bg-card); border-radius: 1rem; padding: 1rem; }
+.radar-demo__map-panel h2 { display: flex; gap: .4rem; align-items: center; margin: 0 0 1rem; font-size: 1.1rem; }
+.radar-demo__map { position: relative; width: 100%; max-width: 100%; min-height: 310px; aspect-ratio: 1.5; isolation: isolate; border-radius: .8rem; overflow: hidden; border: 1px solid #6a527e; }
+.radar-demo__geography { position: absolute; inset: 0; width: 100%; height: 100%; }
+.radar-demo__marker { position: absolute; transform: translate(-50%, -50%); display: flex; align-items: center; flex-direction: column; justify-content: center; min-width: 64px; min-height: 56px; gap: .15rem; border: 1px solid #ffb6d0; background: #4a224e; color: #fff; border-radius: .8rem; box-shadow: 0 .2rem 1rem #0007; cursor: pointer; }
+.radar-demo__marker span { font-size: .62rem; font-weight: 800; letter-spacing: .02em; }
+.radar-demo__marker--selected { background: #f0c0ec; color: #291137; border: 2px solid #fff; z-index: 1; }
+.radar-demo__legend { display: flex; align-items: center; gap: .4rem; margin-bottom: 0; font-size: .8rem; color: #e7d6f0; }
+.radar-demo__detail h2 { margin: .7rem 0 .3rem; font-size: 1.35rem; }
+.radar-demo__detail > p { font-size: .9rem; color: var(--text-secondary); }
+.radar-demo__result { padding: .9rem; margin: 1rem 0; background: #49331d66; border-left: 3px solid #eabf6b; border-radius: .4rem; }
+.radar-demo__result h3 { margin: 0 0 .4rem; font-size: 1rem; color: #ffe4af; }
+.radar-demo__result p { margin: 0; font-size: .9rem; }
+.radar-demo__no-contact { display: flex; gap: .4rem; color: #d6c6e4; font-size: .8rem; line-height: 1.5; }
+.radar-demo__no-contact svg { flex-shrink: 0; }
+.radar-demo__examples { margin: 1.8rem 0; }
+.radar-demo__examples h2, .radar-demo__next h2 { font-size: 1.2rem; }
+.radar-demo__list { display: grid; gap: .6rem; }
+.radar-demo__list button { display: flex; align-items: center; gap: .7rem; min-height: 64px; text-align: left; background: var(--bg-card); color: var(--text-primary); border: 1px solid var(--border-subtle); border-radius: .8rem; padding: .7rem; cursor: pointer; }
+.radar-demo__list button[aria-pressed="true"] { border-color: #f2b9ea; }
+.radar-demo__list button > span:nth-child(2) { flex: 1; }
+.radar-demo__list small { display: block; color: var(--text-secondary); margin-top: .2rem; line-height: 1.4; }
+.radar-demo__avatar { display: grid; place-items: center; flex-shrink: 0; width: 42px; height: 42px; border-radius: 50%; background: #503262; color: #fff; font-size: .9rem; font-weight: 750; }
+.radar-demo__next > div { display: flex; flex-wrap: wrap; gap: .7rem; }
+.radar-demo .btn { display: inline-flex; align-items: center; justify-content: center; gap: .5rem; min-height: 44px; padding: .7rem 1rem; border: 1px solid #c29bd5; border-radius: .7rem; font-size: .9rem; font-weight: 650; text-decoration: none; }
+.radar-demo .btn-primary { background: #f0c0ec; color: #291137; }
+.radar-demo .btn-secondary { background: #291a3c; color: #fff; }
+.radar-demo :focus-visible { outline: 3px solid #fff; outline-offset: 3px; }
+@media (max-width: 740px) { .radar-demo__layout { grid-template-columns: minmax(0, 1fr); } .radar-demo__map { aspect-ratio: 1.2; } }

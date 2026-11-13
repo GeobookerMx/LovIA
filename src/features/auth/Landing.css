@@ -24,6 +24,7 @@
 
 .landing__language {
     display: flex;
+    flex-wrap: wrap;
     justify-content: center;
     align-items: center;
     gap: .75rem;
@@ -33,6 +34,9 @@
 }
 
 .landing__language a {
+    display: inline-flex;
+    align-items: center;
+    min-height: 44px;
     color: #f4bcf3;
     text-underline-offset: .25rem;
 }

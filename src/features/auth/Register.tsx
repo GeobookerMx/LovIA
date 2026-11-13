@@ -8,6 +8,8 @@ import { trackEvent } from '../../lib/analytics'
 import LegalModal from '../../components/ui/LegalModal'
 import SocialSignInButton from './SocialSignInButton'
 import { isIOS } from '../../lib/platform'
+import { LEGAL_VERSION } from '../../lib/legalConsentPolicy'
+import { recordLegalAcceptance } from '../../lib/legalConsent'
 import './Auth.css'
 
 export default function Register() {
@@ -35,14 +37,15 @@ export default function Register() {
     useEffect(() => {
         if (!initialized || !user) return
         let active = true
-        void supabase.from('profiles').select('onboarding_completed').eq('id', user.id).maybeSingle()
+        const beforeProfile = legalAccepted ? recordLegalAcceptance(sensitiveDataAccepted).catch(() => undefined) : Promise.resolve()
+        void beforeProfile.then(() => supabase.from('profiles').select('onboarding_completed').eq('id', user.id).maybeSingle())
             .then(({ data, error }) => {
                 if (!active) return
                 if (error) { setError('No pudimos cargar tu perfil. Inténtalo de nuevo.'); return }
                 navigate(data?.onboarding_completed ? '/home' : '/onboarding', { replace: true })
             })
         return () => { active = false }
-    }, [user, initialized, navigate])
+    }, [user, initialized, navigate, legalAccepted, sensitiveDataAccepted])
 
     const passwordChecks = {
         length: password.length >= 8,
@@ -74,7 +77,7 @@ export default function Register() {
         setSubmitting(true)
         try {
             const result = await signUp(email, password, name, {
-                version: '2026-10-20',
+                version: LEGAL_VERSION,
                 acceptedAt: new Date().toISOString(),
                 sensitiveDataAccepted,
             })

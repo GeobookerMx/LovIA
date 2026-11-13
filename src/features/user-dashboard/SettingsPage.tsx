@@ -1,208 +1,88 @@
-/**
- * LovIA! — Settings Page
- *
- * User preferences: notifications, privacy, language, theme, account.
- * Persisted via Zustand settingsStore with localStorage.
- */
-
-import { useState } from 'react'
-import { ArrowLeft, Eye, User, Shield, Trash2, Loader2, AlertTriangle, X } from 'lucide-react'
+import { useEffect, useState } from 'react'
+import { ArrowLeft, Eye, User, Shield, Trash2, Loader2 } from 'lucide-react'
 import { useNavigate } from 'react-router-dom'
 import { useSettingsStore } from '../../stores/settingsStore'
 import { useAuthStore } from '../../stores/authStore'
 import { supabase } from '../../lib/supabase'
+import { parseDeletionRequestReceipt, type DeletionRequestReceipt } from './accountDeletionStatus'
 import './ProfilePages.css'
+import LegalPreferences from './LegalPreferences'
+import AppVersion from './AppVersion'
 
 export default function SettingsPage() {
-    // Edge Function `delete-account` desplegada y funcional.
-    const accountDeletionAvailable = true
-    const navigate = useNavigate()
-    const settings = useSettingsStore()
-    const { signOut } = useAuthStore()
-    const [isDeleting, setIsDeleting] = useState(false)
-    // Doble confirmación: paso 1 = mostrar aviso, paso 2 = botón rojo activo
-    const [deleteStep, setDeleteStep] = useState<0 | 1>(0)
-
-    const handleDeleteAccount = async () => {
-        // Paso 1: mostrar panel de advertencia
-        if (deleteStep === 0) {
-            setDeleteStep(1)
-            return
-        }
-
-        // Paso 2: usuario leyó la advertencia y confirma
-        try {
-            setIsDeleting(true)
-
-            // Invoke the secure edge function to delete the user
-            const { error } = await supabase.functions.invoke('delete-account')
-
-            if (error) throw error
-
-            // Log out and clear local state
-            await signOut()
-            navigate('/', { replace: true })
-
-        } catch (error: any) {
-            console.error('Error deleting account:', error)
-            alert(
-                'Ocurrió un error al eliminar tu cuenta. Por favor, inténtalo de nuevo más tarde.\n\n' +
-                'Si el problema persiste, puedes solicitar la eliminación manualmente en:\n' +
-                'https://lovia.com.mx/delete-account\n\n' +
-                'O escríbenos a clienteslovia@gmail.com'
-            )
-            setIsDeleting(false)
-            setDeleteStep(0)
-        }
-    }
-
-    return (
-        <div className="profile-sub">
-            <div className="profile-sub__header">
-                <button className="profile-sub__back" onClick={() => navigate('/profile')}>
-                    <ArrowLeft size={20} />
-                </button>
-                <h2>Configuración</h2>
-            </div>
-
-            {/* Privacy */}
-            <div className="settings-section">
-                <div className="settings-section__title">🔒 Privacidad</div>
-
-                <div className="settings-item glass" role="status">
-                    <div className="settings-item__left">
-                        <Eye size={18} className="settings-item__icon" />
-                        <div>
-                            <div className="settings-item__label">Visibilidad del perfil</div>
-                            <div className="settings-item__desc">El control de visibilidad requiere verificación en el servidor y aún no está disponible aquí. Contacta a soporte si necesitas ocultar tu perfil.</div>
-                        </div>
-                    </div>
-                </div>
-                <ToggleItem
-                    icon={<Shield size={18} />}
-                    label="Enviar métricas de uso"
-                    desc="Eventos básicos asociados a tu cuenta, sin contenido íntimo. Se guarda en este dispositivo y está desactivado por defecto."
-                    active={settings.anonymousData}
-                    onToggle={() => settings.toggle('anonymousData')}
-                />
-            </div>
-
-            {/* Account */}
-            <div className="settings-section">
-                <div className="settings-section__title">👤 Cuenta</div>
-
-                <div className="settings-item glass" onClick={() => navigate('/profile/edit')} style={{ cursor: 'pointer' }}>
-                    <div className="settings-item__left">
-                        <User size={18} className="settings-item__icon" />
-                        <div>
-                            <div className="settings-item__label">Editar perfil</div>
-                            <div className="settings-item__desc">Nombre, alias, ciudad y foto</div>
-                        </div>
-                    </div>
-                </div>
-
-                {/* Paso 1: botón inicial para iniciar el flujo de eliminación */}
-                {accountDeletionAvailable && deleteStep === 0 && (
-                    <button
-                        className="settings-item glass"
-                        onClick={handleDeleteAccount}
-                        style={{ cursor: 'pointer', width: '100%', textAlign: 'left', border: 'none', background: 'transparent', padding: 0 }}
-                    >
-                        <div className="settings-item__left">
-                            <Trash2 size={18} style={{ color: 'var(--danger)', margin: '0 12px' }} />
-                            <div>
-                                <div className="settings-item__label" style={{ color: 'var(--danger)' }}>Eliminar cuenta y todos mis datos</div>
-                                <div className="settings-item__desc">Derecho ARCO — LFPDPPP Art. 16</div>
-                            </div>
-                        </div>
-                    </button>
-                )}
-
-                {/* Paso 2: panel de confirmación explícita */}
-                {accountDeletionAvailable && deleteStep === 1 && (
-                    <div className="glass-strong animate-fade-in" style={{
-                        borderRadius: 'var(--radius-md)',
-                        border: '1px solid rgba(239,68,68,0.4)',
-                        padding: 'var(--space-4)',
-                        marginTop: 'var(--space-2)'
-                    }}>
-                        <div style={{ display: 'flex', alignItems: 'flex-start', gap: 'var(--space-3)', marginBottom: 'var(--space-4)' }}>
-                            <AlertTriangle size={20} style={{ color: 'var(--danger)', flexShrink: 0, marginTop: 2 }} />
-                            <div>
-                                <p style={{ fontWeight: 700, color: 'var(--danger)', marginBottom: 'var(--space-1)', fontSize: 'var(--fs-sm)' }}>
-                                    ¿Confirmas la eliminación permanente de tu cuenta?
-                                </p>
-                                <p style={{ fontSize: 'var(--fs-xs)', color: 'var(--text-secondary)', lineHeight: 1.6 }}>
-                                    Lamentamos verte partir. Si decides continuar, se eliminarán de forma
-                                    <strong> permanente e irreversible</strong> todos tus datos, incluyendo:
-                                    perfil, foto, matches, evaluaciones, diario de pareja, finanzas y cualquier
-                                    otro dato asociado a tu cuenta. <strong>Esta acción no se puede deshacer.</strong>
-                                </p>
-                                <p style={{ fontSize: 'var(--fs-xs)', color: 'var(--text-secondary)', marginTop: 'var(--space-2)', lineHeight: 1.5 }}>
-                                    Si prefieres solicitar la eliminación manualmente, visita{' '}
-                                    <a href="https://lovia.com.mx/delete-account" target="_blank" rel="noopener noreferrer"
-                                        style={{ color: 'var(--danger)', textDecoration: 'underline' }}>
-                                        lovia.com.mx/delete-account
-                                    </a>.
-                                </p>
-                            </div>
-                        </div>
-                        <div style={{ display: 'flex', gap: 'var(--space-2)' }}>
-                            <button
-                                onClick={() => setDeleteStep(0)}
-                                style={{
-                                    flex: 1, padding: '10px', borderRadius: 'var(--radius-sm)',
-                                    background: 'var(--bg-card)', border: '1px solid var(--border-subtle)',
-                                    color: 'var(--text-secondary)', cursor: 'pointer', fontSize: 'var(--fs-sm)',
-                                    display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 6
-                                }}
-                            >
-                                <X size={14} /> Cancelar
-                            </button>
-                            <button
-                                onClick={handleDeleteAccount}
-                                disabled={isDeleting}
-                                style={{
-                                    flex: 1, padding: '10px', borderRadius: 'var(--radius-sm)',
-                                    background: 'rgba(239,68,68,0.15)', border: '1px solid rgba(239,68,68,0.5)',
-                                    color: '#ef4444', cursor: isDeleting ? 'not-allowed' : 'pointer',
-                                    fontSize: 'var(--fs-sm)', fontWeight: 700,
-                                    display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 6
-                                }}
-                            >
-                                {isDeleting
-                                    ? <><Loader2 size={14} className="animate-spin" /> Eliminando...</>
-                                    : <><Trash2 size={14} /> Sí, eliminar mi cuenta</>}
-                            </button>
-                        </div>
-                    </div>
-                )}
-            </div>
-        </div>
-    )
+    const userId = useAuthStore(state => state.user?.id)
+    return <SettingsContent key={userId ?? 'anonymous'} userId={userId} />
 }
 
-function ToggleItem({
-    icon, label, desc, active, onToggle,
-}: {
-    icon: React.ReactNode
-    label: string
-    desc: string
-    active: boolean
-    onToggle: () => void
-}) {
-    return (
-        <div className="settings-item glass">
-            <div className="settings-item__left">
-                <span className="settings-item__icon">{icon}</span>
-                <div>
-                    <div className="settings-item__label">{label}</div>
-                    <div className="settings-item__desc">{desc}</div>
-                </div>
-            </div>
-            <button className={`toggle ${active ? 'toggle--active' : ''}`} onClick={onToggle} aria-label={label} aria-pressed={active}>
-                <div className="toggle__knob" />
-            </button>
-        </div>
-    )
+function SettingsContent({ userId }: { userId: string | undefined }) {
+    const navigate = useNavigate()
+    const settings = useSettingsStore()
+    const [confirmation, setConfirmation] = useState('')
+    const [isSending, setIsSending] = useState(false)
+    const [showDelete, setShowDelete] = useState(false)
+    const [receipt, setReceipt] = useState<DeletionRequestReceipt | null>(null)
+    const [error, setError] = useState('')
+    const [checking, setChecking] = useState(Boolean(userId))
+    const [checkAttempt, setCheckAttempt] = useState(0)
+
+    useEffect(() => {
+        let active = true
+        if (!userId) return
+        void supabase.from('account_deletion_requests').select('status, requested_at').eq('user_id', userId).maybeSingle()
+            .then(({ data, error: readError }) => {
+                if (!active) return
+                if (readError) setError('No pudimos consultar solicitudes anteriores. Puedes reintentar o utilizar el canal de soporte indicado abajo.')
+                else if (data) {
+                    try { setReceipt(parseDeletionRequestReceipt(data)) }
+                    catch { setError('No pudimos confirmar el estado de tu solicitud. Contacta a soporte.') }
+                }
+                setChecking(false)
+            })
+        return () => { active = false }
+    }, [userId, checkAttempt])
+
+    const requestDeletion = async () => {
+        if (confirmation !== 'ELIMINAR' || isSending || !userId) return
+        setIsSending(true)
+        setError('')
+        try {
+            const { data, error: requestError } = await supabase.rpc('request_account_deletion', { p_confirmation: confirmation })
+            if (requestError) throw requestError
+            setReceipt(parseDeletionRequestReceipt(data))
+            setConfirmation('')
+            setShowDelete(false)
+        } catch {
+            setError('No pudimos confirmar el registro de tu solicitud. Reintenta; si persiste, usa el canal de soporte. No hemos confirmado la eliminación de tu cuenta.')
+        } finally { setIsSending(false) }
+    }
+
+    return <main className="profile-sub">
+        <header className="profile-sub__header"><button type="button" className="profile-sub__back" onClick={() => navigate('/profile')} aria-label="Volver al perfil"><ArrowLeft size={20} /></button><h2>Configuración</h2></header>
+        <section className="settings-section" aria-label="Privacidad">
+            <h3 className="settings-section__title">Privacidad</h3>
+            {userId && <LegalPreferences userId={userId} />}
+            <div className="settings-item glass"><div className="settings-item__left"><Eye size={18} className="settings-item__icon" /><div><div className="settings-item__label">Visibilidad del perfil</div><p className="settings-item__desc">El control de visibilidad requiere verificación en el servidor y aún no está disponible aquí. Contacta a soporte si necesitas ocultar tu perfil.</p></div></div></div>
+            <div className="settings-item glass"><div className="settings-item__left"><Shield size={18} className="settings-item__icon" /><div><div className="settings-item__label">Enviar métricas de uso</div><p className="settings-item__desc">Eventos básicos asociados a tu cuenta, sin contenido íntimo. Se guarda en este dispositivo y está desactivado por defecto.</p></div></div><button type="button" className={`toggle ${settings.anonymousData ? 'toggle--active' : ''}`} onClick={() => settings.toggle('anonymousData')} aria-label="Enviar métricas de uso" aria-pressed={settings.anonymousData}><span className="toggle__knob" /></button></div>
+        </section>
+        <section className="settings-section" aria-label="Cuenta">
+            <h3 className="settings-section__title">Cuenta</h3>
+            <button type="button" className="settings-item glass" onClick={() => navigate('/profile/edit')} style={{ width: '100%', textAlign: 'left' }}><span className="settings-item__left"><User size={18} className="settings-item__icon" /><span><span className="settings-item__label">Editar perfil</span><span className="settings-item__desc">Nombre, alias, ciudad y foto</span></span></span></button>
+            <section className="glass-strong" style={{ padding: '1rem', marginTop: '1rem', borderRadius: '1rem' }} aria-labelledby="account-deletion-title">
+                <h3 id="account-deletion-title"><Trash2 size={18} aria-hidden="true" /> Eliminar mi cuenta</h3>
+                <p>Desde aquí puedes iniciar una solicitud de eliminación de tu cuenta y los datos asociados. Actualmente requiere atención del equipo; registrar la solicitud no elimina la cuenta de inmediato. Te confirmaremos el resultado por el correo de tu cuenta.</p>
+                {checking && <p role="status">Consultando el estado de tu solicitud…</p>}
+                {receipt && <div role="status"><p><strong>Solicitud registrada: {receipt.status === 'processing' ? 'en revisión' : 'pendiente de atención'}.</strong></p><p>Fecha: {new Date(receipt.requested_at).toLocaleString('es-MX')}. Tu cuenta sigue activa hasta completar el proceso. Conserva esta fecha para dar seguimiento con soporte.</p></div>}
+                {error && <div role="alert"><p>{error}</p><button type="button" className="btn btn-secondary" disabled={isSending || checking} onClick={() => { setError(''); setChecking(true); setCheckAttempt(value => value + 1) }}>Consultar de nuevo</button></div>}
+                {!receipt && !checking && !showDelete && <button type="button" className="btn btn-secondary" onClick={() => setShowDelete(true)}>Iniciar solicitud de eliminación</button>}
+                {showDelete && !receipt && <div>
+                    <p>Solicitas la eliminación permanente del perfil y los datos asociados. Al completarse no podrás recuperar la cuenta. Soporte te informará de cualquier retención que resulte aplicable.</p>
+                    <label htmlFor="deletion-confirmation">Escribe ELIMINAR para confirmar</label>
+                    <input id="deletion-confirmation" type="text" value={confirmation} onChange={event => setConfirmation(event.target.value)} autoComplete="off" disabled={isSending} style={{ display: 'block', margin: '.7rem 0', padding: '.7rem', width: '100%', boxSizing: 'border-box' }} />
+                    <div style={{ display: 'flex', flexWrap: 'wrap', gap: '.7rem' }}><button type="button" className="btn btn-secondary" disabled={isSending} onClick={() => { setShowDelete(false); setConfirmation('') }}>Cancelar</button><button type="button" className="btn btn-primary" disabled={confirmation !== 'ELIMINAR' || isSending} onClick={() => void requestDeletion()}>{isSending ? <><Loader2 size={16} className="animate-spin" /> Registrando…</> : 'Confirmar solicitud'}</button></div>
+                </div>}
+                <p>Para solicitar o dar seguimiento también puedes escribir a <a href="mailto:clienteslovia@gmail.com?subject=Solicitud%20de%20eliminaci%C3%B3n%20de%20cuenta">clienteslovia@gmail.com</a> desde el correo de tu cuenta, o consultar <a href="https://lovia.com.mx/delete-account" target="_blank" rel="noopener noreferrer">el procedimiento de eliminación</a>. No envíes contraseñas.</p>
+            </section>
+        </section>
+        <AppVersion />
+    </main>
 }

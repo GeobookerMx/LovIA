@@ -1,5 +1,7 @@
 import { useState } from 'react'
 import { useCheckInStore } from '../../stores/checkInStore'
+import { useAuthStore } from '../../stores/authStore'
+import { Link } from 'react-router-dom'
 import '../../features/verification/Verification.css'
 
 const moods = [
@@ -20,6 +22,7 @@ const contextMessages: Record<string, { title: string; subtitle: string }> = {
 }
 
 export default function MentalCheckIn() {
+    const sensitiveAllowed = useAuthStore(state => state.sensitiveConsent === true)
     const showCheckIn = useCheckInStore((s) => s.showCheckIn)
     const currentContext = useCheckInStore((s) => s.currentContext)
     const closeCheckIn = useCheckInStore((s) => s.closeCheckIn)
@@ -31,6 +34,7 @@ export default function MentalCheckIn() {
     const [submitted, setSubmitted] = useState(false)
 
     if (!showCheckIn) return null
+    if (!sensitiveAllowed) return <div className="check-in-overlay"><div className="check-in glass-strong" role="dialog" aria-modal="true" aria-label="Preferencias de datos sensibles"><h3>Tú decides qué compartir</h3><p>Antes de guardar un check-in emocional, revisa la autorización opcional de datos sensibles en Configuración.</p><Link to="/profile/settings" onClick={closeCheckIn}>Revisar preferencias</Link><button type="button" style={{ minHeight: 44 }} onClick={closeCheckIn}>Cerrar</button></div></div>
 
     const ctx = contextMessages[currentContext] || contextMessages.weekly
     const lastEntry = getLastEntry()

@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react'
 import { Search, Filter, Ban, RefreshCw } from 'lucide-react'
 import { supabase } from '../../lib/supabase'
+import AccountDeletionQueue from './AccountDeletionQueue'
 import './AdminPages.css'
 
 interface UserData {
@@ -61,6 +62,7 @@ export default function UsersManager() {
             </div>
 
             {loadError && <div role="alert" className="alert-error">{loadError}</div>}
+            <AccountDeletionQueue />
             <p>Las sanciones están desactivadas hasta disponer de una operación autorizada, auditable y probada en staging.</p>
             {/* Toolbar */}
             <div className="admin-toolbar glass">

@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react'
-import { Link } from 'react-router-dom'
+import { Link, useLocation } from 'react-router-dom'
 import { useAuthStore } from '../../stores/authStore'
 import { isHalloweenCampaign, isChristmasCampaign } from '../../lib/campaignDates'
 import './SeasonalBanner.css'
@@ -8,6 +8,7 @@ const DISMISSED_HALLOWEEN_KEY = 'lovia:halloween-2026:dismissed'
 const DISMISSED_XMAS_KEY = 'lovia:xmas-2026:dismissed'
 
 export default function SeasonalBanner() {
+  const { pathname } = useLocation()
   const user = useAuthStore((state) => state.user)
   const [isXmas, setIsXmas] = useState(() => isChristmasCampaign())
   const [isHalloween, setIsHalloween] = useState(() => isHalloweenCampaign())
@@ -26,6 +27,9 @@ export default function SeasonalBanner() {
     }, 60_000)
     return () => window.clearInterval(timer)
   }, [])
+
+  // El recorrido del mapa necesita espacio para sus avisos y controles.
+  if (pathname === '/radar' || pathname === '/demo/mapa') return null
 
   // 1. Banner Navideño 2026
   if (isXmas && !dismissedXmas) {

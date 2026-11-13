@@ -1,35 +1,40 @@
-import { X, Shield, FileText, ChevronDown } from 'lucide-react'
-import { useState } from 'react'
+import { X, Shield, FileText } from 'lucide-react'
+import { useEffect, useRef, useState } from 'react'
+import { LEGAL_VERSION } from '../../lib/legalConsentPolicy'
 import './LegalModal.css'
 
 interface Props {
     onAccept: (sensitiveDataAccepted: boolean) => void
     onClose: () => void
+    initialSensitiveData?: boolean
 }
 
-export default function LegalModal({ onAccept, onClose }: Props) {
-    const [scrolledPrivacy, setScrolledPrivacy] = useState(false)
-    const [scrolledTerms, setScrolledTerms] = useState(false)
+export default function LegalModal({ onAccept, onClose, initialSensitiveData = false }: Props) {
+    const dialog = useRef<HTMLDivElement>(null)
+    const [termsAccepted, setTermsAccepted] = useState(false)
     const [activeTab, setActiveTab] = useState<'privacy' | 'terms'>('privacy')
-    const [consentSensitive, setConsentSensitive] = useState(false)
+    const [consentSensitive, setConsentSensitive] = useState(initialSensitiveData)
     const [ageConfirmed, setAgeConfirmed] = useState(false)
 
-    const handleScroll = (e: React.UIEvent<HTMLDivElement>) => {
-        const el = e.currentTarget
-        const atBottom = el.scrollHeight - el.scrollTop - el.clientHeight < 40
-        if (atBottom) {
-            if (activeTab === 'privacy') setScrolledPrivacy(true)
-            if (activeTab === 'terms') setScrolledTerms(true)
-        }
-    }
-
-    const canAccept = scrolledPrivacy && scrolledTerms && ageConfirmed
+    const canAccept = termsAccepted && ageConfirmed
+    useEffect(() => {
+        const previous = document.activeElement
+        dialog.current?.querySelector<HTMLButtonElement>('button')?.focus()
+        return () => { if (previous instanceof HTMLElement) previous.focus() }
+    }, [])
 
     return (
         <div className="legal-overlay animate-fade-in" onClick={onClose}>
-            <div className="legal-modal glass-strong animate-slide-up" onClick={(e) => e.stopPropagation()}>
+            <div ref={dialog} className="legal-modal glass-strong animate-slide-up" role="dialog" aria-modal="true" aria-label="Aviso y elecciones de privacidad" onClick={(e) => e.stopPropagation()} onKeyDown={event => {
+                if (event.key === 'Escape') { onClose(); return }
+                if (event.key !== 'Tab') return
+                const elements = Array.from(dialog.current?.querySelectorAll<HTMLElement>('button:not([disabled]), input:not([disabled]), a[href]') ?? []).filter(element => element.offsetParent !== null)
+                const first = elements[0], last = elements[elements.length - 1]
+                if (event.shiftKey && document.activeElement === first) { event.preventDefault(); last?.focus() }
+                else if (!event.shiftKey && document.activeElement === last) { event.preventDefault(); first?.focus() }
+            }}>
                 <div className="legal-modal__header">
-                    <h2>
+                            <h2>
                         <Shield size={20} color="var(--love-rose)" />
                         Aviso Legal
                     </h2>
@@ -45,19 +50,19 @@ export default function LegalModal({ onAccept, onClose }: Props) {
                         onClick={() => setActiveTab('privacy')}
                     >
                         <Shield size={14} />
-                        Privacidad {scrolledPrivacy && '✓'}
+                        Privacidad
                     </button>
                     <button
                         className={`legal-modal__tab ${activeTab === 'terms' ? 'legal-modal__tab--active' : ''}`}
                         onClick={() => setActiveTab('terms')}
                     >
                         <FileText size={14} />
-                        T&C {scrolledTerms && '✓'}
+                        Términos
                     </button>
                 </div>
 
                 {/* Content */}
-                <div className="legal-modal__content" onScroll={handleScroll}>
+                <div className="legal-modal__content">
                     {activeTab === 'privacy' ? (
                         <div className="legal-modal__text">
                             <h3>Aviso de Privacidad — LovIA!</h3>
@@ -90,6 +95,7 @@ export default function LegalModal({ onAccept, onClose }: Props) {
                             <p>Tienes derecho a <strong>Acceder, Rectificar, Cancelar u Oponerte</strong> al tratamiento de tus datos en cualquier momento. Para ejercer tus derechos ARCO, contacta a: <strong>clienteslovia@gmail.com</strong></p>
 
                             <h4>5. Seguridad</h4>
+                            <p>Actualmente las fotos de perfil se almacenan mediante una URL pública. Los modos de ocultamiento aún están en preparación. El mapa de demostración usa perfiles ficticios y no solicita GPS. Una solicitud de eliminación pendiente requiere atención y no equivale a un borrado ya completado.</p>
                             <p>LovIA aplica controles técnicos y de acceso para proteger la información. Ningún sistema es infalible; reporta cualquier incidente o acceso que no reconozcas al contacto de privacidad.</p>
 
                             <h4>6. Transferencias</h4>
@@ -98,7 +104,7 @@ export default function LegalModal({ onAccept, onClose }: Props) {
                             <h4>7. Cambios al aviso</h4>
                             <p>Te notificaremos de cualquier cambio material a este aviso mediante la app y por email.</p>
 
-                            <p><em>Última actualización del texto mostrado: 20 de octubre de 2026.</em></p>
+                            <p><em>Versión del texto mostrado: {LEGAL_VERSION}.</em></p>
                         </div>
                     ) : (
                         <div className="legal-modal__text">
@@ -142,16 +148,11 @@ export default function LegalModal({ onAccept, onClose }: Props) {
                         </div>
                     )}
 
-                    {(!scrolledPrivacy && activeTab === 'privacy') || (!scrolledTerms && activeTab === 'terms') ? (
-                        <div className="legal-modal__scroll-hint">
-                            <ChevronDown size={16} />
-                            Desplázate para leer todo
-                        </div>
-                    ) : null}
                 </div>
 
                 {/* Sensitive data consent (LFPDPPP) */}
                 <div className="legal-modal__consent">
+                    <label className="legal-modal__checkbox"><input type="checkbox" checked={termsAccepted} onChange={event => setTermsAccepted(event.target.checked)} /><span>He leído y acepto el aviso de privacidad y los términos mostrados, versión {LEGAL_VERSION}.</span></label>
                     <label className="legal-modal__checkbox">
                         <input
                             type="checkbox"

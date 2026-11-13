@@ -1,5 +1,7 @@
 # Auditoría 360 de LovIA — 4 de noviembre de 2026
 
+> Este documento conserva la revisión del 4 de noviembre. Para el estado comprobado el 12 de noviembre —incluidas correcciones ya aplicadas y nuevos riesgos de finanzas/eliminación— consultar [la revisión previa a builds](revision-prebuild-experiencia-seguridad-2026-11-12.md).
+
 ## Alcance y criterio
 
 Revisión del código React/Capacitor, autenticación, panel admin, funciones Edge, migraciones, Storage, PWA y configuración de build. Se consultaron **solo metadatos y agregados** del proyecto Supabase de producción `nbpidjpkanwynlhdxowx`; no se modificaron datos, esquema, usuarios ni archivos remotos. Los números de usuarios pueden incluir cuentas de prueba.

@@ -16,44 +16,46 @@ const isSkip = (value: string) => value === SKIP_UNSURE || value === SKIP_PRIVAT
 const realValues = (answer?: FinanceAnswer) => (answer?.values ?? []).filter((value) => !isSkip(value))
 
 export default function FinanceJourney() {
-  const navigate = useNavigate()
   const userId = useAuthStore((state) => state.user?.id ?? null)
+  return <FinanceJourneyContent key={userId ?? 'anonymous'} userId={userId} />
+}
+
+function FinanceJourneyContent({ userId }: { userId: string | null }) {
+  const navigate = useNavigate()
   const [answers, setAnswers] = useState<Record<string, FinanceAnswer>>({})
   const [activeBlock, setActiveBlock] = useState<string | null>(null)
   const [qIndex, setQIndex] = useState(0)
   const [scenarioChoices, setScenarioChoices] = useState<Record<number, number>>({})
   const [saveEnabled, setSaveEnabled] = useState(false)
   const [saveState, setSaveState] = useState<SaveState>('idle')
+  const [loadState, setLoadState] = useState<'loading' | 'ready' | 'error'>(userId ? 'loading' : 'ready')
+  const [loadAttempt, setLoadAttempt] = useState(0)
 
   const block = financeBlocks.find((item) => item.id === activeBlock) ?? null
   const question = block ? block.questions[qIndex] : null
   const current = question ? (answers[question.key] ?? emptyAnswer) : emptyAnswer
   const reviewedCount = Object.keys(answers).filter((key) => allFinanceQuestions.some((q) => q.key === key)).length
 
-  // Interruptor y reanudación. Al cambiar de cuenta o cerrar sesión se descarta todo
-  // el estado privado en memoria antes de consultar al servidor.
+  // El contenedor usa una key por cuenta para descartar inmediatamente el estado
+  // privado al cambiar de identidad. La carga no sobrescribe respuestas nuevas.
   useEffect(() => {
     let active = true
-    setAnswers({})
-    setActiveBlock(null)
-    setQIndex(0)
-    setSaveState('idle')
-    setSaveEnabled(false)
     if (!userId) return
     void isFinanceSaveEnabled().then(async (enabled) => {
-      if (!active || !enabled) return
-      setSaveEnabled(true)
+      if (!active) return
+      if (!enabled) { setLoadState('ready'); return }
       try {
-        const saved = await loadFinanceAnswers()
-        if (active) setAnswers(saved)
+        const saved = await loadFinanceAnswers(userId)
+        if (active) { setAnswers(saved); setSaveEnabled(true); setLoadState('ready') }
       } catch {
-        // Sin lectura no se bloquea el recorrido; sólo se empieza vacío.
+        if (active) setLoadState('error')
       }
-    })
+    }).catch(() => { if (active) setLoadState('error') })
     return () => { active = false }
-  }, [userId])
+  }, [userId, loadAttempt])
 
   const openBlock = (id: string) => {
+    if (loadState !== 'ready') return
     const target = financeBlocks.find((item) => item.id === id)
     if (!target) return
     const firstPending = target.questions.findIndex((q) => !answers[q.key])
@@ -87,6 +89,7 @@ export default function FinanceJourney() {
   const canContinue = current.values.length > 0 || current.text.trim() !== ''
 
   const persist = async (key: string, answer: FinanceAnswer): Promise<boolean> => {
+    if (loadState !== 'ready') return false
     if (!saveEnabled || !userId) return true
     if (saveState === 'saving') return false
     setSaveState('saving')
@@ -108,6 +111,7 @@ export default function FinanceJourney() {
   }
 
   const chooseNextStep = async (option: string) => {
+    if (loadState !== 'ready') return
     const answer: FinanceAnswer = { values: [option], text: '' }
     setAnswers((all) => ({ ...all, [NEXT_STEP_KEY]: answer }))
     await persist(NEXT_STEP_KEY, answer)
@@ -155,9 +159,11 @@ export default function FinanceJourney() {
           <div><span className="finance-page__eyebrow">Me conozco</span><h2 id="finance-exercise-title">Cuatro sesiones cortas</h2></div>
           <span className="finance-page__time">{reviewedCount} de {allFinanceQuestions.length} revisadas</span>
         </div>
-        <p className="finance-page__privacy">{saveEnabled
-          ? 'Tus elecciones se guardan en tu cuenta para que puedas continuar después. Son privadas: nadie más las ve, ni se envían a otra persona. Puedes borrarlas cuando quieras.'
+        <p className="finance-page__privacy">{loadState === 'loading' ? 'Consultando tus respuestas guardadas…' : loadState === 'error'
+          ? 'No pudimos recuperar tus respuestas. Reintenta antes de continuar para evitar sobrescribir lo que ya guardaste.' : saveEnabled
+          ? 'Tus elecciones se guardan en tu cuenta para que puedas continuar después. No se comparten con candidatos ni se usan para calcular matches. Puedes borrarlas cuando quieras.'
           : 'Tus elecciones sólo viven en esta pantalla. No se guardan en LovIA ni se envían a otra persona; al salir se borran.'}</p>
+        {loadState === 'error' && <div role="alert"><button type="button" className="finance-page__primary" onClick={() => { setLoadState('loading'); setLoadAttempt(attempt => attempt + 1) }}>Reintentar la carga</button></div>}
 
         {!block && (
           <div className="finance-page__blocks">
@@ -168,7 +174,7 @@ export default function FinanceJourney() {
                   <h3>{item.title}</h3>
                   <p>{item.intro}</p>
                   <p className="finance-page__block-meta">{done} de {item.questions.length} · unos {Math.max(2, item.questions.length)} minutos</p>
-                  <button type="button" className="finance-page__primary" onClick={() => openBlock(item.id)}>
+                  <button type="button" className="finance-page__primary" disabled={loadState !== 'ready'} onClick={() => openBlock(item.id)}>
                     {done === 0 ? 'Empezar' : done === item.questions.length ? 'Revisar' : 'Continuar'} <ArrowRight size={17} aria-hidden="true" />
                   </button>
                 </article>
@@ -227,7 +233,7 @@ export default function FinanceJourney() {
               <div className="finance-page__options">
                 {nextStepOptions.map((option) => {
                   const picked = answers[NEXT_STEP_KEY]?.values[0] === option
-                  return <button key={option} type="button" aria-pressed={picked} className={picked ? 'finance-page__option finance-page__option--selected' : 'finance-page__option'} onClick={() => void chooseNextStep(option)}>{option}</button>
+                  return <button key={option} type="button" disabled={loadState !== 'ready' || saveState === 'saving'} aria-pressed={picked} className={picked ? 'finance-page__option finance-page__option--selected' : 'finance-page__option'} onClick={() => void chooseNextStep(option)}>{option}</button>
                 })}
               </div>
             </fieldset>

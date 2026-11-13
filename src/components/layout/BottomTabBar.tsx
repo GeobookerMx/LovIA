@@ -1,20 +1,17 @@
 import { Link } from 'react-router-dom'
 import { Home, Heart, MapPin, BookOpen, User } from 'lucide-react'
-import { isRadarAvailable } from '../../lib/discoveryAvailability'
-import { isChristmasCampaign } from '../../lib/campaignDates'
+import { isRadarAvailable, isRadarDemoAvailable } from '../../lib/discoveryAvailability'
 import './BottomTabBar.css'
 
 interface Props {
     currentPath: string
 }
 
-const isXmas = isChristmasCampaign()
-
 const tabs = [
-    { path: '/home', icon: Home, label: isXmas ? 'Inicio 🎄' : 'Inicio' },
-    ...(isRadarAvailable ? [{ path: '/radar', icon: MapPin, label: 'Explorar' }] : []),
+    { path: '/home', icon: Home, label: 'Inicio' },
+    ...(isRadarAvailable || isRadarDemoAvailable ? [{ path: '/radar', icon: MapPin, label: isRadarAvailable ? 'Explorar' : 'Mapa demo' }] : []),
     { path: '/modules', icon: BookOpen, label: 'Guía' },
-    { path: '/matches', icon: Heart, label: isXmas ? 'Matches ✨' : 'Conexiones' },
+    { path: '/matches', icon: Heart, label: 'Conexiones' },
     { path: '/profile', icon: User, label: 'Perfil' },
 ]
 

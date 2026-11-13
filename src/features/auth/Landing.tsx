@@ -15,9 +15,12 @@ export default function Landing() {
 
                 <div className="landing__hero-content animate-fade-in-up">
                     {isWeb() && (
-                        <nav className="landing__language" aria-label="Idioma">
+                        <nav className="landing__language" aria-label="Información de LovIA e idioma">
                             <span aria-current="page">Español</span>
                             <a href="/en/" lang="en">English</a>
+                        <a href="/como-funciona">Cómo funciona</a>
+                        <a href="/recursos/">Recursos</a>
+                        <Link to="/demo/mapa">Mapa demo · Perfiles ficticios</Link>
                         </nav>
                     )}
                     <div className="landing__badge">

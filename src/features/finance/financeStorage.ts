@@ -22,14 +22,17 @@ export async function isFinanceSaveEnabled(): Promise<boolean> {
     .select('enabled')
     .eq('key', FLAG_KEY)
     .maybeSingle()
-  return !error && data?.enabled === true
+  if (error) throw error
+  return data?.enabled === true
 }
 
 /** Respuestas propias de esta versión; el servidor (RLS) sólo entrega las del usuario autenticado. */
-export async function loadFinanceAnswers(): Promise<Record<string, FinanceAnswer>> {
+export async function loadFinanceAnswers(userId: string): Promise<Record<string, FinanceAnswer>> {
+  if (!userId) throw new Error('Se requiere una cuenta para recuperar tus respuestas.')
   const { data, error } = await supabase
     .from('finance_answers')
     .select('question_key, status, selected, free_text')
+    .eq('user_id', userId)
     .eq('catalog_version', FINANCE_CATALOG_VERSION)
   if (error) throw error
   const result: Record<string, FinanceAnswer> = {}

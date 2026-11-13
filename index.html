@@ -1,14 +1,15 @@
 <!doctype html>
-<html lang="es">
+<html lang="es-MX">
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
 
     <!-- Identidad -->
-    <title>LovIA! — Conoce personas y explora tus relaciones</title>
-    <meta name="description" content="LovIA te ayuda a conocer personas con intención y a explorar comunicación, límites y acuerdos. Gratis hasta el 31 de enero de 2027, sin tarjeta." />
+    <title>LovIA | Relaciones de pareja, comunicación y acuerdos</title>
+    <meta name="description" content="Explora comunicación, límites, dinero y acuerdos de pareja con LovIA. Guías educativas en español para personas adultas en México y comunidades hispanohablantes." />
     <link rel="canonical" href="https://lovia.com.mx/" />
     <link rel="alternate" hreflang="es-MX" href="https://lovia.com.mx/" />
+    <link rel="alternate" hreflang="es" href="https://lovia.com.mx/" />
     <link rel="alternate" hreflang="en" href="https://lovia.com.mx/en/" />
     <link rel="alternate" hreflang="x-default" href="https://lovia.com.mx/" />
 
@@ -36,45 +37,54 @@
     <!-- Open Graph (WhatsApp, Facebook, iMessage previews) -->
     <meta property="og:type" content="website" />
     <meta property="og:site_name" content="LovIA!" />
-    <meta property="og:title" content="LovIA! — Conoce personas y explora tus relaciones" />
-    <meta property="og:description" content="Conoce personas y explora recursos para tus relaciones. Acceso gratis hasta el 31 de enero de 2027, sin tarjeta requerida." />
+    <meta property="og:title" content="LovIA | Relaciones de pareja, comunicación y acuerdos" />
+    <meta property="og:description" content="Guías educativas, preguntas y herramientas en español para explorar tus relaciones a tu ritmo." />
     <meta property="og:image" content="https://lovia.com.mx/icons/icon-512.png" />
     <meta property="og:url" content="https://lovia.com.mx/" />
     <meta property="og:locale" content="es_MX" />
+    <meta property="og:locale:alternate" content="en_US" />
+    <meta property="og:image:alt" content="Logotipo de LovIA" />
 
     <!-- Twitter Card -->
     <meta name="twitter:card" content="summary" />
-    <meta name="twitter:title" content="LovIA! — Conoce personas y explora tus relaciones" />
-    <meta name="twitter:description" content="Conoce personas y explora recursos para tus relaciones. Gratis hasta el 31 de enero de 2027." />
+    <meta name="twitter:title" content="LovIA | Relaciones de pareja, comunicación y acuerdos" />
+    <meta name="twitter:description" content="Guías y preguntas sobre comunicación, límites, dinero y acuerdos de pareja." />
     <meta name="twitter:image" content="https://lovia.com.mx/icons/icon-512.png" />
-    <!-- Datos estructurados de las funciones p?blicas verificadas -->
+    <!-- Identidad y funciones públicas; sin reseñas, diagnósticos ni avales inventados. -->
     <script type="application/ld+json">
     {
       "@context": "https://schema.org",
-      "@type": "WebApplication",
-      "name": "LovIA!",
-      "url": "https://lovia.com.mx/",
-      "description": "Conoce personas con intenci?n y explora comunicaci?n, l?mites y acuerdos a tu ritmo.",
-      "applicationCategory": "LifestyleApplication",
-      "operatingSystem": "Web, Android",
-      "inLanguage": "es-MX",
-      "offers": {
-        "@type": "Offer",
-        "price": "0",
-        "priceCurrency": "MXN",
-        "description": "Acceso gratuito hasta el 31 de enero de 2027 inclusive; sin cobro autom?tico posterior"
-      },
-      "featureList": [
-        "Perfil y conexiones con autorizaci?n mutua",
-        "Gu?a y ejercicios educativos opcionales",
-        "Mi Diario privado",
-        "Dinero y proyecto de vida: preguntas educativas"
+      "@graph": [
+        {
+          "@type": "Organization", "@id": "https://lovia.com.mx/#organization",
+          "name": "LovIA", "url": "https://lovia.com.mx/", "logo": "https://lovia.com.mx/icons/icon-512.png"
+        },
+        {
+          "@type": "WebSite", "@id": "https://lovia.com.mx/#website",
+          "name": "LovIA", "url": "https://lovia.com.mx/", "inLanguage": ["es-MX", "es", "en"],
+          "publisher": { "@id": "https://lovia.com.mx/#organization" }
+        },
+        {
+          "@type": "WebApplication", "@id": "https://lovia.com.mx/#app",
+          "name": "LovIA", "url": "https://lovia.com.mx/", "applicationCategory": "LifestyleApplication",
+          "operatingSystem": "Web, Android", "inLanguage": "es-MX",
+          "description": "Herramientas educativas sobre comunicación, límites y acuerdos de pareja.",
+          "publisher": { "@id": "https://lovia.com.mx/#organization" },
+          "featureList": ["Guía y ejercicios educativos opcionales", "Mi Diario", "Dinero y proyecto de vida", "Conversaciones con conexiones disponibles"]
+        }
       ]
     }
     </script>
   </head>
   <body>
     <div id="root"></div>
+    <noscript>
+      <main>
+        <h1>LovIA: recursos para tus relaciones de pareja</h1>
+        <p>Guías educativas sobre comunicación, límites, dinero y acuerdos para personas adultas. La aplicación interactiva necesita JavaScript; estas lecturas públicas funcionan sin él.</p>
+        <p><a href="/como-funciona">Cómo funciona LovIA</a> · <a href="/recursos/">Recursos en español</a> · <a href="/en/" lang="en">English</a> · <a href="/privacy">Privacidad</a></p>
+      </main>
+    </noscript>
     <script type="module" src="/src/main.tsx"></script>
   </body>
 </html>

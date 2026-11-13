@@ -2,9 +2,7 @@ User-agent: *
 Allow: /
 Disallow: /admin
 Disallow: /auth
-Disallow: /login
-Disallow: /register
-Disallow: /recover
+# Las pantallas de acceso usan X-Robots-Tag: noindex; se permite leer esa instrucción.
 Disallow: /onboarding
 Disallow: /profile
 Disallow: /book
