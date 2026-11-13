@@ -24,7 +24,7 @@ test('consent audit and sensitive writes are enforced in disposable PostgreSQL',
     CREATE FUNCTION auth.uid() RETURNS uuid LANGUAGE sql STABLE AS $$ SELECT nullif(current_setting('request.jwt.claim.sub',true),'')::uuid $$;
     GRANT USAGE ON SCHEMA auth,public,lovia_private TO authenticated;
     GRANT USAGE ON SCHEMA auth,public TO anon;
-    
+
   `)
   for (const table of tables) await db.exec(`CREATE TABLE public.${table}(user_id uuid NOT NULL, answer text); ALTER TABLE public.${table} ENABLE ROW LEVEL SECURITY;
     GRANT SELECT,INSERT,UPDATE,DELETE ON public.${table} TO authenticated;
