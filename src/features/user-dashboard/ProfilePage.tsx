@@ -1,5 +1,5 @@
 import { useNavigate } from 'react-router-dom'
-import { Shield, ChevronRight, Settings, LogOut, FileText, CreditCard, TrendingUp, BarChart3, Activity, Layers, BookOpen, Eye, ShieldAlert, BookHeart, CheckCircle, AlertCircle } from 'lucide-react'
+import { Shield, ChevronRight, Settings, LogOut, FileText, CreditCard, TrendingUp, BarChart3, Activity, Layers, BookOpen, Eye, ShieldAlert, BookHeart, CheckCircle, AlertCircle, Trash2 } from 'lucide-react'
 import { useAuthStore } from '../../stores/authStore'
 import { useState, useRef } from 'react'
 import { supabase } from '../../lib/supabase'
@@ -263,6 +263,13 @@ export default function ProfilePage() {
                     <MenuItem icon={<CreditCard size={18} />} label="Suscripción" color="var(--love-rose)" onClick={() => navigate('/pricing')} />
                 )}
                 <MenuItem icon={<Settings size={18} />} label="Configuración" color="var(--text-secondary)" onClick={() => navigate('/profile/settings')} />
+                <MenuItem 
+                    icon={<Trash2 size={18} />} 
+                    label="Eliminar cuenta" 
+                    sublabel="Derecho ARCO — Borrar todos mis datos" 
+                    color="var(--danger)" 
+                    onClick={() => navigate('/profile/settings')} 
+                />
                 <MenuItem icon={<FileText size={18} />} label="Legal y Privacidad" color="var(--text-secondary)" onClick={() => navigate('/profile/legal')} />
                 <MenuItem icon={<BookOpen size={18} />} label="Bases y límites de LovIA" color="var(--line-sex)" onClick={() => navigate('/profile/science')} />
                 <MenuItem icon={<BookOpen size={18} />} label="El Libro — Descarga Gratis 📖" color="var(--warning)" onClick={() => navigate('/book')} />
