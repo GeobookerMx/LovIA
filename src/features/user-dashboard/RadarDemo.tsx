@@ -3,6 +3,7 @@ import { Link, useLocation } from 'react-router-dom'
 import { ArrowLeft, ArrowRight, FlaskConical, Heart, MapPin, Share2, ShieldCheck, Sparkles } from 'lucide-react'
 import { demoCandidates, explainDemoCandidate } from './radarDemoFixtures'
 import './RadarDemo.css'
+import { isChristmasCampaign } from '../../lib/campaignDates'
 
 const shareUrl = 'https://lovia.com.mx/demo/mapa'
 
@@ -30,7 +31,7 @@ export default function RadarDemo() {
     <main className="radar-demo">
       <header className="radar-demo__header">
         <Link to={isPublic ? '/' : '/home'} className="radar-demo__back" aria-label="Volver al inicio"><ArrowLeft size={21} /></Link>
-        <div><span className="radar-demo__badge"><FlaskConical size={15} aria-hidden="true" /> DEMOSTRACIÓN · PERFILES FICTICIOS</span><h1>Explora el mapa de LovIA</h1></div>
+        <div><span className="radar-demo__badge"><FlaskConical size={15} aria-hidden="true" /><span>MAPA DEMO · PERFILES FICTICIOS<small className="radar-demo__purpose">Para probar la funcionalidad</small></span></span><h1>Explora el mapa de LovIA</h1>{isChristmasCampaign() && <span className="radar-demo__season"><span aria-hidden="true">🎄</span> Edición navideña 2026</span>}</div>
       </header>
       <p className="radar-demo__intro">Prueba cinco ejemplos para entender los filtros y el interés mutuo. Estos perfiles y zonas son inventados; no representan personas conectadas ni actividad real.</p>
       <div className="radar-demo__privacy" role="note"><ShieldCheck size={21} aria-hidden="true" /><p>Esta demo no pide tu ubicación ni utiliza tu perfil. El mapa de personas reales aún está en preparación. No hay mensajes, citas ni matches reales aquí.</p></div>

@@ -2,6 +2,8 @@ import { Link } from 'react-router-dom'
 import { Home, Heart, MapPin, BookOpen, User } from 'lucide-react'
 import { isRadarAvailable, isRadarDemoAvailable } from '../../lib/discoveryAvailability'
 import './BottomTabBar.css'
+import { useEffect, useState } from 'react'
+import { isChristmasCampaign } from '../../lib/campaignDates'
 
 interface Props {
     currentPath: string
@@ -24,9 +26,15 @@ function activeSection(path: string): string {
 }
 
 export default function BottomTabBar({ currentPath }: Props) {
+    const [christmas, setChristmas] = useState(() => isChristmasCampaign())
+    useEffect(() => {
+        const timer = window.setInterval(() => setChristmas(isChristmasCampaign()), 60_000)
+        return () => window.clearInterval(timer)
+    }, [])
+    const seasonalMarks = ['🎄', '❄️', '🎁', '✨', '🎄']
     return (
-        <nav className="tab-bar" role="navigation" aria-label="Navegación principal">
-            {tabs.map(({ path, icon: Icon, label }) => {
+        <nav className={`tab-bar${christmas ? ' tab-bar--christmas' : ''}`} role="navigation" aria-label="Navegación principal">
+            {tabs.map(({ path, icon: Icon, label }, index) => {
                 const isActive = activeSection(currentPath) === path
                 return (
                     <Link
@@ -35,7 +43,7 @@ export default function BottomTabBar({ currentPath }: Props) {
                         className={`tab-bar__item ${isActive ? 'tab-bar__item--active' : ''}`}
                         aria-current={isActive ? 'page' : undefined}
                     >
-                        <Icon className="tab-bar__icon" size={22} strokeWidth={isActive ? 2.5 : 1.8} />
+                        <span className="tab-bar__icon-wrap"><Icon className="tab-bar__icon" size={22} strokeWidth={isActive ? 2.5 : 1.8} />{christmas && <span className="tab-bar__season" aria-hidden="true">{seasonalMarks[index]}</span>}</span>
                         <span className="tab-bar__label">{label}</span>
                     </Link>
                 )

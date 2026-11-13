@@ -7,6 +7,7 @@ import { mexicoCityDate, isChristmasCampaign } from '../../lib/campaignDates'
 import { supabase } from '../../lib/supabase'
 import ShareCard from '../../components/shared/ShareCard'
 import './Home.css'
+import AuthorReflections from '../../components/shared/AuthorReflections'
 
 export default function Home() {
   const navigate = useNavigate()
@@ -82,6 +83,8 @@ export default function Home() {
           </button>
         </section>
       )}
+
+      <AuthorReflections />
 
       <section className="home__panel home__panel--goal" aria-labelledby="home-goal-heading">
         <div className="home__section-heading">

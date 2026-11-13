@@ -61,3 +61,6 @@
 .tab-bar__icon {
     transition: filter var(--duration-fast) var(--ease-out);
 }
+.tab-bar__icon-wrap { position: relative; display: inline-flex; }
+.tab-bar__season { position: absolute; top: -7px; right: -11px; font-size: .7rem; line-height: 1; pointer-events: none; }
+.tab-bar--christmas { border-top-color: rgba(253, 224, 71, .4); }

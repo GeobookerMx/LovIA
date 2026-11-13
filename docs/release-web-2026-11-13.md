@@ -40,4 +40,20 @@ Borrado completo/Storage/referencias/sesiones/Apple y atención de solicitudes; 
 
 ## Resultado
 
-El commit, deploy e identificación pública se añaden después de verificar la publicación. Un build local no acredita despliegue.
+- Commit publicado: `cbd042ff29bad61f2012a62f005699f69ff52ee5` (incluye implementación `69eccfc`). Enviado a `GeobookerMx/LovIA/main` y desplegado automáticamente por Netlify.
+- Deploy `6af71cffd101fb7888f9547a`, estado `ready`, publicado el 13 de noviembre a las 08:22 de Ciudad de México (`2026-11-13T14:22:20.978Z`). Fuente correcta, sin bloqueo de publicación.
+- Identificador público: `web-20261113T142213379Z-cbd042ff`. `https://lovia.com.mx/build-info.json` devuelve HTTP 200, JSON, `sourceDirty=false`, commit coincidente y `Cache-Control: no-store,max-age=0`.
+- HTTP 200 confirmado para portada, demo y las cuatro páginas educativas nuevas. `/demo/mapa` devuelve `X-Robots-Tag: noindex`; las guías devuelven HTML con sus encabezados propios.
+- Navegador nuevo sobre **producción**: cinco marcadores ficticios; selección del quinto ejemplo y cambio de radio funcionales; sin desbordamiento a 320, 390, 768 y 1280 px. Sin sesión ni escritura de datos reales.
+- APIs reales comprobadas sin autenticación: vista financiera, evidencia de consentimiento y RPC de baja/consentimiento deniegan acceso (`42501`, HTTP 401). El advisor ya no informa el error de vista `SECURITY DEFINER`; continúan los avisos clasificados previos.
+- Las aplicaciones ya instaladas necesitan aceptar el aviso de actualización: guardar borradores, cerrar y reabrir la PWA y pulsar «Actualizar» cuando aparezca. La versión instalada se consulta en Perfil → Configuración.
+
+Este registro de evidencia se actualizó localmente después del despliegue; no se genera otro build por una nota documental. Las carpetas personales de imágenes, libro y capturas permanecen fuera de los commits.
+
+## Ajuste posterior solicitado: mapa, Navidad y autores
+
+El cintillo y el acceso público explican que los perfiles ficticios permiten probar la funcionalidad. Se recuperan adornos navideños en los cinco accesos inferiores, con nombres estables, y una etiqueta compacta de temporada en el mapa. Vigencia automática: 12/11/2026–06/01/2027, hora de Ciudad de México.
+
+Inicio y portada muestran fragmentos breves de Carl Gustav Jung y Erich Fromm, con obra/referencia y traducción identificadas. Atribuciones contrastadas con [la Biblioteca Municipal de Lyon](https://www.guichetdusavoir.org/question/voir/48508) y [el texto de Rainer Funk en la Sociedad Internacional Erich Fromm](https://fromm-online.org/wp-content/uploads/FUNK/Funk_R_1995c.pdf).
+
+Validación: build web, lint enfocado y tres pruebas de calendario correctos. Navegador con datos ficticios y solicitudes interceptadas: dos fichas de autores en `/home` y `/`, cinco distintivos de barra y la indicación de prueba/temporada del mapa; sin desbordamiento en 320, 390 y 1280 px. Sin cambios de backend.

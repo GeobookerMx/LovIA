@@ -1,0 +1,10 @@
+.author-reflections { width: min(100%, 1120px); margin: 1.5rem auto; padding: 1.2rem; color: var(--text-primary); }
+.author-reflections__eyebrow { color: var(--love-warm); font-size: .8rem; font-weight: 650; margin-bottom: .4rem; }
+.author-reflections h2 { font-size: clamp(1.3rem, 4vw, 1.9rem); margin: 0 0 1rem; }
+.author-reflections__grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 1rem; }
+.author-reflections__card { min-width: 0; margin: 0; padding: 1.2rem; border: 1px solid var(--border-subtle); border-radius: 1rem; background: var(--bg-surface-elevated); }
+.author-reflections blockquote { font-size: clamp(1.05rem, 3vw, 1.3rem); line-height: 1.65; margin: 0 0 1rem; }
+.author-reflections figcaption { display: grid; gap: .4rem; line-height: 1.5; }
+.author-reflections cite, .author-reflections small { color: var(--text-secondary); font-style: normal; font-size: .8rem; }
+.author-reflections a { display: inline-flex; align-items: center; min-height: 44px; font-size: .8rem; overflow-wrap: anywhere; }
+@media (max-width: 640px) { .author-reflections__grid { grid-template-columns: minmax(0, 1fr); } .author-reflections { padding: 1rem 0; } .landing > .author-reflections { padding: 1rem; } }

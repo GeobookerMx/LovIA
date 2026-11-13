@@ -3,6 +3,7 @@ import { Heart, Shield, Brain, Sparkles, ArrowRight, Star, BookOpen, Mail, Insta
 import { isWeb } from '../../lib/platform'
 import RelationshipsContext from './RelationshipsContext'
 import './Landing.css'
+import AuthorReflections from '../../components/shared/AuthorReflections'
 
 export default function Landing() {
     return (
@@ -20,7 +21,7 @@ export default function Landing() {
                             <a href="/en/" lang="en">English</a>
                         <a href="/como-funciona">Cómo funciona</a>
                         <a href="/recursos/">Recursos</a>
-                        <Link to="/demo/mapa">Mapa demo · Perfiles ficticios</Link>
+                        <Link to="/demo/mapa">Mapa demo · Perfiles ficticios para probar la funcionalidad</Link>
                         </nav>
                     )}
                     <div className="landing__badge">
@@ -110,6 +111,8 @@ export default function Landing() {
                     <p>Explora preguntas y ejercicios breves para conocerte mejor, a tu ritmo.</p>
                 </div>
             </section>
+
+            <AuthorReflections />
 
             {/* Orientación inicial sin afirmar validaciones no revisadas */}
             <section className="landing__science">

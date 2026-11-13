@@ -1,8 +1,12 @@
 .radar-demo { width: min(100%, 1120px); margin: auto; padding: 1.2rem 1rem calc(6rem + env(safe-area-inset-bottom, 0px)); color: var(--text-primary); }
 .radar-demo__header { display: flex; gap: .8rem; align-items: center; }
+.radar-demo__header > div { min-width: 0; }
+.radar-demo__purpose { display: block; font-size: .76rem; font-weight: 500; margin-top: .2rem; }
+.radar-demo__season { display: inline-flex; align-items: center; gap: .4rem; color: #ffe8ae; font-size: .8rem; margin: .3rem 0; }
 .radar-demo__header h1 { font-size: clamp(1.5rem, 4vw, 2.3rem); margin: .6rem 0; }
 .radar-demo__back { display: grid; place-items: center; min-width: 44px; min-height: 44px; border: 1px solid var(--border-subtle); border-radius: .7rem; color: inherit; }
-.radar-demo__badge { display: inline-flex; gap: .4rem; align-items: center; padding: .35rem .6rem; color: #ffe8ae; background: #5a3d16; border: 1px solid #d1a749; border-radius: .5rem; font-size: .73rem; font-weight: 800; }
+.radar-demo__badge { display: inline-flex; max-width: 100%; line-height: 1.45; gap: .4rem; align-items: center; padding: .35rem .6rem; color: #ffe8ae; background: #5a3d16; border: 1px solid #d1a749; border-radius: .5rem; font-size: .73rem; font-weight: 800; }
+.radar-demo__badge > svg { flex-shrink: 0; }
 .radar-demo__intro, .radar-demo p { line-height: 1.65; }
 .radar-demo__privacy { display: flex; gap: .65rem; align-items: flex-start; padding: .9rem; margin: 1rem 0; border: 1px solid #589683; border-radius: .8rem; background: #143e3338; }
 .radar-demo__privacy svg { flex-shrink: 0; margin-top: .2rem; color: #a3edd1; }
